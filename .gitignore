@@ -1,0 +1,22 @@
+# ignore __pycache__ directories
+__pycache__/
+
+# ignore .pyc files
+*.pyc
+
+# ignore .vscode directory
+.vscode/
+
+# ignore mlflow and mlruns directories
+mlflow/
+mlruns/
+dataset/
+
+# ignore .npz files
+*.npz
+
+# ignore .csv files
+*.csv
+
+# ignore .txt files
+*.txt
