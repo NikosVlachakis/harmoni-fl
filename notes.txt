@@ -1,0 +1,3 @@
+socat TCP-LISTEN:2375,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
+
+https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md

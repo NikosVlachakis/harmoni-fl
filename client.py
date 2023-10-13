@@ -1,7 +1,6 @@
+import time
 import os
 import argparse
-import pickle
-import sys
 from flask import Flask, request, jsonify
 from flask_cors.extension import CORS
 from matplotlib import pyplot as plt
@@ -12,15 +11,13 @@ import tensorflow as tf
 import logging
 from threading import Thread
 import logging
-import docker
-import mlflow
 import numpy as np
 import logging
 from helpers.load_data_helper import load_data_helper
 import os
 import numpy as np
 import tensorflow as tf
-from helpers.mlflow_helper import log_metrics_for_client
+from helpers.mlflow_helper import log_round_metrics_for_client
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
 
@@ -40,38 +37,73 @@ model.compile("adam", loss_function, metrics=["accuracy"])
 (x_train, y_train), (x_test, y_test) = load_data_helper()
 
 
-
 class Client(fl.client.NumPyClient):
+    def __init__(self):
+        # Initialize instance variables to store operational metrics
+        self.fit_operational_metrics = {}
+        self.eval_operational_metrics = {}
+
     def get_parameters(self, config):
         return model.get_weights()
 
     def fit(self, parameters, config):
+        start_time = time.time()  # Capture the start time
+        
         # Set the weights of the model
         model.set_weights(parameters)
         
         # Train the model for a specified number of epochs
         history = model.fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"])
-        logger.info("Fit complete. History: %s", history.history)
         
+        end_time = time.time()  # Capture the end time
+        duration = end_time - start_time  # Calculate duration
+
+        # Store operational metrics for fit
+        self.fit_operational_metrics = {
+            "fit_start_time": start_time,
+            "fit_end_time": end_time,
+            "fit_duration": duration
+        }
+
         # Calculate evaluation metric
         results = {
             "accuracy": float(history.history["accuracy"][config["epochs"]-1]),
         }         
         
         parameters_prime = model.get_weights()
-
-
         num_examples_train = len(x_train)
 
         # Return new weights, number of training examples, and results
         return parameters_prime, num_examples_train, results
 
-
     def evaluate(self, parameters, config):
+        start_time = time.time()  # Capture the start time
+        
         model.set_weights(parameters)
         loss, accuracy = model.evaluate(x_test, y_test)
-        # log metrics to MLflow for this client
-        log_metrics_for_client(container_name=os.getenv('container_name'),server_round = config["server_round"],experiment_id=config["experiment_id"], model_performance={'test_accuracy': accuracy})
+        
+        end_time = time.time()  # Capture the end time
+        duration = end_time - start_time  # Calculate duration
+
+        # Store operational metrics for evaluation
+        self.eval_operational_metrics = {
+            "eval_start_time": start_time,
+            "eval_end_time": end_time,
+            "eval_duration": duration,
+            "test_set_size": len(x_test),
+            "test_set_accuracy": accuracy
+        }
+
+        # Combine fit and eval operational metrics for logging
+        combined_metrics = {**self.fit_operational_metrics, **self.eval_operational_metrics}
+
+        # Log the combined operational metrics
+        log_round_metrics_for_client(
+            container_name=os.getenv('container_name'),
+            server_round=config["server_round"],
+            experiment_id=config["experiment_id"],
+            operational_metrics=combined_metrics 
+        )
 
         return float(loss), len(x_test), {"accuracy": float(accuracy)}
 
@@ -102,7 +134,7 @@ class ContainerMetrics(Resource):
         if container_name is None:
             logger.error("container_name environment variable is not set.")
         else:
-            stats = log_metrics_for_client(container_name)
+            stats = log_round_metrics_for_client(container_name)
 
         return {"cpu_stats": stats['cpu_stats'], "memory_stats": stats['memory_stats']}, 200
      

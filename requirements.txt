@@ -1,0 +1,10 @@
+flwr
+tensorflow
+flask
+flask-restful
+flask_cors
+requests
+mlflow
+psutil
+ping3
+docker

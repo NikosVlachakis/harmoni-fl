@@ -1,4 +1,6 @@
+import datetime
 import pickle
+import time
 from typing import Callable, Dict, List, Optional, Tuple, Union
 import uuid
 from flwr.common import (
@@ -21,6 +23,7 @@ import logging
 import mlflow
 import sys
 import numpy as np
+from services.prometheus_service import PrometheusService
 
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
@@ -40,7 +43,8 @@ class FedCustom(fl.server.strategy.Strategy):
         total_data_sent: int = 0,
         total_data_received: int = 0,
         converged: bool = False,
-        convergence_accuracy: float = None, 
+        convergence_accuracy: float = None,
+        round_timestamps: Dict[int, Dict[str, datetime.datetime]] = {},
     ) -> None:
         super().__init__()
         self.experiment_id = experiment_id
@@ -54,6 +58,7 @@ class FedCustom(fl.server.strategy.Strategy):
         self.total_data_received = total_data_received
         self.converged = converged
         self.convergence_accuracy = convergence_accuracy
+        self.round_timestamps = round_timestamps
 
 
         logger.info("FedCustom strategy initialized.")
@@ -76,11 +81,29 @@ class FedCustom(fl.server.strategy.Strategy):
         self.initial_parameters = None  # Don't keep initial parameters in memory
         return initial_parameters
 
+    # here is the place that based on client's performance, we can decide which of them to keep and which to drop
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         logger.info(f"Configuring fit for server round {server_round}.")
+
+        # Initialize the round timestamps
+        self.round_timestamps[server_round] = {"start": int(time.time() * 1000)}
+
+        # Check if this is not the first round and the previous round timestamps are available
+        if server_round > 0 and server_round - 1 in self.round_timestamps:
+            # Get the start and end times for the previous round
+            prev_round_start_time = self.round_timestamps[server_round - 1].get("start", None)
+            prev_round_end_time = self.round_timestamps[server_round - 1].get("end", None)
+            
+            prom_service = PrometheusService('http://host.docker.internal:9090')
+            max_cpu_usage = prom_service.container_specific_max_cpu_usage(container_name="client1", start_timestamp=prev_round_start_time, end_timestamp=prev_round_end_time)
+            logger.info(f"Max cpu usage for client1 between {prev_round_start_time} and {prev_round_end_time} is {max_cpu_usage}")
+        else:
+            logger.warning("No previous round data available.")
+        
+        
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
@@ -161,6 +184,7 @@ class FedCustom(fl.server.strategy.Strategy):
         examples = [evaluate_res.num_examples for _, evaluate_res in results]
         accuracy_aggregated = sum(accuracies) / sum(examples) if sum(examples) != 0 else 0
 
+       
         # After aggregating the accuracy:
         self.check_convergence(accuracy_aggregated)
         
@@ -196,6 +220,7 @@ class FedCustom(fl.server.strategy.Strategy):
         # Reset the data sent and received counters for the next round
         self.total_data_sent = 0
         self.total_data_received = 0
+        self.round_timestamps[server_round]["end"] = int(time.time() * 1000)
 
         return loss_aggregated, metrics_aggregated
  
@@ -224,9 +249,6 @@ class FedCustom(fl.server.strategy.Strategy):
         # Log the convergence
         logger.info(f"Convergence achieved with accuracy: {accuracy_aggregated:.2f}%")
 
-        # Perform any cleanup tasks if necessary
-        # Example: Save the current model, release resources, notify other components, etc.
-        # self.save_model()  # Example method, if you want to save the model state
 
 
        

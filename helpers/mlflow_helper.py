@@ -25,8 +25,24 @@ def get_container_stats(container_id):
     else:
         return None
 
+def log_round_metrics_for_client(container_name,server_round,experiment_id,operational_metrics):
+   
+    with mlflow.start_run(experiment_id=experiment_id,run_name=f"{server_round} - round - {container_name}") as client_run: 
+        
+        mlflow.set_tag("container_name", container_name)
+        mlflow.log_metric("eval_start_time", operational_metrics['eval_start_time'])
+        mlflow.log_metric("eval_end_time", operational_metrics['eval_end_time'])
+        mlflow.log_metric("eval_duration", operational_metrics['eval_duration'])
+        mlflow.log_metric("test_set_size", operational_metrics['test_set_size'])
+        mlflow.log_metric("test_set_accuracy", operational_metrics['test_set_accuracy'])
+        mlflow.log_metric("fit_start_time", operational_metrics['fit_start_time'])
+        mlflow.log_metric("fit_end_time", operational_metrics['fit_end_time'])
+        mlflow.log_metric("fit_duration", operational_metrics['fit_duration'])
 
-def log_metrics_for_client(container_name,server_round,experiment_id, model_performance=None):
+
+
+
+def log_container_metrics_for_client(container_name,server_round,experiment_id, model_performance=None):
     
     container_id = get_container_id(container_name)
     stats = get_container_stats(container_id)
