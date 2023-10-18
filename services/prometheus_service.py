@@ -1,11 +1,10 @@
 import requests
 import json
-from services.prom_queries import *
+from services.prometheus_queries import *
 import logging
 
-logging.basicConfig(level=logging.INFO)  # Configure logging
-logger = logging.getLogger(__name__)     # Create logger for the module
-
+logging.basicConfig(level=logging.INFO)  
+logger = logging.getLogger(__name__)  
 
 class PrometheusService:
     def __init__(self, prom_url):

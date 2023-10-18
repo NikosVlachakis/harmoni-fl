@@ -8,3 +8,4 @@ mlflow
 psutil
 ping3
 docker
+flask_restx

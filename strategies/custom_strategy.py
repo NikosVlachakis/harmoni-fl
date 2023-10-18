@@ -2,7 +2,6 @@ import datetime
 import pickle
 import time
 from typing import Callable, Dict, List, Optional, Tuple, Union
-import uuid
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -34,7 +33,7 @@ class FedCustom(fl.server.strategy.Strategy):
     def __init__(
         self,
         experiment_id: str = None,
-        fraction_fit: float = 0.5,
+        fraction_fit: float = 1,
         fraction_evaluate: float = 1,
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,

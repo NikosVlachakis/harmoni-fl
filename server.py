@@ -1,32 +1,24 @@
 import os
 import uuid
-import socket
 import traceback
 import flwr as fl
-import mlflow
 import requests
 from flask import Flask, request, jsonify
 from flask_cors.extension import CORS
-from flask_restful import Resource, Api, abort
+from flask_restx import Resource, Api
 import logging
 from threading import Thread
-from strategies.custom_strategy import FedCustom
-import logging
 from experiment.experiment import Experiment
-from client import Client as MyFlowerClient
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
 
-
 app = Flask(__name__)
-api = Api(app)
+api = Api(app, version="1.0", title="Federated Learning Server", description="API for the Federated Learning Server with Swagger")
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 clients = os.environ['CLIENTS'].split(',')
 logger.info("Clients: %s", clients)
-
-
 
 class StartFL(Resource):
     def get(self):
@@ -55,12 +47,6 @@ class StartFL(Resource):
         response = {"status": "started", "job_id": job_id, "experiment_name": experiment.name}
 
         return response, 200
-
-def client_fn(cid: str):
-    # Return a standard Flower client
-    return MyFlowerClient()
-
-
 
 
 def start_fl_server(job_id, strategy,rounds):

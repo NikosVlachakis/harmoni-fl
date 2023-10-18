@@ -18,9 +18,10 @@ import os
 import numpy as np
 import tensorflow as tf
 from helpers.mlflow_helper import log_round_metrics_for_client
+from models.cnn import cnn as cnn_model
+
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
-
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -28,14 +29,8 @@ parser = argparse.ArgumentParser(description='Flower client')
 parser.add_argument('--server_address', type=str, default="server:8080",
                     help='Server address')
 args = parser.parse_args()
-# Define the loss function
-loss_function = tf.keras.losses.SparseCategoricalCrossentropy()
-# Load model (MobileNetV2, CIFAR-10)
-model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-model.compile("adam", loss_function, metrics=["accuracy"])
 
-(x_train, y_train), (x_test, y_test) = load_data_helper()
-
+model = cnn_model()
 
 class Client(fl.client.NumPyClient):
     def __init__(self):
@@ -52,8 +47,10 @@ class Client(fl.client.NumPyClient):
         # Set the weights of the model
         model.set_weights(parameters)
         
-        # Train the model for a specified number of epochs
-        history = model.fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"])
+        # Use the dataset API for training
+        train_dataset, _, num_examples_train, _ = load_data_helper()
+        
+        history = model.fit(train_dataset, epochs=config["epochs"])
         
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
@@ -71,7 +68,6 @@ class Client(fl.client.NumPyClient):
         }         
         
         parameters_prime = model.get_weights()
-        num_examples_train = len(x_train)
 
         # Return new weights, number of training examples, and results
         return parameters_prime, num_examples_train, results
@@ -80,7 +76,11 @@ class Client(fl.client.NumPyClient):
         start_time = time.time()  # Capture the start time
         
         model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, y_test)
+
+        # Use the dataset API for evaluation
+        _, test_dataset, _, num_examples_test = load_data_helper()
+
+        loss, accuracy = model.evaluate(test_dataset)
         
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
@@ -90,7 +90,7 @@ class Client(fl.client.NumPyClient):
             "eval_start_time": start_time,
             "eval_end_time": end_time,
             "eval_duration": duration,
-            "test_set_size": len(x_test),
+            "test_set_size": num_examples_test,
             "test_set_accuracy": accuracy
         }
 
@@ -105,7 +105,7 @@ class Client(fl.client.NumPyClient):
             operational_metrics=combined_metrics 
         )
 
-        return float(loss), len(x_test), {"accuracy": float(accuracy)}
+        return float(loss), num_examples_test, {"accuracy": float(accuracy)}
 
 
 app = Flask(__name__)
@@ -122,23 +122,6 @@ class StartFLClient(Resource):
             logger.error("Error starting FL client: %s", e)
             return {"status": "error", "message": str(e)}, 500
 
-class Ping(Resource):
-    def get(self):
-        logger.info("Received ping. I'm client and I'm alive.")
-        return 'I am client and I am alive', 200
-
-
-class ContainerMetrics(Resource):
-    def get(self):
-        container_name = os.getenv('container_name')
-        if container_name is None:
-            logger.error("container_name environment variable is not set.")
-        else:
-            stats = log_round_metrics_for_client(container_name)
-
-        return {"cpu_stats": stats['cpu_stats'], "memory_stats": stats['memory_stats']}, 200
-     
-         
     
 def start_fl_client():
     try:
@@ -147,10 +130,15 @@ def start_fl_client():
         logger.error("Error starting FL client: %s", e)
         return {"status": "error", "message": str(e)}
 
+class Ping(Resource):
+    def get(self):
+        logger.info("Received ping. I'm client and I'm alive.")
+        return 'I am client and I am alive', 200
+
+
 
 client_api.add_resource(Ping, '/client_api/ping')
 client_api.add_resource(StartFLClient, '/client_api/start-fl-client')
-client_api.add_resource(ContainerMetrics, '/client_api/container-metrics')
 
 if __name__ == "__main__":
     port = int(os.environ.get("FLASK_RUN_PORT"))
