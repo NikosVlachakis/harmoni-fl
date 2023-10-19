@@ -1,0 +1,4 @@
+criteria:
+  - type: max_cpu_usage
+    threshold: 200
+ 

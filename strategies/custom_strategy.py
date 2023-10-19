@@ -24,33 +24,12 @@ import sys
 import numpy as np
 from services.prometheus_service import PrometheusService
 from flwr.common import GetPropertiesIns
-
+from utils.client_selector import ClientSelector
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
 
-class Criteria:
-    @staticmethod
-    def basic(properties: Dict[str, any]) -> bool:
-        return properties.get('container_name') == "client1" or properties.get('container_name') == "client2"
     
-    # You can add more methods here for different criteria in the future
-
-class ClientSelector:
-    def __init__(self, client_manager: 'ClientManager'):
-        self.client_manager = client_manager
-
-    def get_all_clients(self) -> List[ClientProxy]:
-        total_available_clients = self.client_manager.num_available()
-        return self.client_manager.sample(num_clients=total_available_clients, min_num_clients=total_available_clients)
-
-    def filter_clients_by_criteria(self, all_clients: List[ClientProxy], criteria_func: Callable) -> List[ClientProxy]:
-        selected_clients = []
-        for client in all_clients:
-            properties_response = client.get_properties(GetPropertiesIns(config={}), timeout=30)
-            if criteria_func(properties_response.properties):
-                selected_clients.append(client)
-        return selected_clients
 class FedCustom(fl.server.strategy.Strategy):
     def __init__(
         self,
@@ -116,9 +95,10 @@ class FedCustom(fl.server.strategy.Strategy):
 
         # Check if this is not the first round and the previous round timestamps are available
         if server_round > 0 and server_round - 1 in self.round_timestamps:
-            client_selector = ClientSelector(client_manager)
+
+            client_selector = ClientSelector(client_manager)  
             all_clients = client_selector.get_all_clients()
-            selected_clients = client_selector.filter_clients_by_criteria(all_clients, Criteria.basic)
+            selected_clients = client_selector.filter_clients_by_criteria(all_clients, server_round, self.round_timestamps)
             logger.info(f"Selected clients are {selected_clients}")
 
         sample_size, min_num_clients = self.num_fit_clients(client_manager.num_available())
