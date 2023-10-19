@@ -1,3 +1,4 @@
+from ast import Dict
 import time
 import os
 import argparse
@@ -19,6 +20,7 @@ import numpy as np
 import tensorflow as tf
 from helpers.mlflow_helper import log_round_metrics_for_client
 from models.cnn import cnn as cnn_model
+from flwr.common import GetPropertiesIns,GetPropertiesRes,Status
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -106,6 +108,12 @@ class Client(fl.client.NumPyClient):
         )
 
         return float(loss), num_examples_test, {"accuracy": float(accuracy)}
+    
+    
+    def get_properties(self, *args, **kwargs):
+        return {
+          "container_name": os.getenv('container_name')
+        }
 
 
 app = Flask(__name__)
@@ -134,7 +142,6 @@ class Ping(Resource):
     def get(self):
         logger.info("Received ping. I'm client and I'm alive.")
         return 'I am client and I am alive', 200
-
 
 
 client_api.add_resource(Ping, '/client_api/ping')

@@ -1,3 +1,5 @@
 socat TCP-LISTEN:2375,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
 
 https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md
+
+Increased the resources docker can use from the host ( memory 4 -> 7 gb) 

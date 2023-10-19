@@ -7,8 +7,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)  
 
 class PrometheusService:
-    def __init__(self, prom_url):
-        self.prom_url = prom_url
+    def __init__(self):
+        self.prom_url = 'http://host.docker.internal:9090'
 
     def query(self, query):
         response = requests.get(f'{self.prom_url}/api/v1/query', params={'query': query})

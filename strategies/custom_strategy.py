@@ -23,12 +23,34 @@ import mlflow
 import sys
 import numpy as np
 from services.prometheus_service import PrometheusService
+from flwr.common import GetPropertiesIns
 
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
 
+class Criteria:
+    @staticmethod
+    def basic(properties: Dict[str, any]) -> bool:
+        return properties.get('container_name') == "client1" or properties.get('container_name') == "client2"
+    
+    # You can add more methods here for different criteria in the future
 
+class ClientSelector:
+    def __init__(self, client_manager: 'ClientManager'):
+        self.client_manager = client_manager
+
+    def get_all_clients(self) -> List[ClientProxy]:
+        total_available_clients = self.client_manager.num_available()
+        return self.client_manager.sample(num_clients=total_available_clients, min_num_clients=total_available_clients)
+
+    def filter_clients_by_criteria(self, all_clients: List[ClientProxy], criteria_func: Callable) -> List[ClientProxy]:
+        selected_clients = []
+        for client in all_clients:
+            properties_response = client.get_properties(GetPropertiesIns(config={}), timeout=30)
+            if criteria_func(properties_response.properties):
+                selected_clients.append(client)
+        return selected_clients
 class FedCustom(fl.server.strategy.Strategy):
     def __init__(
         self,
@@ -80,7 +102,7 @@ class FedCustom(fl.server.strategy.Strategy):
         self.initial_parameters = None  # Don't keep initial parameters in memory
         return initial_parameters
 
-    # here is the place that based on client's performance, we can decide which of them to keep and which to drop
+
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
@@ -89,38 +111,87 @@ class FedCustom(fl.server.strategy.Strategy):
 
         # Initialize the round timestamps
         self.round_timestamps[server_round] = {"start": int(time.time() * 1000)}
+        
+        selected_clients = []
 
         # Check if this is not the first round and the previous round timestamps are available
         if server_round > 0 and server_round - 1 in self.round_timestamps:
-            # Get the start and end times for the previous round
-            prev_round_start_time = self.round_timestamps[server_round - 1].get("start", None)
-            prev_round_end_time = self.round_timestamps[server_round - 1].get("end", None)
-            
-            prom_service = PrometheusService('http://host.docker.internal:9090')
-            max_cpu_usage = prom_service.container_specific_max_cpu_usage(container_name="client1", start_timestamp=prev_round_start_time, end_timestamp=prev_round_end_time)
-            logger.info(f"Max cpu usage for client1 between {prev_round_start_time} and {prev_round_end_time} is {max_cpu_usage}")
-        else:
-            logger.warning("No previous round data available.")
-        
-        
-        sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available()
-        )
-        clients = client_manager.sample(
+            client_selector = ClientSelector(client_manager)
+            all_clients = client_selector.get_all_clients()
+            selected_clients = client_selector.filter_clients_by_criteria(all_clients, Criteria.basic)
+            logger.info(f"Selected clients are {selected_clients}")
+
+        sample_size, min_num_clients = self.num_fit_clients(client_manager.num_available())
+        clients = selected_clients if selected_clients else client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
-        n_clients = len(clients)
-        half_clients = n_clients // 2
+
         standard_config = {"epochs": 1, "batch_size": 32}
         fit_configurations = [
             (client, FitIns(parameters, standard_config))
             for idx, client in enumerate(clients)
         ]
+
         serialized_params = pickle.dumps(parameters)
         size_sent = sys.getsizeof(serialized_params)
         self.total_data_sent += size_sent * len(clients)  # Multiplied by number of clients as the model is sent to each client
 
         return fit_configurations
+
+
+
+        # # here is the place that based on client's performance, we can decide which of them to keep and which to drop
+        # def configure_fit(
+        #     self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        # ) -> List[Tuple[ClientProxy, FitIns]]:
+        #     """Configure the next round of training."""
+        #     logger.info(f"Configuring fit for server round {server_round}.")
+
+        #     # Initialize the round timestamps
+        #     self.round_timestamps[server_round] = {"start": int(time.time() * 1000)}
+
+        #     # Check if this is not the first round and the previous round timestamps are available
+        #     if server_round > 0 and server_round - 1 in self.round_timestamps:
+        #         # Get the start and end times for the previous round
+        #         prev_round_start_time = self.round_timestamps[server_round - 1].get("start", None)
+        #         prev_round_end_time = self.round_timestamps[server_round - 1].get("end", None)
+                
+        #         prom_service = PrometheusService()
+        #         max_cpu_usage = prom_service.container_specific_max_cpu_usage(container_name="client1", start_timestamp=prev_round_start_time, end_timestamp=prev_round_end_time)
+        #         logger.info(f"Max cpu usage for client1 between {prev_round_start_time} and {prev_round_end_time} is {max_cpu_usage}")
+        #     else:
+        #         logger.warning("No previous round data available.")
+            
+        #     # Fetch all available clients
+        #     total_available_clients = client_manager.num_available()
+        #     all_clients = client_manager.sample(num_clients=total_available_clients, min_num_clients=total_available_clients)
+
+        #     client_properties = []
+        #     for client in all_clients:
+        #         properties_response = client.get_properties(GetPropertiesIns(config={}), timeout=30)
+        #         client_properties.append(properties_response.properties.get('container_name'))
+
+        #     logger.info(f"Client properties are {client_properties}")
+
+
+        #     sample_size, min_num_clients = self.num_fit_clients(
+        #         client_manager.num_available()
+        #     )
+        #     clients = client_manager.sample(
+        #         num_clients=sample_size, min_num_clients=min_num_clients
+        #     )
+        #     n_clients = len(clients)
+        #     half_clients = n_clients // 2
+        #     standard_config = {"epochs": 1, "batch_size": 32}
+        #     fit_configurations = [
+        #         (client, FitIns(parameters, standard_config))
+        #         for idx, client in enumerate(clients)
+        #     ]
+        #     serialized_params = pickle.dumps(parameters)
+        #     size_sent = sys.getsizeof(serialized_params)
+        #     self.total_data_sent += size_sent * len(clients)  # Multiplied by number of clients as the model is sent to each client
+
+        #     return fit_configurations
 
     def aggregate_fit(
         self,
@@ -183,7 +254,7 @@ class FedCustom(fl.server.strategy.Strategy):
         examples = [evaluate_res.num_examples for _, evaluate_res in results]
         accuracy_aggregated = sum(accuracies) / sum(examples) if sum(examples) != 0 else 0
 
-       
+        
         # After aggregating the accuracy:
         self.check_convergence(accuracy_aggregated)
         
@@ -222,7 +293,7 @@ class FedCustom(fl.server.strategy.Strategy):
         self.round_timestamps[server_round]["end"] = int(time.time() * 1000)
 
         return loss_aggregated, metrics_aggregated
- 
+
 
 
     def evaluate(
