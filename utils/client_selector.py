@@ -3,11 +3,11 @@ from typing import List, Dict
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.common import GetPropertiesIns
-from services.prometheus_queries import METRIC_TO_QUERY_MAPPING
-from utils.criteria import AbstractCriterion, MemoryUsageCriterion, MaxCPUUsageCriterion
+from utils.criteria import AbstractCriterion, MAXMemoryUsageCriterion, MaxCPUUsageCriterion
 from config.config_loader import load_criteria_config
 from services.prometheus_service import PrometheusService
 from utils.metric_names import MetricNames
+from config.mappings import METRIC_TO_QUERY_MAPPING
 
 logger = logging.getLogger(__name__)
 
@@ -24,22 +24,7 @@ class ClientSelector:
         logger.info(f"Retrieved {len(clients)} clients")
         return clients
 
-    # def generate_queries_for_client(self, client_properties: Dict[str, str], prev_round_start_time: int, prev_round_end_time: int) -> List[str]:
-    #     queries = []
-    #     for crit in self.criteria_config.get('criteria', []):
-    #         crit_type = crit.get('type')
-    #         logger.info(f"Processing criteria type: {crit_type}")
-
-    #         query_func = METRIC_TO_QUERY_MAPPING.get(crit_type)
-    #         if query_func:
-    #             query = query_func(client_properties['container_name'], prev_round_start_time, prev_round_end_time)
-    #             queries.append(query)
-    #             logger.info(f"Generated query for {crit_type}: {query}")
-    #         else:
-    #             logger.error(f"No query function found for criteria type: {crit_type}")
-
-    #     logger.info(f"Created queries for client {client_properties['container_name']}: {queries}")
-    #     return queries
+    
     def generate_queries_for_client(self, client_properties: Dict[str, str], prev_round_start_time: int, prev_round_end_time: int) -> List[tuple]:
         query_tuples = []
         for crit in self.criteria_config.get('criteria', []):
@@ -89,6 +74,6 @@ class ClientSelector:
         for crit in self.criteria_config.get('criteria', []):
             if crit['type'] == MetricNames.MAX_CPU_USAGE.value:
                 criteria_objects.append(MaxCPUUsageCriterion(crit['threshold']))
-                logger.info(f"Loaded MaxCPUUsageCriterion with threshold {crit['threshold']}")
-            # ... [add other criteria here based on their type] ...
+            elif crit['type'] == MetricNames.MAX_MEMORY_USAGE_PERCENTAGE.value:
+                criteria_objects.append(MAXMemoryUsageCriterion(crit['threshold']))
         return criteria_objects

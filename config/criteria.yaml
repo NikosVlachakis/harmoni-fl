@@ -1,4 +1,7 @@
 criteria:
   - type: max_cpu_usage
     threshold: 200
+  - type: max_memory_usage_percentage
+    threshold: 70
+
  

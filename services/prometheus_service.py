@@ -3,7 +3,7 @@ import json
 from services.prometheus_queries import *
 import logging
 from typing import Dict, List
-from services.prometheus_queries import METRIC_TO_QUERY_MAPPING
+from config.mappings import METRIC_TO_QUERY_MAPPING
 
 logging.basicConfig(level=logging.INFO)  
 logger = logging.getLogger(__name__)  
@@ -38,7 +38,6 @@ class PrometheusService:
                 result = self.query(query)
                 identifier = self.extract_metric_identifier(func_name)
                 results[identifier] = float(result)  # Ensure the result is converted to a float
-                logger.info(f"Fetched value {result} for query identifier {identifier}")
             except Exception as e:
                 logger.error(f"Error while fetching value for query {query}: {e}")
         return results
