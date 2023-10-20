@@ -3,6 +3,7 @@ import logging
 # criteria.py
 from abc import ABC, abstractmethod
 from typing import Dict
+from utils.metric_names import MetricNames
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class MaxCPUUsageCriterion(AbstractCriterion):
         logger.info(f"Initialized MaxCPUUsageCriterion with threshold: {threshold}")
 
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
-        meets_criteria = float(metrics.get("max_cpu_usage", 100)) <= self.threshold
+        meets_criteria = float(metrics.get(MetricNames.MAX_CPU_USAGE.value, 100)) <= self.threshold
         logger.info(f"MaxCPUUsageCriterion check result: {meets_criteria}")
         return meets_criteria
 
