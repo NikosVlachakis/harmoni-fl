@@ -3,11 +3,10 @@ from typing import List, Dict
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.common import GetPropertiesIns
-from utils.criteria import AbstractCriterion, MAXMemoryUsageCriterion, MaxCPUUsageCriterion
+from utils.criteria import *
 from config.config_loader import load_criteria_config
 from services.prometheus_service import PrometheusService
-from utils.metric_names import MetricNames
-from config.mappings import METRIC_TO_QUERY_MAPPING
+from config.mappings import *
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class ClientSelector:
             crit_type = crit.get('type')
             logger.info(f"Processing criteria type: {crit_type}")
 
-            query_func = METRIC_TO_QUERY_MAPPING.get(crit_type)
+            query_func = CRITERIA_TO_QUERY_MAPPING.get(crit_type)
             if query_func:
                 query = query_func(client_properties['container_name'], prev_round_start_time, prev_round_end_time)
                 query_tuples.append((query, query_func.__name__))
@@ -51,6 +50,7 @@ class ClientSelector:
             properties_response = client.get_properties(GetPropertiesIns(config={}), timeout=30)
             client_properties = properties_response.properties
 
+            # Get the start and end time of the previous round
             prev_round_start_time = round_timestamps[server_round - 1].get("start", None)
             prev_round_end_time = round_timestamps[server_round - 1].get("end", None)
             
@@ -61,9 +61,24 @@ class ClientSelector:
             metrics = self.prom_service.batch_query(query_tuples)
             logger.info(f"Fetched metrics for client {client_properties['container_name']}: {metrics}")
 
-            # Check each criterion using the fetched metrics
-            if all(criterion.check(client_properties, metrics) for criterion in criteria):
-                selected_clients.append(client)
+            # Separate blocking and non-blocking criteria
+            blocking_criteria = [c for c in criteria if c.is_blocking]
+            non_blocking_criteria = [c for c in criteria if not c.is_blocking]
+
+            # Check each blocking criterion using the fetched metrics
+            if all(criterion.check(client_properties, metrics) for criterion in blocking_criteria):
+                # If all blocking criteria are met, handle non-blocking criteria
+                client_config = {}
+                for criterion in non_blocking_criteria:
+                    result = criterion.check(client_properties, metrics)
+                    if isinstance(result, dict):
+                        client_config.update(result)
+
+                selected_client = {
+                    'client': client,
+                    'config': client_config
+                }
+                selected_clients.append(selected_client)
 
         logger.info(f"Selected {len(selected_clients)} clients based on criteria")
         return selected_clients
@@ -72,8 +87,23 @@ class ClientSelector:
     def _load_criteria(self) -> List[AbstractCriterion]:
         criteria_objects = []
         for crit in self.criteria_config.get('criteria', []):
-            if crit['type'] == MetricNames.MAX_CPU_USAGE.value:
-                criteria_objects.append(MaxCPUUsageCriterion(crit['threshold']))
-            elif crit['type'] == MetricNames.MAX_MEMORY_USAGE_PERCENTAGE.value:
-                criteria_objects.append(MAXMemoryUsageCriterion(crit['threshold']))
+            crit_type = crit.get('type')
+            crit_config = crit.get('config', {})
+            is_blocking = crit.get('blocking', True)  # Default to True if 'blocking' is not specified
+
+            if crit_type in CRITERIA_CONFIG:
+                criterion_config = CRITERIA_CONFIG[crit_type]
+                criterion_class = criterion_config.get('criterion_class')
+
+                if criterion_class is not None:
+                    criterion_obj = criterion_class(crit_config, is_blocking)
+                    criteria_objects.append(criterion_obj)
+                    logger.info(f"Loaded {criterion_class.__name__} with config {crit_config} and blocking={is_blocking}")
+                else:
+                    logger.warning(f"No criterion class found for type {crit_type}")
+            else:
+                logger.error(f"No configuration found for criteria type: {crit_type}")
+
         return criteria_objects
+
+

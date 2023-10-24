@@ -1,7 +1,15 @@
 criteria:
   - type: max_cpu_usage
-    threshold: 200
+    blocking: true
+    config:
+      threshold: 200
   - type: max_memory_usage_percentage
-    threshold: 70
-
- 
+    blocking: true
+    config:
+      threshold: 70
+  - type: learning_rate_based_on_incoming_bandwidth
+    blocking: false
+    config:
+        threshold_bandwidth_mbps: 3  # Bandwidth threshold in Mbps
+        adjustment_factor: 1.5  # Factor to increase the learning rate by when bandwidth is below threshold
+        default_learning_rate: 0.05

@@ -97,19 +97,30 @@ class FedCustom(fl.server.strategy.Strategy):
             selected_clients = client_selector.filter_clients_by_criteria(all_clients, server_round, self.round_timestamps)
             logger.info(f"Selected clients are {selected_clients}")
 
+       
         sample_size, min_num_clients = self.num_fit_clients(client_manager.num_available())
         clients = selected_clients if selected_clients else client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
 
         standard_config = {"epochs": 1, "batch_size": 32}
-        fit_configurations = [
-            (client, FitIns(parameters, standard_config))
-            for idx, client in enumerate(clients)
-        ]
+
+        if selected_clients:
+            # Use the standard config as a default and update it with the client-specific config if available
+            fit_configurations = [
+                (client_info['client'], FitIns(parameters, {**standard_config, **client_info.get('config', {})}))
+                for client_info in clients
+            ]
+        else:
+            # Use the standard config for all clients
+            fit_configurations = [
+                (client, FitIns(parameters, standard_config))
+                for idx, client in enumerate(clients)
+            ]
 
     
         return fit_configurations
+
 
 
     def aggregate_fit(

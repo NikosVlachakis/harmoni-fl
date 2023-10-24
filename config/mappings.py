@@ -1,16 +1,20 @@
-from utils.criteria import MaxCPUUsageCriterion, MAXMemoryUsageCriterion
-from utils.metric_names import MetricNames
+from utils.criteria import *
+from utils.names import Names
 from services.prometheus_queries import *
 
 CRITERIA_CONFIG = {
-    MetricNames.MAX_CPU_USAGE.value: {
+    Names.MAX_CPU_USAGE.value: {
         "query_func": container_specific_max_cpu_usage_query,
         "criterion_class": MaxCPUUsageCriterion
     },
-    MetricNames.MAX_MEMORY_USAGE_PERCENTAGE.value: {
+    Names.MAX_MEMORY_USAGE_PERCENTAGE.value: {
         "query_func": container_specific_max_memory_usage_query,
         "criterion_class": MAXMemoryUsageCriterion
-    }
+    },
+    Names.LEARNING_RATE_BASED_ON_INCOMING_BANDWIDTH.value: {
+        "query_func": container_incoming_bandwidth_query,
+        "criterion_class": LearningRateBOIncomingBandwidth
+    },
 }
 
-METRIC_TO_QUERY_MAPPING = {metric: config["query_func"] for metric, config in CRITERIA_CONFIG.items()}
+CRITERIA_TO_QUERY_MAPPING = {criteria: config["query_func"] for criteria, config in CRITERIA_CONFIG.items()}
