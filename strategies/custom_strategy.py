@@ -40,8 +40,6 @@ class FedCustom(fl.server.strategy.Strategy):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         initial_parameters: Optional[Parameters] = None,
-        total_data_sent: int = 0,
-        total_data_received: int = 0,
         converged: bool = False,
         convergence_accuracy: float = None,
         round_timestamps: Dict[int, Dict[str, datetime.datetime]] = {},
@@ -54,8 +52,6 @@ class FedCustom(fl.server.strategy.Strategy):
         self.min_evaluate_clients = min_evaluate_clients
         self.min_available_clients = min_available_clients
         self.initial_parameters = initial_parameters
-        self.total_data_sent = total_data_sent
-        self.total_data_received = total_data_received
         self.converged = converged
         self.convergence_accuracy = convergence_accuracy
         self.round_timestamps = round_timestamps
@@ -112,66 +108,9 @@ class FedCustom(fl.server.strategy.Strategy):
             for idx, client in enumerate(clients)
         ]
 
-        serialized_params = pickle.dumps(parameters)
-        size_sent = sys.getsizeof(serialized_params)
-        self.total_data_sent += size_sent * len(clients)  # Multiplied by number of clients as the model is sent to each client
-
+    
         return fit_configurations
 
-
-
-        # # here is the place that based on client's performance, we can decide which of them to keep and which to drop
-        # def configure_fit(
-        #     self, server_round: int, parameters: Parameters, client_manager: ClientManager
-        # ) -> List[Tuple[ClientProxy, FitIns]]:
-        #     """Configure the next round of training."""
-        #     logger.info(f"Configuring fit for server round {server_round}.")
-
-        #     # Initialize the round timestamps
-        #     self.round_timestamps[server_round] = {"start": int(time.time() * 1000)}
-
-        #     # Check if this is not the first round and the previous round timestamps are available
-        #     if server_round > 0 and server_round - 1 in self.round_timestamps:
-        #         # Get the start and end times for the previous round
-        #         prev_round_start_time = self.round_timestamps[server_round - 1].get("start", None)
-        #         prev_round_end_time = self.round_timestamps[server_round - 1].get("end", None)
-                
-        #         prom_service = PrometheusService()
-        #         max_cpu_usage = prom_service.container_specific_max_cpu_usage(container_name="client1", start_timestamp=prev_round_start_time, end_timestamp=prev_round_end_time)
-        #         logger.info(f"Max cpu usage for client1 between {prev_round_start_time} and {prev_round_end_time} is {max_cpu_usage}")
-        #     else:
-        #         logger.warning("No previous round data available.")
-            
-        #     # Fetch all available clients
-        #     total_available_clients = client_manager.num_available()
-        #     all_clients = client_manager.sample(num_clients=total_available_clients, min_num_clients=total_available_clients)
-
-        #     client_properties = []
-        #     for client in all_clients:
-        #         properties_response = client.get_properties(GetPropertiesIns(config={}), timeout=30)
-        #         client_properties.append(properties_response.properties.get('container_name'))
-
-        #     logger.info(f"Client properties are {client_properties}")
-
-
-        #     sample_size, min_num_clients = self.num_fit_clients(
-        #         client_manager.num_available()
-        #     )
-        #     clients = client_manager.sample(
-        #         num_clients=sample_size, min_num_clients=min_num_clients
-        #     )
-        #     n_clients = len(clients)
-        #     half_clients = n_clients // 2
-        #     standard_config = {"epochs": 1, "batch_size": 32}
-        #     fit_configurations = [
-        #         (client, FitIns(parameters, standard_config))
-        #         for idx, client in enumerate(clients)
-        #     ]
-        #     serialized_params = pickle.dumps(parameters)
-        #     size_sent = sys.getsizeof(serialized_params)
-        #     self.total_data_sent += size_sent * len(clients)  # Multiplied by number of clients as the model is sent to each client
-
-        #     return fit_configurations
 
     def aggregate_fit(
         self,
@@ -187,11 +126,6 @@ class FedCustom(fl.server.strategy.Strategy):
         ]
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
         metrics_aggregated = {}
-        for _, fit_res in results:
-            serialized_gradients = pickle.dumps(parameters_to_ndarrays(fit_res.parameters))
-            size_received = sys.getsizeof(serialized_gradients)
-            self.total_data_received += size_received
-
         return parameters_aggregated, metrics_aggregated
 
     def configure_evaluate(
@@ -252,8 +186,6 @@ class FedCustom(fl.server.strategy.Strategy):
         with mlflow.start_run(experiment_id=self.experiment_id, run_name=f"{server_round} - round - server"): 
             mlflow.log_metric("aggregated_loss", loss_aggregated)
             mlflow.log_metric("aggregated_accuracy", accuracy_aggregated)
-            mlflow.log_metric("total_data_sent_MB", self.total_data_sent / (1024 * 1024))
-            mlflow.log_metric("total_data_received_MB", self.total_data_received / (1024 * 1024))
             
             # log the failure rate
             denominator = len(results) + len(failures)
@@ -266,10 +198,6 @@ class FedCustom(fl.server.strategy.Strategy):
             # log the number of clients that participated in this round
             mlflow.log_metric("num_clients", len(results))
         
-
-        # Reset the data sent and received counters for the next round
-        self.total_data_sent = 0
-        self.total_data_received = 0
         self.round_timestamps[server_round]["end"] = int(time.time() * 1000)
 
         return loss_aggregated, metrics_aggregated
