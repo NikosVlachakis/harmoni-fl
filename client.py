@@ -8,6 +8,8 @@ from matplotlib import pyplot as plt
 import requests
 from flask_restful import Resource, Api, abort
 import flwr as fl
+from services.prometheus_queries import *
+from services.prometheus_service import PrometheusService
 import tensorflow as tf
 import logging
 from threading import Thread
@@ -21,6 +23,7 @@ import tensorflow as tf
 from helpers.mlflow_helper import log_round_metrics_for_client
 from models.cnn import cnn as cnn_model
 from flwr.common import GetPropertiesIns,GetPropertiesRes,Status
+from callbacks.learning_rate_setter import LearningRateSetter
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -49,9 +52,13 @@ class Client(fl.client.NumPyClient):
         model.set_weights(parameters)
         
         # Use the dataset API for training
-        train_dataset, _, num_examples_train, _ = load_data_helper(batch_size = config["batch_size"])
+        train_dataset, _, num_examples_train, _ = load_data_helper(batch_size=config["batch_size"])
         
-        history = model.fit(train_dataset, epochs=config["epochs"], learning_rate=config["learning_rate"])
+        learning_rate_setter = LearningRateSetter(learning_rate= config["learning_rate"])
+        
+        # Train the model
+        history = model.fit(train_dataset, epochs=config["epochs"], callbacks=[learning_rate_setter])
+        # history = model.fit(train_dataset, epochs=config["epochs"])
         
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
@@ -110,8 +117,13 @@ class Client(fl.client.NumPyClient):
     
     
     def get_properties(self, *args, **kwargs):
+        container_name = os.getenv('container_name')
+        # prometheus_service = PrometheusService()
+        # cpu_allocation = prometheus_service.query(container_cpu_allocation_query(container_name))
+        # logger.info("Container %s has CPU allocation %s", container_name, cpu_allocation)
         return {
-          "container_name": os.getenv('container_name')
+            "container_name": container_name,
+            # "cpu_allocation": cpu_allocation
         }
 
 

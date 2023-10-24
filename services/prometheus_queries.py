@@ -31,4 +31,7 @@ def container_outgoing_bandwidth_query(container_name: str, start_timestamp: int
     outgoing_bandwidth_query = f'8 * rate({metric}{{name="{container_name}", interface="{network_interface}"}}[{range_str}]) / 1000000'
     return outgoing_bandwidth_query
 
-
+# CPU allocation for a container
+def container_cpu_allocation_query(container_name: str, metric_quota='container_spec_cpu_quota', metric_period='container_spec_cpu_period') -> str:
+    query = f'({metric_quota}{{name="{container_name}"}} / {metric_period}{{name="{container_name}"}})'
+    return query
