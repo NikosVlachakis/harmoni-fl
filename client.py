@@ -45,14 +45,13 @@ class Client(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         start_time = time.time()  # Capture the start time
-        
         # Set the weights of the model
         model.set_weights(parameters)
         
         # Use the dataset API for training
-        train_dataset, _, num_examples_train, _ = load_data_helper()
+        train_dataset, _, num_examples_train, _ = load_data_helper(batch_size = config["batch_size"])
         
-        history = model.fit(train_dataset, epochs=config["epochs"])
+        history = model.fit(train_dataset, epochs=config["epochs"], learning_rate=config["learning_rate"])
         
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
