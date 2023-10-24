@@ -30,7 +30,7 @@ def generate_data():
 import numpy as np
 
 
-def load_data_helper(percentage=0.01, batch_size=32):
+def load_data_helper(percentage=0.05, batch_size=32):
     data = generate_data()
 
     # Create TensorFlow datasets

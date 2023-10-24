@@ -59,7 +59,6 @@ class ClientSelector:
             
             # Fetch metrics for the client
             metrics = self.prom_service.batch_query(query_tuples)
-            logger.info(f"Fetched metrics for client {client_properties['container_name']}: {metrics}")
 
             # Separate blocking and non-blocking criteria
             blocking_criteria = [c for c in criteria if c.is_blocking]
