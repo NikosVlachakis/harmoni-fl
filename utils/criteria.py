@@ -61,14 +61,23 @@ class LearningRateBOIncomingBandwidth(AbstractCriterion):
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
         incoming_bandwidth = float(metrics.get(Names.LEARNING_RATE_BASED_ON_INCOMING_BANDWIDTH.value))  # in Mbps
         logger.info(f"LearningRateBOIncomingBandwidth check result: {incoming_bandwidth} Mbps")
-        learning_rate_adjustment = {"learning_rate": self.default_learning_rate}
+
+        # Check if an adjusted learning rate already exists in client_properties
+        adjusted_learning_rate = client_properties.get('learning_rate')
+        if adjusted_learning_rate is not None:
+            current_learning_rate = float(adjusted_learning_rate)
+        else:
+            current_learning_rate = self.default_learning_rate
+
+        learning_rate_adjustment = {"learning_rate": current_learning_rate}
 
         if incoming_bandwidth < self.bandwidth_threshold:
-            adjusted_learning_rate = self.default_learning_rate * self.adjustment_factor
-            learning_rate_adjustment["learning_rate"] = adjusted_learning_rate
-            logger.info(f"Adjusted learning rate to {adjusted_learning_rate} due to low incoming bandwidth ({incoming_bandwidth} Mbps)")
+            new_learning_rate = current_learning_rate * self.adjustment_factor
+            learning_rate_adjustment["learning_rate"] = new_learning_rate
+            logger.info(f"Adjusted learning rate to {new_learning_rate} due to low incoming bandwidth ({incoming_bandwidth} Mbps)")
 
         return learning_rate_adjustment
+
 
 class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
@@ -78,14 +87,22 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         self.adjustment_factor = config.get('adjustment_factor')
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+        logger.info(f"client properties in check method are: {client_properties}")
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
         rate_of_cpu_usase = float(metrics.get(Names.EPOCH_ADJUSTMENT_BASED_ON_CPU_UTILIZATION.value))
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
         logger.info(f"EpochAdjustmentBasedOnCPUUtilization check result: {cpu_utlization}%")
-        epoch_adjustment = {"epochs": self.default_number_of_epochs}
+        
+        adjusted_epochs = client_properties.get('epochs')
+        if adjusted_epochs is not None:
+            current_number_of_epochs = int(adjusted_epochs)
+        else:
+            current_number_of_epochs = self.default_number_of_epochs
+
+        epoch_adjustment = {"epochs": current_number_of_epochs}
 
         if cpu_utlization > self.threshold_cpu_utilization_percentage:
-            epoch_adjustment["epochs"] = math.floor(self.default_number_of_epochs / self.adjustment_factor)
+            epoch_adjustment["epochs"] = math.ceil(current_number_of_epochs / self.adjustment_factor)
             logger.info(f"Adjusted number of epochs to {epoch_adjustment['epochs']} due to high CPU utilization of ({cpu_utlization}%)")
 
         return epoch_adjustment

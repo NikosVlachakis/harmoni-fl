@@ -42,7 +42,14 @@ class Client(fl.client.NumPyClient):
         # Initialize instance variables to store operational metrics
         self.fit_operational_metrics = {}
         self.eval_operational_metrics = {}
+        self.properties = {}
         self.prom_service = PrometheusService()
+        self.container_name = os.getenv('container_name')
+        self.static_metrics = self.prom_service.get_container_static_metrics(self.container_name)
+        self.properties.update({
+            "container_name": self.container_name,
+            **self.static_metrics
+        })
 
     def get_parameters(self, config):
         return model.get_weights()
@@ -53,6 +60,9 @@ class Client(fl.client.NumPyClient):
         model.set_weights(parameters)
 
         logger.info("config is: %s", config)
+        
+        # Update the properties with the config as it contains the new configuration for the round
+        self.properties.update(config)
 
         # Use the dataset API for training
         train_dataset, _, num_examples_train, _ = load_data_helper(batch_size=config["batch_size"])
@@ -118,17 +128,11 @@ class Client(fl.client.NumPyClient):
 
         return float(loss), num_examples_test, {"accuracy": float(accuracy)}
     
-    
-    def get_properties(self, *args, **kwargs):
-        container_name = os.getenv('container_name', 'default_container_name')
-        static_metrics = self.prom_service.get_container_static_metrics(container_name)
-        logger.info(f"Static metrics for container {container_name}: {static_metrics}")
 
-        properties = {
-            "container_name": container_name,
-            **static_metrics 
-        }
-        return properties
+    def get_properties(self, *args, **kwargs):
+            return self.properties
+
+
 
 
 app = Flask(__name__)

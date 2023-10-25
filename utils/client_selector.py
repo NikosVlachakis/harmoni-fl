@@ -49,7 +49,7 @@ class ClientSelector:
         for client in all_clients:
             properties_response = client.get_properties(GetPropertiesIns(config={}), timeout=30)
             client_properties = properties_response.properties
-
+           
             # Get the start and end time of the previous round
             prev_round_start_time = round_timestamps[server_round - 1].get("start", None)
             prev_round_end_time = round_timestamps[server_round - 1].get("end", None)

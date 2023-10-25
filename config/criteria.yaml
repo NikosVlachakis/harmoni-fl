@@ -1,8 +1,8 @@
 criteria:
-  - type: max_cpu_usage
-    blocking: true
-    config:
-      threshold: 200 # Max CPU that this client can reach during training
+  # - type: max_cpu_usage
+  #   blocking: true
+  #   config:
+  #     threshold: 200 # Max CPU that this client can reach during training
   - type: max_memory_usage_percentage
     blocking: true
     config:
