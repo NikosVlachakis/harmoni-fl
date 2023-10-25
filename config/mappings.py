@@ -17,4 +17,14 @@ CRITERIA_CONFIG = {
     },
 }
 
+STATIC_CONTAINER_CONFIG = {
+    Names.CONTAINER_CPU_CORES.value: {
+        "query_func": machine_physical_cpu_cores_query
+    },
+    Names.CONTAINER_MEMORY_LIMIT.value: {
+        "query_func": container_memory_limit_query
+    }
+}
+
 CRITERIA_TO_QUERY_MAPPING = {criteria: config["query_func"] for criteria, config in CRITERIA_CONFIG.items()}
+CONTAINER_STATIC_QUERIES_MAPPING = {name: config["query_func"] for name, config in STATIC_CONTAINER_CONFIG.items()}

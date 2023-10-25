@@ -35,3 +35,13 @@ def container_outgoing_bandwidth_query(container_name: str, start_timestamp: int
 def container_cpu_allocation_query(container_name: str, metric_quota='container_spec_cpu_quota', metric_period='container_spec_cpu_period') -> str:
     query = f'({metric_quota}{{name="{container_name}"}} / {metric_period}{{name="{container_name}"}})'
     return query
+
+# Container memory limit
+def container_memory_limit_query(container_name: str, metric='container_spec_memory_limit_bytes') -> str:
+    query = f'{metric}{{name="{container_name}"}}'
+    return query
+
+# Number of physical CPU cores
+def machine_physical_cpu_cores_query(container_name: str,metric='machine_cpu_physical_cores') -> str:
+    query = metric
+    return query

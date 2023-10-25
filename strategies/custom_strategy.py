@@ -95,7 +95,7 @@ class FedCustom(fl.server.strategy.Strategy):
             client_selector = ClientSelector(client_manager)  
             all_clients = client_selector.get_all_clients()
             selected_clients = client_selector.filter_clients_by_criteria(all_clients, server_round, self.round_timestamps)
-            logger.info(f"Selected clients are {selected_clients}")
+            logger.info(f"Selected clients based on criteria are: {selected_clients}")
 
        
         sample_size, min_num_clients = self.num_fit_clients(client_manager.num_available())

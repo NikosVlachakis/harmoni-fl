@@ -24,7 +24,7 @@ class ClientSelector:
         return clients
 
     
-    def generate_queries_for_client(self, client_properties: Dict[str, str], prev_round_start_time: int, prev_round_end_time: int) -> List[tuple]:
+    def generate_dynamic_queries_for_client_B0_criteria(self, client_properties: Dict[str, str], prev_round_start_time: int, prev_round_end_time: int) -> List[tuple]:
         query_tuples = []
         for crit in self.criteria_config.get('criteria', []):
             crit_type = crit.get('type')
@@ -55,7 +55,7 @@ class ClientSelector:
             prev_round_end_time = round_timestamps[server_round - 1].get("end", None)
             
             # Create a list of queries based on criteria
-            query_tuples = self.generate_queries_for_client(client_properties, prev_round_start_time, prev_round_end_time)
+            query_tuples = self.generate_dynamic_queries_for_client_B0_criteria(client_properties, prev_round_start_time, prev_round_end_time)
             
             # Fetch metrics for the client
             metrics = self.prom_service.batch_query(query_tuples)

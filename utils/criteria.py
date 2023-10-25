@@ -23,8 +23,7 @@ class MAXMemoryUsageCriterion(AbstractCriterion):
         logger.info(f"Initialized MAXMemoryUsageCriterion with threshold: {self.threshold}")
 
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
-        max_memory_available = float(4 * 1024 * 1024 * 1024)  # 4GB
-        percentage_memory_consumed = (float(metrics.get(Names.MAX_MEMORY_USAGE_PERCENTAGE.value, 0)) / max_memory_available) * 100
+        percentage_memory_consumed = (float(metrics.get(Names.MAX_MEMORY_USAGE_PERCENTAGE.value, 0)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
         logger.info(f"Percentage memory consumed: {percentage_memory_consumed}")
         meets_criteria = percentage_memory_consumed <= self.threshold
         logger.info(f"MAXMemoryUsageCriterion check result: {meets_criteria}")

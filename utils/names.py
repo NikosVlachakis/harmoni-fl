@@ -8,4 +8,6 @@ class Names(Enum):
     INCOMING_BANDWIDTH = "incoming_bandwidth"
     OUTGOING_BANDWIDTH = "outgoing_bandwidth"
     LEARNING_RATE_BASED_ON_INCOMING_BANDWIDTH = "learning_rate_based_on_incoming_bandwidth"
+    CONTAINER_CPU_CORES = "container_cpu_cores"
+    CONTAINER_MEMORY_LIMIT = "container_memory_limit"
 

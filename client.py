@@ -42,6 +42,7 @@ class Client(fl.client.NumPyClient):
         # Initialize instance variables to store operational metrics
         self.fit_operational_metrics = {}
         self.eval_operational_metrics = {}
+        self.prom_service = PrometheusService()
 
     def get_parameters(self, config):
         return model.get_weights()
@@ -117,14 +118,15 @@ class Client(fl.client.NumPyClient):
     
     
     def get_properties(self, *args, **kwargs):
-        container_name = os.getenv('container_name')
-        # prometheus_service = PrometheusService()
-        # cpu_allocation = prometheus_service.query(container_cpu_allocation_query(container_name))
-        # logger.info("Container %s has CPU allocation %s", container_name, cpu_allocation)
-        return {
+        container_name = os.getenv('container_name', 'default_container_name')
+        static_metrics = self.prom_service.get_container_static_metrics(container_name)
+        logger.info(f"Static metrics for container {container_name}: {static_metrics}")
+
+        properties = {
             "container_name": container_name,
-            # "cpu_allocation": cpu_allocation
+            **static_metrics 
         }
+        return properties
 
 
 app = Flask(__name__)

@@ -3,7 +3,7 @@ import json
 from services.prometheus_queries import *
 import logging
 from typing import Dict, List
-from config.mappings import CRITERIA_TO_QUERY_MAPPING
+from config.mappings import *
 
 logging.basicConfig(level=logging.INFO)  
 logger = logging.getLogger(__name__)  
@@ -18,7 +18,6 @@ class PrometheusService:
         return data['data']['result'][0]['value'][1]
     
     
-    
     def batch_query(self, query_tuples: List[tuple]) -> Dict[str, float]:
         results = {}
         for query, func_name in query_tuples:
@@ -30,6 +29,16 @@ class PrometheusService:
                 logger.error(f"Error while fetching value for query {query}: {e}")
         return results
     
+    def get_container_static_metrics(self, container_name, queries_mapping=CONTAINER_STATIC_QUERIES_MAPPING):
+        results = {}
+        for metric_name, query_func in queries_mapping.items():
+            try:
+                query = query_func(container_name)
+                result = self.query(query)
+                results[metric_name] = float(result)
+            except Exception as e:
+                logger.error(f"Error fetching result for query {query}: {e}")
+        return results
 
 
     def extract_criteria_identifier(self, func_name: str) -> str:
