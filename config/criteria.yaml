@@ -13,3 +13,9 @@ criteria:
         threshold_bandwidth_mbps: 3  # Bandwidth threshold in Mbps
         adjustment_factor: 1.5  # Factor to increase the learning rate by when bandwidth is below threshold
         default_learning_rate: 0.2
+  - type: epoch_adjustment_based_on_cpu_utilization
+    blocking: false
+    config: 
+        default_number_of_epochs: 8
+        threshold_cpu_utilization_percentage : 20
+        adjustment_factor : 1.5

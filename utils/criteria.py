@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+import math
 from typing import Dict
 from utils.names import Names
 
@@ -51,7 +52,7 @@ class GPUCriterion(AbstractCriterion):
     
 class LearningRateBOIncomingBandwidth(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
-        self.bandwidth_threshold = config.get('bandwidth_threshold', 10)  # in Mbps, default to 10Mbps if not provided
+        self.bandwidth_threshold = config.get('threshold_bandwidth_mbps', 10)  # in Mbps, default to 10Mbps if not provided
         self.adjustment_factor = config.get('adjustment_factor', 1.5)  # default to 1.5 if not provided
         self.default_learning_rate = config.get('default_learning_rate', 0.01)  # default to 0.01 if not provided
         self.is_blocking = blocking
@@ -68,3 +69,23 @@ class LearningRateBOIncomingBandwidth(AbstractCriterion):
             logger.info(f"Adjusted learning rate to {adjusted_learning_rate} due to low incoming bandwidth ({incoming_bandwidth} Mbps)")
 
         return learning_rate_adjustment
+
+class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
+    def __init__(self, config: Dict[str, any], blocking: bool):
+        self.is_blocking = blocking
+        self.default_number_of_epochs = config.get('default_number_of_epochs')
+        self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
+        self.adjustment_factor = config.get('adjustment_factor')
+    
+    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+        container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
+        rate_of_cpu_usase = float(metrics.get(Names.EPOCH_ADJUSTMENT_BASED_ON_CPU_UTILIZATION.value))
+        cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
+        logger.info(f"EpochAdjustmentBasedOnCPUUtilization check result: {cpu_utlization}%")
+        epoch_adjustment = {"epochs": self.default_number_of_epochs}
+
+        if cpu_utlization > self.threshold_cpu_utilization_percentage:
+            epoch_adjustment["epochs"] = math.floor(self.default_number_of_epochs / self.adjustment_factor)
+            logger.info(f"Adjusted number of epochs to {epoch_adjustment['epochs']} due to high CPU utilization of ({cpu_utlization}%)")
+
+        return epoch_adjustment

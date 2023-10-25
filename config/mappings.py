@@ -15,6 +15,10 @@ CRITERIA_CONFIG = {
         "query_func": container_incoming_bandwidth_query,
         "criterion_class": LearningRateBOIncomingBandwidth
     },
+    Names.EPOCH_ADJUSTMENT_BASED_ON_CPU_UTILIZATION.value: {
+        "query_func": container_specific_cpu_usage_query,
+        "criterion_class": EpochAdjustmentBasedOnCPUUtilization
+    },
 }
 
 STATIC_CONTAINER_CONFIG = {

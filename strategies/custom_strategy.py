@@ -103,7 +103,7 @@ class FedCustom(fl.server.strategy.Strategy):
             num_clients=sample_size, min_num_clients=min_num_clients
         )
 
-        standard_config = {"epochs": 1, "batch_size": 32, "learning_rate": 0.01}
+        standard_config = {"epochs": 8, "batch_size": 32, "learning_rate": 0.01}
 
         if selected_clients:
             # Use the standard config as a default and update it with the client-specific config if available

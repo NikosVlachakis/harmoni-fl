@@ -51,7 +51,9 @@ class Client(fl.client.NumPyClient):
         start_time = time.time()  # Capture the start time
         # Set the weights of the model
         model.set_weights(parameters)
-        
+
+        logger.info("config is: %s", config)
+
         # Use the dataset API for training
         train_dataset, _, num_examples_train, _ = load_data_helper(batch_size=config["batch_size"])
         
