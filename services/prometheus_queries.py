@@ -1,8 +1,6 @@
 
 # Max cpu usage for a container between two timestamps
 import logging
-import math
-import time
 from utils.simple_utils import range_from_timestamps
 
 logging.basicConfig(level=logging.INFO)  # Configure logging

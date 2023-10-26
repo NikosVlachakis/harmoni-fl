@@ -1,6 +1,6 @@
 import uuid
 import mlflow
-from strategies.custom_strategy import FedCustom
+from strategies.strategy import FedCustom
 import logging
 import flwr as fl
 

@@ -25,7 +25,6 @@ class MAXMemoryUsageCriterion(AbstractCriterion):
 
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
         percentage_memory_consumed = (float(metrics.get(Names.MAX_MEMORY_USAGE_PERCENTAGE.value, 0)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
-        logger.info(f"Percentage memory consumed: {percentage_memory_consumed}")
         meets_criteria = percentage_memory_consumed <= self.threshold
         logger.info(f"MAXMemoryUsageCriterion check result: {meets_criteria}")
         return meets_criteria
@@ -35,20 +34,13 @@ class MaxCPUUsageCriterion(AbstractCriterion):
         self.threshold = config.get('threshold')  # Default threshold to 100 if not provided
         self.is_blocking = blocking
         logger.info(f"Initialized MaxCPUUsageCriterion with threshold: {self.threshold}")
-
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
-        meets_criteria = float(metrics.get(Names.MAX_CPU_USAGE.value, 0)) <= self.threshold
+        container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
+        rate_of_cpu_usase = float(metrics.get(Names.MAX_CPU_USAGE.value))
+        cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
+        meets_criteria = cpu_utlization <= self.threshold
         logger.info(f"MaxCPUUsageCriterion check result: {meets_criteria}")
         return meets_criteria
-
-class GPUCriterion(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
-        pass  # No configuration required for GPU criterion at the moment
-
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
-        has_gpu = client_properties.get("has_gpu", False)
-        logger.info(f"GPUCriterion check result: {has_gpu}")
-        return has_gpu
     
 class LearningRateBOIncomingBandwidth(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
@@ -60,7 +52,6 @@ class LearningRateBOIncomingBandwidth(AbstractCriterion):
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
         incoming_bandwidth = float(metrics.get(Names.LEARNING_RATE_BASED_ON_INCOMING_BANDWIDTH.value))  # in Mbps
-        logger.info(f"LearningRateBOIncomingBandwidth check result: {incoming_bandwidth} Mbps")
 
         # Check if an adjusted learning rate already exists in client_properties
         adjusted_learning_rate = client_properties.get('learning_rate')
@@ -87,11 +78,9 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         self.adjustment_factor = config.get('adjustment_factor')
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
-        logger.info(f"client properties in check method are: {client_properties}")
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
         rate_of_cpu_usase = float(metrics.get(Names.EPOCH_ADJUSTMENT_BASED_ON_CPU_UTILIZATION.value))
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
-        logger.info(f"EpochAdjustmentBasedOnCPUUtilization check result: {cpu_utlization}%")
         
         adjusted_epochs = client_properties.get('epochs')
         if adjusted_epochs is not None:

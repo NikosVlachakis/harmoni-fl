@@ -1,10 +1,10 @@
-from utils.criteria import *
+from criteria import *
 from utils.names import Names
 from services.prometheus_queries import *
 
 CRITERIA_CONFIG = {
     Names.MAX_CPU_USAGE.value: {
-        "query_func": container_specific_max_cpu_usage_query,
+        "query_func": container_specific_cpu_usage_query,
         "criterion_class": MaxCPUUsageCriterion
     },
     Names.MAX_MEMORY_USAGE_PERCENTAGE.value: {
@@ -30,5 +30,5 @@ STATIC_CONTAINER_CONFIG = {
     }
 }
 
-CRITERIA_TO_QUERY_MAPPING = {criteria: config["query_func"] for criteria, config in CRITERIA_CONFIG.items()}
+CRITERIA_TO_QUERY_MAPPING = {criteria: (config["query_func"], config["criterion_class"].__name__) for criteria, config in CRITERIA_CONFIG.items()}
 CONTAINER_STATIC_QUERIES_MAPPING = {name: config["query_func"] for name, config in STATIC_CONTAINER_CONFIG.items()}

@@ -1,8 +1,8 @@
 criteria:
-  # - type: max_cpu_usage
-  #   blocking: true
-  #   config:
-  #     threshold: 200 # Max CPU that this client can reach during training
+  - type: max_cpu_usage
+    blocking: true
+    config:
+      threshold: 90 # Max CPU Percentage that this client can reach during training
   - type: max_memory_usage_percentage
     blocking: true
     config:
@@ -16,6 +16,6 @@ criteria:
   - type: epoch_adjustment_based_on_cpu_utilization
     blocking: false
     config: 
-        default_number_of_epochs: 8
+        default_number_of_epochs: 5
         threshold_cpu_utilization_percentage : 20
         adjustment_factor : 1.5

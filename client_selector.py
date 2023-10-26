@@ -3,7 +3,7 @@ from typing import List, Dict
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.common import GetPropertiesIns
-from utils.criteria import *
+from criteria import *
 from config.config_loader import load_criteria_config
 from services.prometheus_service import PrometheusService
 from config.mappings import *
@@ -30,11 +30,12 @@ class ClientSelector:
             crit_type = crit.get('type')
             logger.info(f"Processing criteria type: {crit_type}")
 
-            query_func = CRITERIA_TO_QUERY_MAPPING.get(crit_type)
+            query_func, criterion_class = CRITERIA_TO_QUERY_MAPPING.get(crit_type)
+
             if query_func:
                 query = query_func(client_properties['container_name'], prev_round_start_time, prev_round_end_time)
-                query_tuples.append((query, query_func.__name__))
-                logger.info(f"Generated query for {crit_type}: {query}")
+                query_tuples.append((query, criterion_class))
+                logger.info(f"Generated query_tuples for {crit_type}: {query_tuples}")
             else:
                 logger.error(f"No query function found for criteria type: {crit_type}")
 
@@ -59,6 +60,8 @@ class ClientSelector:
             
             # Fetch metrics for the client
             metrics = self.prom_service.batch_query(query_tuples)
+
+            logger.info(f"Metrics for client {client_properties['container_name']}: {metrics}")
 
             # Separate blocking and non-blocking criteria
             blocking_criteria = [c for c in criteria if c.is_blocking]

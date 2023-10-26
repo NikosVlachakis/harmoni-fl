@@ -24,7 +24,7 @@ import sys
 import numpy as np
 from services.prometheus_service import PrometheusService
 from flwr.common import GetPropertiesIns
-from utils.client_selector import ClientSelector
+from client_selector import ClientSelector
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -103,7 +103,7 @@ class FedCustom(fl.server.strategy.Strategy):
             num_clients=sample_size, min_num_clients=min_num_clients
         )
 
-        standard_config = {"epochs": 8, "batch_size": 32, "learning_rate": 0.01}
+        standard_config = {"epochs": 5, "batch_size": 32, "learning_rate": 0.01}
 
         if selected_clients:
             # Use the standard config as a default and update it with the client-specific config if available
