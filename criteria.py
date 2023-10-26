@@ -24,7 +24,7 @@ class MAXMemoryUsageCriterion(AbstractCriterion):
         logger.info(f"Initialized MAXMemoryUsageCriterion with threshold: {self.threshold}")
 
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
-        percentage_memory_consumed = (float(metrics.get(Names.MAX_MEMORY_USAGE_PERCENTAGE.value, 0)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
+        percentage_memory_consumed = (float(metrics.get(Names.MAX_MEMORY_USAGE_PERCENTAGE.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
         meets_criteria = percentage_memory_consumed <= self.threshold
         logger.info(f"MAXMemoryUsageCriterion check result: {meets_criteria}")
         return meets_criteria
@@ -95,3 +95,53 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
             logger.info(f"Adjusted number of epochs to {epoch_adjustment['epochs']} due to high CPU utilization of ({cpu_utlization}%)")
 
         return epoch_adjustment
+    
+class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
+    def __init__(self, config: Dict[str, any], blocking: bool):
+        self.is_blocking = blocking
+        self.default_batch_size = config.get('default_batch_size')
+        self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
+        self.adjustment_factor = config.get('adjustment_factor')
+    
+    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+        percentage_memory_consumed = (float(metrics.get(Names.ADAPTIVE_BATCH_SIZE_BASED_ON_MEMORY_UTILIZATION.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
+        logger.info(f"Percentage memory consumed: {percentage_memory_consumed}")
+        adjusted_batch_size = client_properties.get('batch_size')
+
+        if adjusted_batch_size is not None:
+            current_batch_size = int(adjusted_batch_size)
+        else:
+            current_batch_size = self.default_batch_size
+
+        batch_size_adjustment = {"batch_size": current_batch_size}
+
+        if percentage_memory_consumed > self.threshold_memory_utilization_percentage:
+            batch_size_adjustment["batch_size"] = math.ceil(current_batch_size / self.adjustment_factor)
+            logger.info(f"Adjusted batch size to {batch_size_adjustment['batch_size']} due to high memory utilization of ({percentage_memory_consumed}%)")
+
+        return batch_size_adjustment
+    
+class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
+    def __init__(self, config: Dict[str, any], blocking: bool):
+        self.is_blocking = blocking
+        self.default_data_sample_percentage = config.get('default_data_sample_percentage')
+        self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
+        self.adjustment_factor = config.get('adjustment_factor')
+    
+    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+        percentage_memory_consumed = (float(metrics.get(Names.ADAPTIVE_DATA_SAMPLING_BASED_ON_MEMORY_UTILIZATION.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
+        logger.info(f"Percentage memory consumed: {percentage_memory_consumed}")
+        adjusted_data_sample_percentage = client_properties.get('data_sample_percentage')
+
+        if adjusted_data_sample_percentage is not None:
+            current_data_sample_percentage = float(adjusted_data_sample_percentage)
+        else:
+            current_data_sample_percentage = self.default_data_sample_percentage
+
+        data_sample_percentage_adjustment = {"data_sample_percentage": current_data_sample_percentage}
+
+        if percentage_memory_consumed > self.threshold_memory_utilization_percentage:
+            data_sample_percentage_adjustment["data_sample_percentage"] = (current_data_sample_percentage / self.adjustment_factor)
+            logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to high memory utilization of ({percentage_memory_consumed}%)")
+
+        return data_sample_percentage_adjustment

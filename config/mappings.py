@@ -19,6 +19,14 @@ CRITERIA_CONFIG = {
         "query_func": container_specific_cpu_usage_query,
         "criterion_class": EpochAdjustmentBasedOnCPUUtilization
     },
+    Names.ADAPTIVE_BATCH_SIZE_BASED_ON_MEMORY_UTILIZATION.value: {
+        "query_func": container_specific_max_memory_usage_query,
+        "criterion_class": AdaptiveBatchSizeBasedOnMemoryUtilization
+    },
+    Names.ADAPTIVE_DATA_SAMPLING_BASED_ON_MEMORY_UTILIZATION.value: {
+        "query_func": container_specific_max_memory_usage_query,
+        "criterion_class": AdaptiveDataSamplingBasedOnMemoryUtilization
+    }
 }
 
 STATIC_CONTAINER_CONFIG = {

@@ -19,3 +19,18 @@ criteria:
         default_number_of_epochs: 5
         threshold_cpu_utilization_percentage : 20
         adjustment_factor : 1.5
+  - type: adaptive_batch_size_based_on_memory_utilization
+    blocking: false
+    config:
+      default_batch_size: 128
+      threshold_memory_utilization_percentage: 50
+      adjustment_factor: 1.5
+    
+  - type: adaptive_data_sampling_based_on_memory_utilization
+    blocking: false
+    config:
+      default_data_sample_percentage: 0.2
+      threshold_memory_utilization_percentage: 20
+      adjustment_factor: 1.2
+
+

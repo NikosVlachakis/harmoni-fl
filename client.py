@@ -59,19 +59,18 @@ class Client(fl.client.NumPyClient):
         # Set the weights of the model
         model.set_weights(parameters)
 
-        logger.info("config is: %s", config)
+        logger.info("config for client is:::::: %s", config)
         
         # Update the properties with the config as it contains the new configuration for the round
         self.properties.update(config)
 
         # Use the dataset API for training
-        train_dataset, _, num_examples_train, _ = load_data_helper(batch_size=config["batch_size"])
+        train_dataset, _, num_examples_train, _ = load_data_helper(percentage = config["data_sample_percentage"],batch_size=config["batch_size"])
         
         learning_rate_setter = LearningRateSetter(learning_rate= config["learning_rate"])
         
         # Train the model
         history = model.fit(train_dataset, epochs=config["epochs"], callbacks=[learning_rate_setter])
-        # history = model.fit(train_dataset, epochs=config["epochs"])
         
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration

@@ -4,7 +4,7 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.common import GetPropertiesIns
 from criteria import *
-from config.config_loader import load_criteria_config
+from utils.load_configs import load_criteria_config
 from services.prometheus_service import PrometheusService
 from config.mappings import *
 
@@ -15,12 +15,10 @@ class ClientSelector:
         self.client_manager = client_manager
         self.criteria_config = load_criteria_config("config/criteria.yaml")
         self.prom_service = PrometheusService()
-        logger.info("ClientSelector initialized")
 
     def get_all_clients(self) -> List[ClientProxy]:
         total_available_clients = self.client_manager.num_available()
         clients = self.client_manager.sample(num_clients=total_available_clients, min_num_clients=total_available_clients)
-        logger.info(f"Retrieved {len(clients)} clients")
         return clients
 
     
@@ -28,7 +26,6 @@ class ClientSelector:
         query_tuples = []
         for crit in self.criteria_config.get('criteria', []):
             crit_type = crit.get('type')
-            logger.info(f"Processing criteria type: {crit_type}")
 
             query_func, criterion_class = CRITERIA_TO_QUERY_MAPPING.get(crit_type)
 
@@ -39,7 +36,6 @@ class ClientSelector:
             else:
                 logger.error(f"No query function found for criteria type: {crit_type}")
 
-        logger.info(f"Created queries for client {client_properties['container_name']}: {query_tuples}")
         return query_tuples
 
 
@@ -60,8 +56,6 @@ class ClientSelector:
             
             # Fetch metrics for the client
             metrics = self.prom_service.batch_query(query_tuples)
-
-            logger.info(f"Metrics for client {client_properties['container_name']}: {metrics}")
 
             # Separate blocking and non-blocking criteria
             blocking_criteria = [c for c in criteria if c.is_blocking]

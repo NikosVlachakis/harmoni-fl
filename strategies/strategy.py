@@ -25,6 +25,8 @@ import numpy as np
 from services.prometheus_service import PrometheusService
 from flwr.common import GetPropertiesIns
 from client_selector import ClientSelector
+import json
+from utils.load_configs import load_strategy_config
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -103,7 +105,8 @@ class FedCustom(fl.server.strategy.Strategy):
             num_clients=sample_size, min_num_clients=min_num_clients
         )
 
-        standard_config = {"epochs": 5, "batch_size": 32, "learning_rate": 0.01}
+        standard_config = load_strategy_config()
+        logger.info(f"Standard config is: {standard_config}")
 
         if selected_clients:
             # Use the standard config as a default and update it with the client-specific config if available
@@ -238,6 +241,4 @@ class FedCustom(fl.server.strategy.Strategy):
         # Log the convergence
         logger.info(f"Convergence achieved with accuracy: {accuracy_aggregated:.2f}%")
 
-
-
-       
+        
