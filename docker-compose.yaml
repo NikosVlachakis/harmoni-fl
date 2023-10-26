@@ -9,7 +9,7 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
-      - ./monitoring-configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - cadvisor
   cadvisor:
@@ -99,11 +99,6 @@ services:
       container_name: client1
       DOCKER_HOST_IP: host.docker.internal
       MLFLOW_TRACKING_URI: http://mlflow_server:5010
-    # deploy:
-    #     resources:
-    #       limits:
-    #         memory: 6g
-    # mem_reservation: 2g
   client2:
     container_name: client2
     build:
