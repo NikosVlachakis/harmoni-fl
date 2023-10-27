@@ -133,10 +133,7 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
         logger.info(f"Percentage memory consumed: {percentage_memory_consumed}")
         adjusted_data_sample_percentage = client_properties.get('data_sample_percentage')
 
-        if adjusted_data_sample_percentage is not None:
-            current_data_sample_percentage = float(adjusted_data_sample_percentage)
-        else:
-            current_data_sample_percentage = self.default_data_sample_percentage
+        current_data_sample_percentage = float(adjusted_data_sample_percentage) if adjusted_data_sample_percentage is not None else self.default_data_sample_percentage
 
         data_sample_percentage_adjustment = {"data_sample_percentage": current_data_sample_percentage}
 
@@ -145,3 +142,28 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
             logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to high memory utilization of ({percentage_memory_consumed}%)")
 
         return data_sample_percentage_adjustment
+
+
+class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
+    def __init__(self, config: Dict[str, any], blocking: bool):
+        self.is_blocking = blocking
+        self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
+        self.adjustment_factor = config.get('adjustment_factor')
+    
+    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+        container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
+        rate_of_cpu_usase = float(metrics.get(Names.MODEL_LAYER_FREEZING_BASED_ON_HIGH_CPU_UTILIZATION.value))
+        cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
+        
+        current_freeze_percentage = client_properties.get('freeze_layers_percentage')
+
+        current_freeze_percentage = int(current_freeze_percentage) if current_freeze_percentage is not None else 0
+
+        freeze_percentage_adjustment = {"freeze_layers_percentage": current_freeze_percentage}
+
+        if cpu_utlization > self.threshold_cpu_utilization_percentage:
+            freeze_percentage_adjustment["freeze_layers_percentage"] = math.ceil(current_freeze_percentage + self.adjustment_factor)
+            logger.info(f"Adjusted percentage of freezing layers to {freeze_percentage_adjustment['freeze_layers_percentage']} due to high CPU utilization of ({cpu_utlization}%)")
+
+        return freeze_percentage_adjustment
+    

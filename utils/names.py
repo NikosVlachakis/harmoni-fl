@@ -13,5 +13,7 @@ class Names(Enum):
     CONTAINER_MEMORY_LIMIT = "container_memory_limit"
     ADAPTIVE_BATCH_SIZE_BASED_ON_MEMORY_UTILIZATION = "adaptive_batch_size_based_on_memory_utilization"
     ADAPTIVE_DATA_SAMPLING_BASED_ON_MEMORY_UTILIZATION = "adaptive_data_sampling_based_on_memory_utilization"
+    MODEL_LAYER_FREEZING_BASED_ON_HIGH_CPU_UTILIZATION = "model_layer_freezing_based_on_high_cpu_utilization"
+    FREEZE_LAYERS_PERCENTAGE = "freeze_layers_percentage"
 
 

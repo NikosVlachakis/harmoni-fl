@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import requests
 from flask_restful import Resource, Api, abort
 import flwr as fl
+from models.model_adjustments import ModelAdjuster
 from services.prometheus_queries import *
 from services.prometheus_service import PrometheusService
 import tensorflow as tf
@@ -19,7 +20,6 @@ import logging
 from helpers.load_data_helper import load_data_helper
 import os
 import numpy as np
-import tensorflow as tf
 from helpers.mlflow_helper import log_round_metrics_for_client
 from models.cnn import cnn as cnn_model
 from flwr.common import GetPropertiesIns,GetPropertiesRes,Status
@@ -68,10 +68,15 @@ class Client(fl.client.NumPyClient):
         train_dataset, _, num_examples_train, _ = load_data_helper(percentage = config["data_sample_percentage"],batch_size=config["batch_size"])
         
         learning_rate_setter = LearningRateSetter(learning_rate= config["learning_rate"])
-        
-        # Train the model
-        history = model.fit(train_dataset, epochs=config["epochs"], callbacks=[learning_rate_setter])
-        
+     
+        # Apply model adjustments based on config
+        model_adjuster = ModelAdjuster(model)
+        with model_adjuster.apply_adjustments(config):
+            # Train the model
+            logger.info("Starting training")
+            history = model.fit(train_dataset, epochs=config["epochs"], callbacks=[learning_rate_setter])
+            logger.info("Finished training")
+
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
 

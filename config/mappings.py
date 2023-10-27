@@ -26,6 +26,10 @@ CRITERIA_CONFIG = {
     Names.ADAPTIVE_DATA_SAMPLING_BASED_ON_MEMORY_UTILIZATION.value: {
         "query_func": container_specific_max_memory_usage_query,
         "criterion_class": AdaptiveDataSamplingBasedOnMemoryUtilization
+    },
+    Names.MODEL_LAYER_FREEZING_BASED_ON_HIGH_CPU_UTILIZATION.value: {
+        "query_func": container_specific_cpu_usage_query,
+        "criterion_class": ModelLayerReductionBasedOnHighCPUUtilization
     }
 }
 
