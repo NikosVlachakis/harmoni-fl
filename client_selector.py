@@ -32,7 +32,6 @@ class ClientSelector:
             if query_func:
                 query = query_func(client_properties['container_name'], prev_round_start_time, prev_round_end_time)
                 query_tuples.append((query, criterion_class))
-                logger.info(f"Generated query_tuples for {crit_type}: {query_tuples}")
             else:
                 logger.error(f"No query function found for criteria type: {crit_type}")
 
@@ -94,7 +93,6 @@ class ClientSelector:
                 if criterion_class is not None:
                     criterion_obj = criterion_class(crit_config, is_blocking)
                     criteria_objects.append(criterion_obj)
-                    logger.info(f"Loaded {criterion_class.__name__} with config {crit_config} and blocking={is_blocking}")
                 else:
                     logger.warning(f"No criterion class found for type {crit_type}")
             else:

@@ -21,7 +21,6 @@ class MAXMemoryUsageCriterion(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.threshold = config.get('threshold')  # Default threshold to 100 if not provided
         self.is_blocking = blocking
-        logger.info(f"Initialized MAXMemoryUsageCriterion with threshold: {self.threshold}")
 
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
         percentage_memory_consumed = (float(metrics.get(Names.MAX_MEMORY_USAGE_PERCENTAGE.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
@@ -33,7 +32,6 @@ class MaxCPUUsageCriterion(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.threshold = config.get('threshold')  # Default threshold to 100 if not provided
         self.is_blocking = blocking
-        logger.info(f"Initialized MaxCPUUsageCriterion with threshold: {self.threshold}")
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
         rate_of_cpu_usase = float(metrics.get(Names.MAX_CPU_USAGE.value))
@@ -44,11 +42,10 @@ class MaxCPUUsageCriterion(AbstractCriterion):
     
 class LearningRateBOIncomingBandwidth(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
-        self.bandwidth_threshold = config.get('threshold_bandwidth_mbps', 10)  # in Mbps, default to 10Mbps if not provided
-        self.adjustment_factor = config.get('adjustment_factor', 1.5)  # default to 1.5 if not provided
-        self.default_learning_rate = config.get('default_learning_rate', 0.01)  # default to 0.01 if not provided
+        self.bandwidth_threshold = config.get('threshold_bandwidth_mbps')  # in Mbps, default to 10Mbps if not provided
+        self.adjustment_factor = config.get('adjustment_factor')  # default to 1.5 if not provided
+        self.default_learning_rate = config.get('default_learning_rate')  # default to 0.01 if not provided
         self.is_blocking = blocking
-        logger.info(f"Initialized LearningRateBOIncomingBandwidth with bandwidth_threshold: {self.bandwidth_threshold} Mbps, adjustment_factor: {self.adjustment_factor}, default_learning_rate: {self.default_learning_rate}")
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
         incoming_bandwidth = float(metrics.get(Names.LEARNING_RATE_BASED_ON_INCOMING_BANDWIDTH.value))  # in Mbps
@@ -91,7 +88,8 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         epoch_adjustment = {"epochs": current_number_of_epochs}
 
         if cpu_utlization > self.threshold_cpu_utilization_percentage:
-            epoch_adjustment["epochs"] = math.ceil(current_number_of_epochs / self.adjustment_factor)
+            adjusted_epochs = math.ceil(current_number_of_epochs / self.adjustment_factor)
+            epoch_adjustment["epochs"] = max(adjusted_epochs, 1)
             logger.info(f"Adjusted number of epochs to {epoch_adjustment['epochs']} due to high CPU utilization of ({cpu_utlization}%)")
 
         return epoch_adjustment
@@ -105,7 +103,6 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
         percentage_memory_consumed = (float(metrics.get(Names.ADAPTIVE_BATCH_SIZE_BASED_ON_MEMORY_UTILIZATION.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
-        logger.info(f"Percentage memory consumed: {percentage_memory_consumed}")
         adjusted_batch_size = client_properties.get('batch_size')
 
         if adjusted_batch_size is not None:
@@ -115,8 +112,10 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
 
         batch_size_adjustment = {"batch_size": current_batch_size}
 
+
         if percentage_memory_consumed > self.threshold_memory_utilization_percentage:
-            batch_size_adjustment["batch_size"] = math.ceil(current_batch_size / self.adjustment_factor)
+            adjusted_batch_size = math.ceil(current_batch_size / self.adjustment_factor)
+            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, 1)
             logger.info(f"Adjusted batch size to {batch_size_adjustment['batch_size']} due to high memory utilization of ({percentage_memory_consumed}%)")
 
         return batch_size_adjustment
@@ -130,7 +129,6 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
         percentage_memory_consumed = (float(metrics.get(Names.ADAPTIVE_DATA_SAMPLING_BASED_ON_MEMORY_UTILIZATION.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
-        logger.info(f"Percentage memory consumed: {percentage_memory_consumed}")
         adjusted_data_sample_percentage = client_properties.get('data_sample_percentage')
 
         current_data_sample_percentage = float(adjusted_data_sample_percentage) if adjusted_data_sample_percentage is not None else self.default_data_sample_percentage
@@ -138,7 +136,9 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
         data_sample_percentage_adjustment = {"data_sample_percentage": current_data_sample_percentage}
 
         if percentage_memory_consumed > self.threshold_memory_utilization_percentage:
-            data_sample_percentage_adjustment["data_sample_percentage"] = (current_data_sample_percentage / self.adjustment_factor)
+            adjusted_data_sample_percentage = (current_data_sample_percentage / self.adjustment_factor)
+            # Ensure that the data sample percentage is not less than 5%
+            data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, 0.05)
             logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to high memory utilization of ({percentage_memory_consumed}%)")
 
         return data_sample_percentage_adjustment
@@ -161,9 +161,34 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
 
         freeze_percentage_adjustment = {"freeze_layers_percentage": current_freeze_percentage}
 
+
         if cpu_utlization > self.threshold_cpu_utilization_percentage:
-            freeze_percentage_adjustment["freeze_layers_percentage"] = math.ceil(current_freeze_percentage + self.adjustment_factor)
+            adjusted_freeze_percentage = math.ceil(current_freeze_percentage + self.adjustment_factor)
+            freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, 90)
             logger.info(f"Adjusted percentage of freezing layers to {freeze_percentage_adjustment['freeze_layers_percentage']} due to high CPU utilization of ({cpu_utlization}%)")
 
         return freeze_percentage_adjustment
     
+class GradientClippingBasedOnHighCPUUtilization(AbstractCriterion):
+    def __init__(self, config: Dict[str, any], blocking: bool):
+        self.is_blocking = blocking
+        self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
+        self.adjustment_factor = config.get('adjustment_factor')
+    
+    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+        container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
+        rate_of_cpu_usase = float(metrics.get(Names.GRADIENT_CLIPPING_BASED_ON_HIGH_CPU_UTILIZATION.value))
+        cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
+        
+        current_gradient_clipping = client_properties.get('gradient_clipping_value')
+
+        current_gradient_clipping = float(current_gradient_clipping) if current_gradient_clipping is not None else 0
+
+        gradient_clipping_adjustment = {"gradient_clipping_value": current_gradient_clipping}
+
+        if cpu_utlization > self.threshold_cpu_utilization_percentage:
+            adjusted_gradient_clipping = float(current_gradient_clipping - self.adjustment_factor)
+            gradient_clipping_adjustment["gradient_clipping_value"] = max(adjusted_gradient_clipping, 0.5)
+            logger.info(f"Adjusted gradient clipping to {gradient_clipping_adjustment['gradient_clipping_value']} due to high CPU utilization of ({cpu_utlization}%)")
+
+        return gradient_clipping_adjustment

@@ -30,6 +30,10 @@ CRITERIA_CONFIG = {
     Names.MODEL_LAYER_FREEZING_BASED_ON_HIGH_CPU_UTILIZATION.value: {
         "query_func": container_specific_cpu_usage_query,
         "criterion_class": ModelLayerReductionBasedOnHighCPUUtilization
+    },
+    Names.GRADIENT_CLIPPING_BASED_ON_HIGH_CPU_UTILIZATION.value: {
+        "query_func": container_specific_cpu_usage_query,
+        "criterion_class": GradientClippingBasedOnHighCPUUtilization
     }
 }
 
