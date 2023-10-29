@@ -7,6 +7,7 @@ from flask_cors.extension import CORS
 from matplotlib import pyplot as plt
 import requests
 from callbacks.gradient_clipping_setter import GradientClippingCallback
+from callbacks.model_precision_setter import ModelPrecisionAdjustmentCallback
 from flask_restful import Resource, Api, abort
 import flwr as fl
 from models.model_adjustments import ModelAdjuster
@@ -70,11 +71,12 @@ class Client(fl.client.NumPyClient):
         
         learning_rate_setter = LearningRateSetter(learning_rate= config["learning_rate"])
         gradient_clipping_setter = GradientClippingCallback(clipvalue=config.get("gradient_clipping_value"))
+        model_precision_adjustment = ModelPrecisionAdjustmentCallback(target_dtype=config.get("model_precision"))
 
         # Apply model adjustments based on config
         model_adjuster = ModelAdjuster(model)
         with model_adjuster.apply_adjustments(config):
-            history = model.fit(train_dataset, epochs=config["epochs"], callbacks=[learning_rate_setter, gradient_clipping_setter])
+            history = model.fit(train_dataset, epochs=config["epochs"], callbacks=[learning_rate_setter, gradient_clipping_setter,model_precision_adjustment])
 
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration

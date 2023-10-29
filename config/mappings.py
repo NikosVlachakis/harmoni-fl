@@ -34,6 +34,10 @@ CRITERIA_CONFIG = {
     Names.GRADIENT_CLIPPING_BASED_ON_HIGH_CPU_UTILIZATION.value: {
         "query_func": container_specific_cpu_usage_query,
         "criterion_class": GradientClippingBasedOnHighCPUUtilization
+    },
+    Names.MODEL_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value: {
+        "query_func": container_specific_cpu_usage_query,
+        "criterion_class": ModelPrecisionBasedOnHighCPUUtilization
     }
 }
 

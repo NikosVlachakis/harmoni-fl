@@ -20,16 +20,13 @@ class ModelAdjuster:
         applied_adjustments = []
         for key, value in config.items():
             if key in self.adjustment_mapper:
-                logger.info(f"Checking adjustment: {key}")
                 applied = self.adjustment_mapper[key](value)
                 if applied:
                     applied_adjustments.append(key)
-                    logger.info(f"Adjustment {key} applied")
                 
         try:
             yield
         finally:
-            logger.info("Reverting adjustments")
             self.revert_adjustments(applied_adjustments)
 
     def revert_adjustments(self, applied_adjustments):
@@ -58,4 +55,3 @@ class ModelAdjuster:
     def unfreeze_layers(self):
         for layer in self.frozen_layers:
             layer.trainable = True
-        logger.info("Unfreezed all previously frozen layers.")

@@ -45,3 +45,9 @@ criteria:
       threshold_cpu_utilization_percentage: 10
       adjustment_factor: 0.5
 
+
+  - type: model_precision_based_on_high_cpu_utilization
+    blocking: false
+    config: 
+      threshold_cpu_utilization_percentage: 20
+      new_precision_value: "float16"

@@ -16,5 +16,6 @@ class Names(Enum):
     MODEL_LAYER_FREEZING_BASED_ON_HIGH_CPU_UTILIZATION = "model_layer_freezing_based_on_high_cpu_utilization"
     FREEZE_LAYERS_PERCENTAGE = "freeze_layers_percentage"
     GRADIENT_CLIPPING_BASED_ON_HIGH_CPU_UTILIZATION = "gradient_clipping_based_on_high_cpu_utilization"
+    MODEL_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION = "model_precision_based_on_high_cpu_utilization"
 
 

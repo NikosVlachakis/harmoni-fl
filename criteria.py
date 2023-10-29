@@ -192,3 +192,26 @@ class GradientClippingBasedOnHighCPUUtilization(AbstractCriterion):
             logger.info(f"Adjusted gradient clipping to {gradient_clipping_adjustment['gradient_clipping_value']} due to high CPU utilization of ({cpu_utlization}%)")
 
         return gradient_clipping_adjustment
+
+class ModelPrecisionBasedOnHighCPUUtilization(AbstractCriterion):
+    def __init__(self, config: Dict[str, any], blocking: bool):
+        self.is_blocking = blocking
+        self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
+        self.new_precision_value = config.get('new_precision_value')
+    
+    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+        container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
+        rate_of_cpu_usase = float(metrics.get(Names.MODEL_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value))
+        cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
+        
+        current_model_precision = client_properties.get('model_precision')
+
+        current_model_precision = str(current_model_precision) if current_model_precision is not None else "float32"
+
+        model_precision_adjustment = {"model_precision": current_model_precision}
+
+        if cpu_utlization > self.threshold_cpu_utilization_percentage:
+            model_precision_adjustment["model_precision"] = self.new_precision_value
+            logger.info(f"Adjusted model precision to {model_precision_adjustment['model_precision']} due to high CPU utilization of ({cpu_utlization}%)")
+
+        return model_precision_adjustment
