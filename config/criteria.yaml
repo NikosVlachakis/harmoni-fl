@@ -46,7 +46,7 @@ criteria:
       adjustment_factor: 0.5
 
 
-  - type: model_precision_based_on_high_cpu_utilization
+  - type: weight_precision_based_on_high_cpu_utilization
     blocking: false
     config: 
       threshold_cpu_utilization_percentage: 20

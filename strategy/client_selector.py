@@ -3,7 +3,7 @@ from typing import List, Dict
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.common import GetPropertiesIns
-from criteria import *
+from strategy.criteria import *
 from utils.load_configs import load_criteria_config
 from services.prometheus_service import PrometheusService
 from config.mappings import *

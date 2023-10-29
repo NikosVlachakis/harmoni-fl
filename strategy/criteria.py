@@ -201,7 +201,7 @@ class ModelPrecisionBasedOnHighCPUUtilization(AbstractCriterion):
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
-        rate_of_cpu_usase = float(metrics.get(Names.MODEL_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value))
+        rate_of_cpu_usase = float(metrics.get(Names.WEIGHT_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value))
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
         
         current_model_precision = client_properties.get('model_precision')

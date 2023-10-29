@@ -22,10 +22,7 @@ import logging
 import mlflow
 import sys
 import numpy as np
-from services.prometheus_service import PrometheusService
-from flwr.common import GetPropertiesIns
-from client_selector import ClientSelector
-import json
+from strategy.client_selector import ClientSelector
 from utils.load_configs import load_strategy_config
 
 logging.basicConfig(level=logging.INFO)  # Configure logging

@@ -1,4 +1,4 @@
-from criteria import *
+from strategy.criteria import *
 from utils.names import Names
 from services.prometheus_queries import *
 
@@ -35,7 +35,7 @@ CRITERIA_CONFIG = {
         "query_func": container_specific_cpu_usage_query,
         "criterion_class": GradientClippingBasedOnHighCPUUtilization
     },
-    Names.MODEL_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value: {
+    Names.WEIGHT_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value: {
         "query_func": container_specific_cpu_usage_query,
         "criterion_class": ModelPrecisionBasedOnHighCPUUtilization
     }

@@ -6,8 +6,8 @@ from flask import Flask, request, jsonify
 from flask_cors.extension import CORS
 from matplotlib import pyplot as plt
 import requests
-from callbacks.gradient_clipping_setter import GradientClippingCallback
-from callbacks.model_precision_setter import ModelPrecisionAdjustmentCallback
+from models.callbacks.gradient_clipping_setter import GradientClippingCallback
+from models.callbacks.model_precision_setter import ModelPrecisionAdjustmentCallback
 from flask_restful import Resource, Api, abort
 import flwr as fl
 from models.model_adjustments import ModelAdjuster
@@ -24,8 +24,7 @@ import os
 import numpy as np
 from helpers.mlflow_helper import log_round_metrics_for_client
 from models.cnn import cnn as cnn_model
-from flwr.common import GetPropertiesIns,GetPropertiesRes,Status
-from callbacks.learning_rate_setter import LearningRateSetter
+from models.callbacks.learning_rate_setter import LearningRateSetter
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
