@@ -19,7 +19,7 @@ class AbstractCriterion(ABC):
 
 class MAXMemoryUsageCriterion(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
-        self.threshold = config.get('threshold')  # Default threshold to 100 if not provided
+        self.threshold = config.get('threshold')
         self.is_blocking = blocking
 
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
@@ -30,7 +30,7 @@ class MAXMemoryUsageCriterion(AbstractCriterion):
     
 class MaxCPUUsageCriterion(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
-        self.threshold = config.get('threshold')  # Default threshold to 100 if not provided
+        self.threshold = config.get('threshold')
         self.is_blocking = blocking
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
@@ -42,20 +42,14 @@ class MaxCPUUsageCriterion(AbstractCriterion):
     
 class LearningRateBOIncomingBandwidth(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
-        self.bandwidth_threshold = config.get('threshold_bandwidth_mbps')  # in Mbps, default to 10Mbps if not provided
-        self.adjustment_factor = config.get('adjustment_factor')  # default to 1.5 if not provided
-        self.default_learning_rate = config.get('default_learning_rate')  # default to 0.01 if not provided
+        self.bandwidth_threshold = config.get('threshold_bandwidth_mbps')  
+        self.adjustment_factor = config.get('adjustment_factor')
         self.is_blocking = blocking
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
         incoming_bandwidth = float(metrics.get(Names.LEARNING_RATE_BASED_ON_INCOMING_BANDWIDTH.value))  # in Mbps
-
-        # Check if an adjusted learning rate already exists in client_properties
         adjusted_learning_rate = client_properties.get('learning_rate')
-        if adjusted_learning_rate is not None:
-            current_learning_rate = float(adjusted_learning_rate)
-        else:
-            current_learning_rate = self.default_learning_rate
+        current_learning_rate = float(adjusted_learning_rate)
 
         learning_rate_adjustment = {"learning_rate": current_learning_rate}
 
@@ -70,7 +64,6 @@ class LearningRateBOIncomingBandwidth(AbstractCriterion):
 class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.is_blocking = blocking
-        self.default_number_of_epochs = config.get('default_number_of_epochs')
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
     
@@ -80,10 +73,7 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
         
         adjusted_epochs = client_properties.get('epochs')
-        if adjusted_epochs is not None:
-            current_number_of_epochs = int(adjusted_epochs)
-        else:
-            current_number_of_epochs = self.default_number_of_epochs
+        current_number_of_epochs = int(adjusted_epochs)
 
         epoch_adjustment = {"epochs": current_number_of_epochs}
 
@@ -97,21 +87,14 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
 class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.is_blocking = blocking
-        self.default_batch_size = config.get('default_batch_size')
         self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
     
     def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
         percentage_memory_consumed = (float(metrics.get(Names.ADAPTIVE_BATCH_SIZE_BASED_ON_MEMORY_UTILIZATION.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
         adjusted_batch_size = client_properties.get('batch_size')
-
-        if adjusted_batch_size is not None:
-            current_batch_size = int(adjusted_batch_size)
-        else:
-            current_batch_size = self.default_batch_size
-
+        current_batch_size = int(adjusted_batch_size)
         batch_size_adjustment = {"batch_size": current_batch_size}
-
 
         if percentage_memory_consumed > self.threshold_memory_utilization_percentage:
             adjusted_batch_size = math.ceil(current_batch_size / self.adjustment_factor)
@@ -123,7 +106,6 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
 class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.is_blocking = blocking
-        self.default_data_sample_percentage = config.get('default_data_sample_percentage')
         self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
     
@@ -131,7 +113,7 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
         percentage_memory_consumed = (float(metrics.get(Names.ADAPTIVE_DATA_SAMPLING_BASED_ON_MEMORY_UTILIZATION.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
         adjusted_data_sample_percentage = client_properties.get('data_sample_percentage')
 
-        current_data_sample_percentage = float(adjusted_data_sample_percentage) if adjusted_data_sample_percentage is not None else self.default_data_sample_percentage
+        current_data_sample_percentage = float(adjusted_data_sample_percentage)
 
         data_sample_percentage_adjustment = {"data_sample_percentage": current_data_sample_percentage}
 

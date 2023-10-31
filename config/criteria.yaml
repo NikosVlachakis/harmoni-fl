@@ -2,34 +2,30 @@ criteria:
   - type: max_cpu_usage
     blocking: true
     config:
-      threshold: 90 # Max CPU Percentage that this client can reach during training
+      threshold: 90
   - type: max_memory_usage_percentage
     blocking: true
     config:
-      threshold: 70 # Max Memory percentage that this client can reach during training
+      threshold: 70 
   - type: learning_rate_based_on_incoming_bandwidth
     blocking: false
     config:
-        threshold_bandwidth_mbps: 3  # Bandwidth threshold in Mbps
-        adjustment_factor: 1.5  # Factor to increase the learning rate by when bandwidth is below threshold
-        default_learning_rate: 0.2
+        threshold_bandwidth_mbps: 3 
+        adjustment_factor: 1.5 
   - type: epoch_adjustment_based_on_cpu_utilization
     blocking: false
     config: 
-        default_number_of_epochs: 5
         threshold_cpu_utilization_percentage : 20
         adjustment_factor : 1.5
   - type: adaptive_batch_size_based_on_memory_utilization
     blocking: false
     config:
-      default_batch_size: 128
       threshold_memory_utilization_percentage: 50
       adjustment_factor: 1.5
     
   - type: adaptive_data_sampling_based_on_memory_utilization
     blocking: false
     config:
-      default_data_sample_percentage: 0.2
       threshold_memory_utilization_percentage: 20
       adjustment_factor: 1.2
 
