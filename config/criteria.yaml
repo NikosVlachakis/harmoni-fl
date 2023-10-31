@@ -1,12 +1,11 @@
 criteria:
-  - type: max_cpu_usage
+  - type: include_clients_within_specific_thresholds
     blocking: true
     config:
-      threshold: 90
-  - type: max_memory_usage_percentage
-    blocking: true
-    config:
-      threshold: 70 
+        min_cpu_utilization_percentage: 10
+        max_cpu_utilization_percentage: 40
+        min_memory_utilization_percentage: 10
+        max_memory_utilization_percentage: 40
   - type: learning_rate_based_on_incoming_bandwidth
     blocking: false
     config:

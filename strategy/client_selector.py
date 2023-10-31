@@ -1,5 +1,4 @@
 import logging
-from typing import List, Dict
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.common import GetPropertiesIns
@@ -7,6 +6,7 @@ from strategy.criteria import *
 from utils.load_configs import load_criteria_config
 from services.prometheus_service import PrometheusService
 from config.mappings import *
+from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -22,20 +22,22 @@ class ClientSelector:
         return clients
 
     
-    def generate_dynamic_queries_for_client_B0_criteria(self, client_properties: Dict[str, str], prev_round_start_time: int, prev_round_end_time: int) -> List[tuple]:
-        query_tuples = []
+    def generate_dynamic_queries_for_client_B0_criteria(self, client_properties: Dict[str, str], prev_round_start_time: int, prev_round_end_time: int) -> List[Tuple[str, str]]:
+        queries = []
         for crit in self.criteria_config.get('criteria', []):
             crit_type = crit.get('type')
 
-            query_func, criterion_class = CRITERIA_TO_QUERY_MAPPING.get(crit_type)
+            query_funcs = CRITERIA_TO_QUERY_MAPPING.get(crit_type, [])
 
-            if query_func:
+            for query_func in query_funcs:
                 query = query_func(client_properties['container_name'], prev_round_start_time, prev_round_end_time)
-                query_tuples.append((query, criterion_class))
-            else:
+                query_name = query_func.__name__
+                if (query, query_name) not in queries:
+                    queries.append((query, query_name))
+            if not query_funcs:
                 logger.error(f"No query function found for criteria type: {crit_type}")
 
-        return query_tuples
+        return queries
 
 
     def filter_clients_by_criteria(self, all_clients: List[ClientProxy], server_round: int, round_timestamps: Dict[int, Dict[str, int]]) -> List[ClientProxy]:
@@ -51,21 +53,21 @@ class ClientSelector:
             prev_round_end_time = round_timestamps[server_round - 1].get("end", None)
             
             # Create a list of queries based on criteria
-            query_tuples = self.generate_dynamic_queries_for_client_B0_criteria(client_properties, prev_round_start_time, prev_round_end_time)
+            queries = self.generate_dynamic_queries_for_client_B0_criteria(client_properties, prev_round_start_time, prev_round_end_time)
             
-            # Fetch metrics for the client
-            metrics = self.prom_service.batch_query(query_tuples)
+            # Fetch queries_results for the client
+            queries_results = self.prom_service.batch_query(queries)
 
             # Separate blocking and non-blocking criteria
             blocking_criteria = [c for c in criteria if c.is_blocking]
             non_blocking_criteria = [c for c in criteria if not c.is_blocking]
 
-            # Check each blocking criterion using the fetched metrics
-            if all(criterion.check(client_properties, metrics) for criterion in blocking_criteria):
+            # Check each blocking criterion using the fetched queries_results
+            if all(criterion.check(client_properties, queries_results) for criterion in blocking_criteria):
                 # If all blocking criteria are met, handle non-blocking criteria
                 client_config = {}
                 for criterion in non_blocking_criteria:
-                    result = criterion.check(client_properties, metrics)
+                    result = criterion.check(client_properties, queries_results)
                     if isinstance(result, dict):
                         client_config.update(result)
 
@@ -81,11 +83,13 @@ class ClientSelector:
 
     def _load_criteria(self) -> List[AbstractCriterion]:
         criteria_objects = []
+        # loop through the .yaml file and create criterion objects
         for crit in self.criteria_config.get('criteria', []):
             crit_type = crit.get('type')
             crit_config = crit.get('config', {})
             is_blocking = crit.get('blocking', True)  # Default to True if 'blocking' is not specified
-
+            
+            # check if the criterion type is in the mapping
             if crit_type in CRITERIA_CONFIG:
                 criterion_config = CRITERIA_CONFIG[crit_type]
                 criterion_class = criterion_config.get('criterion_class')

@@ -3,41 +3,37 @@ from utils.names import Names
 from services.prometheus_queries import *
 
 CRITERIA_CONFIG = {
-    Names.MAX_CPU_USAGE.value: {
-        "query_func": container_specific_cpu_usage_query,
-        "criterion_class": MaxCPUUsageCriterion
-    },
-    Names.MAX_MEMORY_USAGE_PERCENTAGE.value: {
-        "query_func": container_specific_max_memory_usage_query,
-        "criterion_class": MAXMemoryUsageCriterion
-    },
     Names.LEARNING_RATE_BASED_ON_INCOMING_BANDWIDTH.value: {
-        "query_func": container_incoming_bandwidth_query,
+        "query_func": [container_incoming_bandwidth_query],
         "criterion_class": LearningRateBOIncomingBandwidth
     },
     Names.EPOCH_ADJUSTMENT_BASED_ON_CPU_UTILIZATION.value: {
-        "query_func": container_specific_cpu_usage_query,
+        "query_func": [container_specific_rate_of_cpu_usase_query],
         "criterion_class": EpochAdjustmentBasedOnCPUUtilization
     },
     Names.ADAPTIVE_BATCH_SIZE_BASED_ON_MEMORY_UTILIZATION.value: {
-        "query_func": container_specific_max_memory_usage_query,
+        "query_func": [container_specific_average_memory_usage_query],
         "criterion_class": AdaptiveBatchSizeBasedOnMemoryUtilization
     },
     Names.ADAPTIVE_DATA_SAMPLING_BASED_ON_MEMORY_UTILIZATION.value: {
-        "query_func": container_specific_max_memory_usage_query,
+        "query_func": [container_specific_average_memory_usage_query],
         "criterion_class": AdaptiveDataSamplingBasedOnMemoryUtilization
     },
     Names.MODEL_LAYER_FREEZING_BASED_ON_HIGH_CPU_UTILIZATION.value: {
-        "query_func": container_specific_cpu_usage_query,
+        "query_func": [container_specific_rate_of_cpu_usase_query],
         "criterion_class": ModelLayerReductionBasedOnHighCPUUtilization
     },
     Names.GRADIENT_CLIPPING_BASED_ON_HIGH_CPU_UTILIZATION.value: {
-        "query_func": container_specific_cpu_usage_query,
+        "query_func": [container_specific_rate_of_cpu_usase_query],
         "criterion_class": GradientClippingBasedOnHighCPUUtilization
     },
     Names.WEIGHT_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value: {
-        "query_func": container_specific_cpu_usage_query,
+        "query_func": [container_specific_rate_of_cpu_usase_query],
         "criterion_class": ModelPrecisionBasedOnHighCPUUtilization
+    },
+    Names.INCLUDE_CLIENTS_WITHIN_SPECIFIC_THRESHOLDS.value: {
+        "query_func": [container_specific_rate_of_cpu_usase_query,container_specific_average_memory_usage_query],
+        "criterion_class": IncludeClientsWithinSpecificThresholds
     }
 }
 
@@ -50,5 +46,5 @@ STATIC_CONTAINER_CONFIG = {
     }
 }
 
-CRITERIA_TO_QUERY_MAPPING = {criteria: (config["query_func"], config["criterion_class"].__name__) for criteria, config in CRITERIA_CONFIG.items()}
+CRITERIA_TO_QUERY_MAPPING = {criteria: config["query_func"] for criteria, config in CRITERIA_CONFIG.items()}
 CONTAINER_STATIC_QUERIES_MAPPING = {name: config["query_func"] for name, config in STATIC_CONTAINER_CONFIG.items()}

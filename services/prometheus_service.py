@@ -18,17 +18,17 @@ class PrometheusService:
         return data['data']['result'][0]['value'][1]
     
     
-    def batch_query(self, query_tuples: List[tuple]) -> Dict[str, float]:
+    def batch_query(self, queries: List[tuple]) -> Dict[str, float]:
         results = {}
         # criterion_class acts as the identifier for the criteria
-        for query, criterion_class in query_tuples:
+        for query, query_name in queries:
             try:
                 result = self.query(query)
-                identifier = self.extract_criteria_identifier(criterion_class)
-                results[identifier] = float(result)  # Ensure the result is converted to a float
+                results[query_name] = float(result)  # Ensure the result is converted to a float
             except Exception as e:
                 logger.error(f"Error while fetching value for query {query}: {e}")
         return results
+    
     
     def get_container_static_metrics(self, container_name, queries_mapping=CONTAINER_STATIC_QUERIES_MAPPING):
         results = {}
@@ -41,13 +41,6 @@ class PrometheusService:
                 logger.error(f"Error fetching result for query {query}: {e}")
         return results
 
-
-    def extract_criteria_identifier(self, class_name: str) -> str:
-        # Find the criterion identifier whose class name matches the input class name
-        for criteria, (_, criterion_class) in CRITERIA_TO_QUERY_MAPPING.items():
-            if criterion_class == class_name:
-                return criteria
-        return "unknown_criteria"
 
 
 

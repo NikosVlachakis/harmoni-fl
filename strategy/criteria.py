@@ -17,46 +17,53 @@ class AbstractCriterion(ABC):
         """Check if the client meets the criteria"""
         pass
 
-class MAXMemoryUsageCriterion(AbstractCriterion):
+class IncludeClientsWithinSpecificThresholds(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
-        self.threshold = config.get('threshold')
         self.is_blocking = blocking
+        self.min_cpu_utilization_percentage = config.get('min_cpu_utilization_percentage')
+        self.max_cpu_utilization_percentage = config.get('max_cpu_utilization_percentage')
+        self.min_memory_utilization_percentage = config.get('min_memory_utilization_percentage')
+        self.max_memory_utilization_percentage = config.get('max_memory_utilization_percentage')
 
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
-        percentage_memory_consumed = (float(metrics.get(Names.MAX_MEMORY_USAGE_PERCENTAGE.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
-        meets_criteria = percentage_memory_consumed <= self.threshold
-        logger.info(f"MAXMemoryUsageCriterion check result: {meets_criteria}")
-        return meets_criteria
     
-class MaxCPUUsageCriterion(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
-        self.threshold = config.get('threshold')
-        self.is_blocking = blocking
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+        
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
-        rate_of_cpu_usase = float(metrics.get(Names.MAX_CPU_USAGE.value))
+        rate_of_cpu_usase = float(queries_results['container_specific_rate_of_cpu_usase_query'])
+        
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
-        meets_criteria = cpu_utlization <= self.threshold
-        logger.info(f"MaxCPUUsageCriterion check result: {meets_criteria}")
+        
+        average_memory_usage = float(queries_results['container_specific_average_memory_usage_query'])
+        percentage_memory_consumed = (average_memory_usage / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
+        
+        meets_criteria = (self.min_threshold_cpu_utilization_percentage <= cpu_utlization <= self.max_threshold_cpu_utilization_percentage) and (self.min_threshold_memory_utilization_percentage <= percentage_memory_consumed <= self.max_threshold_memory_utilization_percentage)
+
+        if not meets_criteria:
+            logger.info(f"Client {client_properties.get('container_name')} does not meet the criteria")
+        else:
+            logger.info(f"Client {client_properties.get('container_name')} meets the criteria")
+
         return meets_criteria
-    
+
 class LearningRateBOIncomingBandwidth(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.bandwidth_threshold = config.get('threshold_bandwidth_mbps')  
         self.adjustment_factor = config.get('adjustment_factor')
         self.is_blocking = blocking
     
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
-        incoming_bandwidth = float(metrics.get(Names.LEARNING_RATE_BASED_ON_INCOMING_BANDWIDTH.value))  # in Mbps
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+        
+        container_incoming_bandwidth_query = float(queries_results['container_incoming_bandwidth_query'])  # in Mbps
+        
         adjusted_learning_rate = client_properties.get('learning_rate')
         current_learning_rate = float(adjusted_learning_rate)
 
         learning_rate_adjustment = {"learning_rate": current_learning_rate}
 
-        if incoming_bandwidth < self.bandwidth_threshold:
+        if container_incoming_bandwidth_query < self.bandwidth_threshold:
             new_learning_rate = current_learning_rate * self.adjustment_factor
             learning_rate_adjustment["learning_rate"] = new_learning_rate
-            logger.info(f"Adjusted learning rate to {new_learning_rate} due to low incoming bandwidth ({incoming_bandwidth} Mbps)")
+            logger.info(f"Adjusted learning rate to {new_learning_rate} due to low incoming bandwidth ({container_incoming_bandwidth_query} Mbps)")
 
         return learning_rate_adjustment
 
@@ -67,9 +74,10 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
     
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+        
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
-        rate_of_cpu_usase = float(metrics.get(Names.EPOCH_ADJUSTMENT_BASED_ON_CPU_UTILIZATION.value))
+        rate_of_cpu_usase = float(queries_results['container_specific_rate_of_cpu_usase_query'])
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
         
         adjusted_epochs = client_properties.get('epochs')
@@ -90,8 +98,11 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
         self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
     
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
-        percentage_memory_consumed = (float(metrics.get(Names.ADAPTIVE_BATCH_SIZE_BASED_ON_MEMORY_UTILIZATION.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+        
+        average_memory_usage = float(queries_results['container_specific_average_memory_usage_query'])
+        percentage_memory_consumed = (average_memory_usage / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
+        
         adjusted_batch_size = client_properties.get('batch_size')
         current_batch_size = int(adjusted_batch_size)
         batch_size_adjustment = {"batch_size": current_batch_size}
@@ -109,8 +120,11 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
         self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
     
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
-        percentage_memory_consumed = (float(metrics.get(Names.ADAPTIVE_DATA_SAMPLING_BASED_ON_MEMORY_UTILIZATION.value)) / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+        
+        average_memory_usage = float(queries_results['container_specific_average_memory_usage_query'])
+        percentage_memory_consumed = (average_memory_usage / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
+        
         adjusted_data_sample_percentage = client_properties.get('data_sample_percentage')
 
         current_data_sample_percentage = float(adjusted_data_sample_percentage)
@@ -132,9 +146,11 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
     
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+        
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
-        rate_of_cpu_usase = float(metrics.get(Names.MODEL_LAYER_FREEZING_BASED_ON_HIGH_CPU_UTILIZATION.value))
+        rate_of_cpu_usase = float(queries_results['container_specific_rate_of_cpu_usase_query'])
+        
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
         
         current_freeze_percentage = client_properties.get('freeze_layers_percentage')
@@ -157,9 +173,10 @@ class GradientClippingBasedOnHighCPUUtilization(AbstractCriterion):
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
     
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
-        rate_of_cpu_usase = float(metrics.get(Names.GRADIENT_CLIPPING_BASED_ON_HIGH_CPU_UTILIZATION.value))
+        rate_of_cpu_usase = float(queries_results['container_specific_rate_of_cpu_usase_query'])
+        
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
         
         current_gradient_clipping = client_properties.get('gradient_clipping_value')
@@ -181,9 +198,11 @@ class ModelPrecisionBasedOnHighCPUUtilization(AbstractCriterion):
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.new_precision_value = config.get('new_precision_value')
     
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, any]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+        
         container_cpu_cores = float(client_properties.get(Names.CONTAINER_CPU_CORES.value, 4))
-        rate_of_cpu_usase = float(metrics.get(Names.WEIGHT_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value))
+        rate_of_cpu_usase = float(queries_results['container_specific_rate_of_cpu_usase_query'])
+        
         cpu_utlization = (rate_of_cpu_usase / container_cpu_cores) * 100
         
         current_model_precision = client_properties.get('model_precision')
