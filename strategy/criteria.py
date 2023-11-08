@@ -36,7 +36,7 @@ class IncludeClientsWithinSpecificThresholds(AbstractCriterion):
         average_memory_usage = float(queries_results['container_specific_average_memory_usage_query'])
         percentage_memory_consumed = (average_memory_usage / float(client_properties.get(Names.CONTAINER_MEMORY_LIMIT.value))) * 100
         
-        meets_criteria = (self.min_threshold_cpu_utilization_percentage <= cpu_utlization <= self.max_threshold_cpu_utilization_percentage) and (self.min_threshold_memory_utilization_percentage <= percentage_memory_consumed <= self.max_threshold_memory_utilization_percentage)
+        meets_criteria = (self.min_cpu_utilization_percentage <= cpu_utlization <= self.max_cpu_utilization_percentage) and (self.min_memory_utilization_percentage <= percentage_memory_consumed <= self.max_memory_utilization_percentage)
 
         if not meets_criteria:
             logger.info(f"Client {client_properties.get('container_name')} does not meet the criteria")

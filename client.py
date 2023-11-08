@@ -40,7 +40,6 @@ model = cnn_model()
 
 class Client(fl.client.NumPyClient):
     def __init__(self):
-        # Initialize instance variables to store operational metrics
         self.fit_operational_metrics = {}
         self.eval_operational_metrics = {}
         self.properties = {}

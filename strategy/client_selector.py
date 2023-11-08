@@ -45,6 +45,7 @@ class ClientSelector:
         selected_clients = []
 
         for client in all_clients:
+            # Get the properties of the client
             properties_response = client.get_properties(GetPropertiesIns(config={}), timeout=30)
             client_properties = properties_response.properties
            
