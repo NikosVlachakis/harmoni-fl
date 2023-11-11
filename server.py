@@ -5,7 +5,7 @@ import flwr as fl
 import requests
 from flask import Flask, request, jsonify
 from flask_cors.extension import CORS
-from flask_restx import Resource, Api
+from flask_restful import Resource, Api
 import logging
 from threading import Thread
 from experiment.experiment import Experiment
@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
 
 app = Flask(__name__)
-api = Api(app, version="1.0", title="Federated Learning Server", description="API for the Federated Learning Server with Swagger")
+api = Api(app)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 clients = os.environ['CLIENTS'].split(',')

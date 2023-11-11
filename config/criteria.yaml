@@ -2,47 +2,47 @@ criteria:
   - type: include_clients_within_specific_thresholds
     blocking: true
     config:
-        min_cpu_utilization_percentage: 10
-        max_cpu_utilization_percentage: 40
-        min_memory_utilization_percentage: 10
-        max_memory_utilization_percentage: 40
+        min_cpu_utilization_percentage: 5
+        max_cpu_utilization_percentage: 90
+        min_memory_utilization_percentage: 5
+        max_memory_utilization_percentage: 90
   - type: learning_rate_based_on_incoming_bandwidth
     blocking: false
     config:
-        threshold_bandwidth_mbps: 3 
+        threshold_bandwidth_mbps: 10 
         adjustment_factor: 1.5 
   - type: epoch_adjustment_based_on_cpu_utilization
     blocking: false
     config: 
-        threshold_cpu_utilization_percentage : 20
+        threshold_cpu_utilization_percentage : 80
         adjustment_factor : 1.5
   - type: adaptive_batch_size_based_on_memory_utilization
     blocking: false
     config:
-      threshold_memory_utilization_percentage: 50
+      threshold_memory_utilization_percentage: 80
       adjustment_factor: 1.5
     
   - type: adaptive_data_sampling_based_on_memory_utilization
     blocking: false
     config:
-      threshold_memory_utilization_percentage: 20
+      threshold_memory_utilization_percentage: 80
       adjustment_factor: 1.2
 
   - type: model_layer_freezing_based_on_high_cpu_utilization
     blocking: false
     config:
-      threshold_cpu_utilization_percentage: 20
+      threshold_cpu_utilization_percentage: 90
       adjustment_factor: 5
   
   - type: gradient_clipping_based_on_high_cpu_utilization
     blocking: false
     config:
-      threshold_cpu_utilization_percentage: 10
+      threshold_cpu_utilization_percentage: 90
       adjustment_factor: 0.5
 
 
   - type: weight_precision_based_on_high_cpu_utilization
     blocking: false
     config: 
-      threshold_cpu_utilization_percentage: 20
+      threshold_cpu_utilization_percentage: 90
       new_precision_value: "float16"

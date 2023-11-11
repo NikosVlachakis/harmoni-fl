@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message SparseMatrix {
+    repeated double data = 1;
+    repeated int32 coords = 2;
+    repeated int32 shape = 3;
+}

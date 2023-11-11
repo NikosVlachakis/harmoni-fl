@@ -1,9 +1,10 @@
 {
     "epochs": 1,
-    "batch_size": 128,
+    "batch_size": 64,
     "learning_rate": 0.2,
-    "data_sample_percentage": 0.2,
+    "data_sample_percentage": 0.0002,
     "freeze_layers_percentage": 0,
     "gradient_clipping_value": 6,
-    "model_precision": "float32"
+    "model_precision": "float32",
+    "sparsification": false
 }
