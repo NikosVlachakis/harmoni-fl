@@ -99,7 +99,6 @@ class Client(fl.client.NumPyClient):
         
         # Get the weights after training
         parameters_prime = model.get_weights()
-        
 
         if enable_sparsification:
 
