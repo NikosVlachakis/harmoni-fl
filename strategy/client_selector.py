@@ -7,6 +7,7 @@ from utils.load_configs import load_criteria_config
 from services.prometheus_service import PrometheusService
 from config.mappings import *
 from typing import Dict, List, Tuple
+from utils.simple_utils import get_client_properties
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +47,7 @@ class ClientSelector:
 
         for client in all_clients:
             # Get the properties of the client
-            properties_response = client.get_properties(GetPropertiesIns(config={}), timeout=30)
-            client_properties = properties_response.properties
+            client_properties = get_client_properties(client)
            
             # Get the start and end time of the previous round
             prev_round_start_time = round_timestamps[server_round - 1].get("start", None)

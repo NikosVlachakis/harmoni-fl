@@ -3,9 +3,9 @@ criteria:
     blocking: true
     config:
         min_cpu_utilization_percentage: 5
-        max_cpu_utilization_percentage: 90
+        max_cpu_utilization_percentage: 99
         min_memory_utilization_percentage: 5
-        max_memory_utilization_percentage: 90
+        max_memory_utilization_percentage: 99
   - type: learning_rate_based_on_incoming_bandwidth
     blocking: false
     config:

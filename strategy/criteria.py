@@ -39,9 +39,9 @@ class IncludeClientsWithinSpecificThresholds(AbstractCriterion):
         meets_criteria = (self.min_cpu_utilization_percentage <= cpu_utlization <= self.max_cpu_utilization_percentage) and (self.min_memory_utilization_percentage <= percentage_memory_consumed <= self.max_memory_utilization_percentage)
 
         if not meets_criteria:
-            logger.info(f"Client {client_properties.get('container_name')} does not meet the criteria")
+            logger.info(f"Client {client_properties.get('container_name')} does not meet the criteria because CPU utilization is {cpu_utlization}% and memory utilization is {percentage_memory_consumed}%")
         else:
-            logger.info(f"Client {client_properties.get('container_name')} meets the criteria")
+            logger.info(f"Client {client_properties.get('container_name')} meets the criteria because CPU utilization is {cpu_utlization}% and memory utilization is {percentage_memory_consumed}%")
 
         return meets_criteria
 

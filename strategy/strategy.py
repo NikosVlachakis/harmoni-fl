@@ -26,7 +26,7 @@ from strategy.client_selector import ClientSelector
 from utils.load_configs import load_strategy_config
 import sparse 
 from flwr.common import GetPropertiesIns
-
+from utils.simple_utils import get_client_properties
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -125,23 +125,6 @@ class FedCustom(fl.server.strategy.Strategy):
         return fit_configurations
 
 
-    # def aggregate_fit(
-    #     self,
-    #     server_round: int,
-    #     results: List[Tuple[ClientProxy, FitRes]],
-    #     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    # ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-    #     """Aggregate fit results using weighted average."""
-    #     logger.info(f"Aggregating fit results for server round {server_round}.")
-    #     weights_results = [
-    #         (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-    #         for _, fit_res in results
-    #     ]
-    #     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-    #     metrics_aggregated = {}
-    #     return parameters_aggregated, metrics_aggregated
-
-
     def deserialize_sparse_coo(self,serialized_data):
         # Deserialize the data
         deserialized_data = pickle.loads(serialized_data)
@@ -166,16 +149,12 @@ class FedCustom(fl.server.strategy.Strategy):
 
         # Convert from serialized sparse to dense format and prepare for aggregation
         dense_results = []
-        densed = 0
-        sparsed = 0
         for ClientProxy, fit_res in results:
-            properties_response = ClientProxy.get_properties(GetPropertiesIns(config={}), timeout=30)
-            client_properties = properties_response.properties
-            logger.info(f"Client properties are: {client_properties}")
+            # Get the client properties
+            client_properties = get_client_properties(ClientProxy)
             enabledSparsification =  client_properties.get('sparsification')
 
             if enabledSparsification:
-                sparsed += 1
                 # Deserialize each sparse weight and convert to dense
                 dense_weights = []
                 for serialized_sparse_weight in parameters_to_ndarrays(fit_res.parameters):
@@ -189,7 +168,6 @@ class FedCustom(fl.server.strategy.Strategy):
                 dense_results.append((dense_weights, fit_res.num_examples))
 
             else:
-                densed += 1
                 dense_results.append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
 
         # Use Flower's default aggregation method on dense weights
@@ -198,7 +176,6 @@ class FedCustom(fl.server.strategy.Strategy):
         # Convert aggregated weights back to Parameters
         parameters_aggregated = ndarrays_to_parameters(aggregated_weights)
         metrics_aggregated = {}
-        logger.info(f"Aggregated {densed} dense and {sparsed} sparse weights.")
 
         return parameters_aggregated, metrics_aggregated
 
@@ -279,6 +256,22 @@ class FedCustom(fl.server.strategy.Strategy):
         return loss_aggregated, metrics_aggregated
 
 
+
+    # def aggregate_fit(
+    #     self,
+    #     server_round: int,
+    #     results: List[Tuple[ClientProxy, FitRes]],
+    #     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    # ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    #     """Aggregate fit results using weighted average."""
+    #     logger.info(f"Aggregating fit results for server round {server_round}.")
+    #     weights_results = [
+    #         (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+    #         for _, fit_res in results
+    #     ]
+    #     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+    #     metrics_aggregated = {}
+    #     return parameters_aggregated, metrics_aggregated
 
     def evaluate(
         self, server_round: int, parameters: Parameters
