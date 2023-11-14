@@ -152,8 +152,9 @@ class FedCustom(fl.server.strategy.Strategy):
         for ClientProxy, fit_res in results:
             # Get the client properties
             client_properties = get_client_properties(ClientProxy)
-            enabledSparsification =  client_properties.get('sparsification')
-
+            enabledSparsification =  client_properties.get('sparsification_enabled')
+            logger.info(f"Client {client_properties['container_name']} has sparsification enabled: {enabledSparsification}")
+            
             if enabledSparsification:
                 # Deserialize each sparse weight and convert to dense
                 dense_weights = []

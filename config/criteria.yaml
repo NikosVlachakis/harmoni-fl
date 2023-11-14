@@ -6,6 +6,14 @@ criteria:
         max_cpu_utilization_percentage: 99
         min_memory_utilization_percentage: 5
         max_memory_utilization_percentage: 99
+  - type: sparsification_based_on_outgoing_bandwidth
+    blocking: false
+    config:
+      threshold_bandwidth_mbps: 10
+      methods:
+        sparsity_threshold_bo_weight_magnitude:
+          enabled: true
+          percentile: 95
   - type: learning_rate_based_on_incoming_bandwidth
     blocking: false
     config:

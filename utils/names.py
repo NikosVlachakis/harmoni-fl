@@ -16,6 +16,7 @@ class Names(Enum):
     GRADIENT_CLIPPING_BASED_ON_HIGH_CPU_UTILIZATION = auto()
     WEIGHT_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION = auto()
     INCLUDE_CLIENTS_WITHIN_SPECIFIC_THRESHOLDS = auto()
+    SPARSIFICATION_BASED_ON_OUTGOING_BANDWIDTH = auto()
 
     def __str__(self):
         """Return the string representation of the enum member."""

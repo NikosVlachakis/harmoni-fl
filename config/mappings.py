@@ -34,6 +34,10 @@ CRITERIA_CONFIG = {
     Names.INCLUDE_CLIENTS_WITHIN_SPECIFIC_THRESHOLDS.value: {
         "query_func": [container_specific_rate_of_cpu_usase_query,container_specific_average_memory_usage_query],
         "criterion_class": IncludeClientsWithinSpecificThresholds
+    },
+    Names.SPARSIFICATION_BASED_ON_OUTGOING_BANDWIDTH.value: {
+        "query_func": [container_outgoing_bandwidth_query],
+        "criterion_class": SparsificationBOOutgoingBandwidth
     }
 }
 

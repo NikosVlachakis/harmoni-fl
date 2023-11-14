@@ -6,5 +6,7 @@
     "freeze_layers_percentage": 0,
     "gradient_clipping_value": 6,
     "model_precision": "float32",
-    "sparsification": false
+    "sparsification_enabled": false,
+    "sparsification_method": "sparsity_threshold_bo_weight_magnitude",
+    "sparsification_percentile": 95
 }

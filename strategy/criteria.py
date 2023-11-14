@@ -45,6 +45,35 @@ class IncludeClientsWithinSpecificThresholds(AbstractCriterion):
 
         return meets_criteria
 
+class SparsificationBOOutgoingBandwidth(AbstractCriterion):
+    def __init__(self, config: Dict[str, any], blocking: bool):
+        self.is_blocking = blocking
+        self.threshold_bandwidth_mbps = config.get('threshold_bandwidth_mbps')
+        self.methods = config.get('methods', {})
+
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+        container_outgoing_bandwidth_query = float(queries_results.get('container_outgoing_bandwidth_query')) # in Mbps
+
+        if container_outgoing_bandwidth_query < self.threshold_bandwidth_mbps:
+            for method_name, method_details in self.methods.items():
+                if method_details['enabled']:
+                    sparsification_config = {
+                        "sparsification_enabled": True,
+                        "sparsification_method": method_name,
+                        "sparsification_percentile": method_details.get('percentile'),
+                    }
+                logger.info(f"Adjusted sparsification config for client {client_properties.get('container_name')} as follows: {sparsification_config} because outgoing bandwidth is {container_outgoing_bandwidth_query} Mbps")
+                return sparsification_config
+
+        # Default configuration if bandwidth is not below threshold or no method is enabled
+        return {
+            "sparsification_enabled": False,
+            "sparsification_method": None,
+            "sparsification_percentile": None,
+        }
+
+
+
 class LearningRateBOIncomingBandwidth(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.bandwidth_threshold = config.get('threshold_bandwidth_mbps')  

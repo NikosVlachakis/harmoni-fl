@@ -60,13 +60,6 @@ class Client(fl.client.NumPyClient):
 
         logger.info("config for client is: %s", config)
 
-        enable_sparsification = True if self.container_name == "client1" else False
-       
-        if enable_sparsification:
-            config["sparsification"] = True
-        else:
-            config["sparsification"] = False
-
         # Update the properties with the config as it contains the new configuration for the round
         self.properties.update(config)
 
@@ -99,17 +92,17 @@ class Client(fl.client.NumPyClient):
         
         # Get the weights after training
         parameters_prime = model.get_weights()
-
-        if enable_sparsification:
-
+       
+        # Check if sparsification is enabled
+        if config["sparsification_enabled"]:
+            
             logger.info("sparsification enabled for client with container name: %s", self.container_name)
             
-            sparsifier = Sparsifier()
-            serialized_sparse_weights, total_nnz = sparsifier.sparsify_and_serialize_weights(parameters_prime)
+            # Create a sparsifier object 
+            sparsifier = Sparsifier(method=config["sparsification_method"], percentile=config["sparsification_percentile"])
             
-            # Log the total nnz for all weights
-            logger.info("Total nnz for all sparse weights: %s", total_nnz)
-           
+            serialized_sparse_weights, total_nnz = sparsifier.sparsify_and_serialize_weights(parameters_prime)
+
             # Get the size of the serialized sparse weights and the original weights
             serialized_sparse_weights_size = calculate_weights_size(serialized_sparse_weights)
             original_weights_size = calculate_weights_size(parameters_prime)    
