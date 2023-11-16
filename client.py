@@ -22,8 +22,7 @@ from models.callbacks.learning_rate_setter import LearningRateSetter
 from models.sparsification import Sparsifier
 
 from utils.simple_utils import calculate_weights_size
-import sparse
-import pickle
+
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module

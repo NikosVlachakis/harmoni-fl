@@ -33,13 +33,13 @@ def container_specific_max_memory_usage_query(container_name: str, start_timesta
     query = f'max_over_time({metric}{{name="{container_name}"}}[{start_timestamp}ms:{end_timestamp}ms])'
     return query
 
-# Download bandwidth for a container between two timestamps in bits per second
+# Download bandwidth for a container between two timestamps
 def container_incoming_bandwidth_query(container_name: str, start_timestamp: int, end_timestamp: int, network_interface: str = 'eth0', metric: str = 'container_network_receive_bytes_total') -> str:
     range_str = range_from_timestamps(start_timestamp)
     incoming_bandwidth_query = f'8 * rate({metric}{{name="{container_name}", interface="{network_interface}"}}[{range_str}]) / 1000000'
     return incoming_bandwidth_query
 
-# Upload bandwidth for a container between two timestamps in bits per second
+# Upload bandwidth for a container between two timestamps
 def container_outgoing_bandwidth_query(container_name: str, start_timestamp: int, end_timestamp: int,network_interface: str = 'eth0', metric: str = 'container_network_transmit_bytes_total') -> str:
     range_str = range_from_timestamps(start_timestamp)
     outgoing_bandwidth_query = f'8 * rate({metric}{{name="{container_name}", interface="{network_interface}"}}[{range_str}]) / 1000000'
