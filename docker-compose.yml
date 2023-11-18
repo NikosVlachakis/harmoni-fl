@@ -1,3 +1,4 @@
+
 version: '3'
 services:
   prometheus:
@@ -13,6 +14,7 @@ services:
     depends_on:
       - cadvisor
     restart: always
+
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
@@ -27,7 +29,7 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
-      - /var/run/docker.sock:/var/run/docker.sock      
+      - /var/run/docker.sock:/var/run/docker.sock  
 
   grafana:
     image: grafana/grafana:latest
@@ -38,25 +40,21 @@ services:
     restart: always
     volumes:
       - grafana-storage:/var/lib/grafana
-      # - ./monitoring-configs/grafana.ini:/etc/grafana/grafana.ini
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - prometheus
       - cadvisor
-    # command:
-    #   - --config=/etc/grafana/grafana.ini
+
   server:
     container_name: server
     shm_size: '6g'
     build:
       context: .
       dockerfile: Dockerfile
-    # mem_limit: 1g
     command: python server.py
     restart: always
     environment:
-      CLIENTS: "client1:6001,client2:6002"
       FLASK_RUN_PORT: 6000
       DOCKER_HOST_IP: host.docker.internal
       MLFLOW_TRACKING_URI: http://mlflow_server:5010
@@ -70,6 +68,7 @@ services:
       - mlflow_server
       - prometheus
       - grafana
+
   mlflow_server:
     container_name: mlflow_server
     restart: always
@@ -83,15 +82,15 @@ services:
       - ./mlruns:/mlruns 
     ports:
       - "5010:5010"
-  
+
   client1:
     container_name: client1
-    restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    mem_limit: 4g
     command: python client.py --server_address=server:8080
+    restart: always
+    mem_limit: 4g
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -104,103 +103,89 @@ services:
       container_name: client1
       DOCKER_HOST_IP: host.docker.internal
       MLFLOW_TRACKING_URI: http://mlflow_server:5010
+
   client2:
     container_name: client2
-    restart: always
     build:
       context: .
       dockerfile: Dockerfile
     command: python client.py --server_address=server:8080
-    depends_on:
-      - server
+    restart: always
     mem_limit: 4g
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "6002:6002"
+    depends_on:
+      - server
     environment:
       FLASK_RUN_PORT: 6002
       container_name: client2
       DOCKER_HOST_IP: host.docker.internal
       MLFLOW_TRACKING_URI: http://mlflow_server:5010
-    # deploy:
-    #     resources:
-    #       limits:
-    #         memory: 6g
-    # mem_reservation: 2g
-  # client3:
-  #   container_name: client3
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   # mem_limit: 1g
-  #   command: python client.py --server_address=server:8080
-  #   depends_on:
-  #     - server
-  #   volumes:
-  #     - .:/app
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   ports:
-  #     - "6003:6003"
-  #   environment:
-  #     FLASK_RUN_PORT: 6003
-  #     container_name: client3
-  #     DOCKER_HOST_IP: host.docker.internal
-  #     MLFLOW_TRACKING_URI: http://mlflow_server:5010
-  #   # deploy:
-  #   #     resources:
-  #   #       limits:
-  #   #         memory: 6g
-  #   # mem_reservation: 2g
-  # client4:
-  #   container_name: client4
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   # mem_limit: 1g
-  #   command: python client.py --server_address=server:8080
-  #   depends_on:
-  #     - server
-  #   volumes:
-  #     - .:/app
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   ports:
-  #     - "6004:6004"
-  #   environment:
-  #     FLASK_RUN_PORT: 6004
-  #     container_name: client4
-  #     DOCKER_HOST_IP: host.docker.internal
-  #     MLFLOW_TRACKING_URI: http://mlflow_server:5010
-  #   # deploy:
-  #   #     resources:
-  #   #       limits:
-  #   #         memory: 6g
-  #   # mem_reservation: 2g
-  # client5:
-  #     container_name: client5
-  #     build:
-  #       context: .
-  #       dockerfile: Dockerfile
-  #     command: python client.py --server_address=server:8080
-  #     depends_on:
-  #     - server
-  #     volumes:
-  #       - .:/app
-  #       - /var/run/docker.sock:/var/run/docker.sock
-  #     ports:
-  #       - "6005:6005"
-  #     environment:
-  #       FLASK_RUN_PORT: 6005
-  #       container_name: client5
-  #       DOCKER_HOST_IP: host.docker.internal
-  #       MLFLOW_TRACKING_URI: http://mlflow_server:5010
-  #     # deploy:
-  #     #   resources:
-  #     #     limits:
-  #     #       memory: 6g
-  #     # mem_reservation: 2g
+
+  client3:
+    container_name: client3
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python client.py --server_address=server:8080
+    restart: always
+    mem_limit: 4g
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "6003:6003"
+    depends_on:
+      - server
+    environment:
+      FLASK_RUN_PORT: 6003
+      container_name: client3
+      DOCKER_HOST_IP: host.docker.internal
+      MLFLOW_TRACKING_URI: http://mlflow_server:5010
+
+  client4:
+    container_name: client4
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python client.py --server_address=server:8080
+    restart: always
+    mem_limit: 4g
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "6004:6004"
+    depends_on:
+      - server
+    environment:
+      FLASK_RUN_PORT: 6004
+      container_name: client4
+      DOCKER_HOST_IP: host.docker.internal
+      MLFLOW_TRACKING_URI: http://mlflow_server:5010
+
+  client5:
+    container_name: client5
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python client.py --server_address=server:8080
+    restart: always
+    mem_limit: 4g
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "6005:6005"
+    depends_on:
+      - server
+    environment:
+      FLASK_RUN_PORT: 6005
+      container_name: client5
+      DOCKER_HOST_IP: host.docker.internal
+      MLFLOW_TRACKING_URI: http://mlflow_server:5010
 volumes:
   grafana-storage:
- 
-  

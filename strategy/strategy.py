@@ -59,7 +59,7 @@ class FedCustom(fl.server.strategy.Strategy):
         self.round_timestamps = round_timestamps
 
 
-        logger.info("FedCustom strategy initialized.")
+        logger.info("Strategy initialized.")
         logger.info("Configuring evaluation with experiment ID: %s", self.experiment_id)
 
 
@@ -106,7 +106,6 @@ class FedCustom(fl.server.strategy.Strategy):
         )
 
         standard_config = load_strategy_config()
-        logger.info(f"Standard config is: {standard_config}")
 
         if selected_clients:
             # Use the standard config as a default and update it with the client-specific config if available

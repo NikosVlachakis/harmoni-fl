@@ -57,8 +57,9 @@ class Client(fl.client.NumPyClient):
         # Set the weights of the model
         model.set_weights(parameters)
 
-        logger.info("config for client is: %s", config)
-
+        # logger.info the config and the name of the container
+        logger.info("Config for client with name: %s, is: %s", self.container_name, config)
+        
         # Update the properties with the config as it contains the new configuration for the round
         self.properties.update(config)
 

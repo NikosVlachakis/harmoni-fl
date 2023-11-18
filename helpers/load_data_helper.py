@@ -49,6 +49,6 @@ def load_data_helper(percentage=0.05, batch_size=32):
     train_dataset = train_dataset.batch(batch_size)
     test_dataset = test_dataset.batch(batch_size)
 
-    logger.info("Created data generators with batch size and subset size: %s, %s", batch_size, percentage)
+    logger.info("Created data generators with batch size and subset percentage: %s, %s", batch_size, percentage)
     
     return train_dataset, test_dataset, train_subset_size, test_subset_size

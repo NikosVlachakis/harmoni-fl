@@ -1,8 +1,10 @@
 import math
+import re
 import time
 import flwr as fl
 import pickle
 import numpy as np
+import yaml
 
 
 def range_from_timestamps(start_timestamp: int) -> str:
@@ -46,3 +48,15 @@ def flatten_weights(weights):
         for weight in weights
     ])
     return flat_weights
+
+def parse_docker_compose(file_path):
+    with open(file_path, 'r') as file:
+        docker_compose = yaml.safe_load(file)
+
+    client_services = []
+    for service_name, service_details in docker_compose['services'].items():
+        if re.match(r'^client\d+$', service_name):
+            port = service_details.get('ports', [''])[0].split(':')[0]  # Extract the exposed port
+            client_services.append(f"{service_name}:{port}")
+
+    return client_services
