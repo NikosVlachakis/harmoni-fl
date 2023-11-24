@@ -13,6 +13,7 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - cadvisor
+    user: root
     restart: always
 
   cadvisor:
@@ -125,67 +126,5 @@ services:
       DOCKER_HOST_IP: host.docker.internal
       MLFLOW_TRACKING_URI: http://mlflow_server:5010
 
-  client3:
-    container_name: client3
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080
-    restart: always
-    mem_limit: 4g
-    volumes:
-      - .:/app
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "6003:6003"
-    depends_on:
-      - server
-    environment:
-      FLASK_RUN_PORT: 6003
-      container_name: client3
-      DOCKER_HOST_IP: host.docker.internal
-      MLFLOW_TRACKING_URI: http://mlflow_server:5010
-
-  client4:
-    container_name: client4
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080
-    restart: always
-    mem_limit: 4g
-    volumes:
-      - .:/app
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "6004:6004"
-    depends_on:
-      - server
-    environment:
-      FLASK_RUN_PORT: 6004
-      container_name: client4
-      DOCKER_HOST_IP: host.docker.internal
-      MLFLOW_TRACKING_URI: http://mlflow_server:5010
-
-  client5:
-    container_name: client5
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080
-    restart: always
-    mem_limit: 4g
-    volumes:
-      - .:/app
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "6005:6005"
-    depends_on:
-      - server
-    environment:
-      FLASK_RUN_PORT: 6005
-      container_name: client5
-      DOCKER_HOST_IP: host.docker.internal
-      MLFLOW_TRACKING_URI: http://mlflow_server:5010
 volumes:
   grafana-storage:
