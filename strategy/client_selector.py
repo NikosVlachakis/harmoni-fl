@@ -42,7 +42,15 @@ class ClientSelector:
 
 
     def filter_clients_by_criteria(self, all_clients: List[ClientProxy], server_round: int, round_timestamps: Dict[int, Dict[str, int]]) -> List[ClientProxy]:
-        criteria = self._load_criteria()
+        # Get the criteria objects
+        criteria_objects = self._load_criteria()
+        
+        # If no criteria are specified, return all clients
+        if not criteria_objects:
+            logger.info("No criteria specified, returning an empty list of selected clients")
+            return []
+
+        # Initialize the list of selected clients
         selected_clients = []
 
         for client in all_clients:
@@ -60,8 +68,8 @@ class ClientSelector:
             queries_results = self.prom_service.batch_query(queries)
 
             # Separate blocking and non-blocking criteria
-            blocking_criteria = [c for c in criteria if c.is_blocking]
-            non_blocking_criteria = [c for c in criteria if not c.is_blocking]
+            blocking_criteria = [c for c in criteria_objects if c.is_blocking]
+            non_blocking_criteria = [c for c in criteria_objects if not c.is_blocking]
 
             # Check each blocking criterion using the fetched queries_results
             if all(criterion.check(client_properties, queries_results) for criterion in blocking_criteria):
@@ -84,8 +92,16 @@ class ClientSelector:
 
     def _load_criteria(self) -> List[AbstractCriterion]:
         criteria_objects = []
+        criteria_config = self.criteria_config.get('criteria', [])
+
+         # Handle the case where criteria_config is None
+        if criteria_config is None:
+            logger.warning("No criteria found in the configuration")
+            return criteria_objects
+
+
         # loop through the .yaml file and create criterion objects
-        for crit in self.criteria_config.get('criteria', []):
+        for crit in criteria_config:
             crit_type = crit.get('type')
             crit_config = crit.get('config', {})
             is_blocking = crit.get('blocking', True)  # Default to True if 'blocking' is not specified
