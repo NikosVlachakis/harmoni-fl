@@ -27,6 +27,7 @@ from utils.load_configs import load_strategy_config
 import sparse 
 from flwr.common import GetPropertiesIns
 from utils.simple_utils import get_client_properties
+from prometheus_client import Gauge
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -44,7 +45,9 @@ class FedCustom(fl.server.strategy.Strategy):
         initial_parameters: Optional[Parameters] = None,
         converged: bool = False,
         convergence_accuracy: float = None,
-        round_timestamps: Dict[int, Dict[str, datetime.datetime]] = {},
+        round_timestamps:Dict[str, Dict[str, float]] = {},
+        accuracy_gauge: Gauge = None,
+        loss_gauge: Gauge = None,
     ) -> None:
         super().__init__()
         self.experiment_id = experiment_id
@@ -57,6 +60,8 @@ class FedCustom(fl.server.strategy.Strategy):
         self.converged = converged
         self.convergence_accuracy = convergence_accuracy
         self.round_timestamps = round_timestamps
+        self.accuracy_gauge = accuracy_gauge
+        self.loss_gauge = loss_gauge
 
 
         logger.info("Strategy initialized.")
@@ -85,18 +90,15 @@ class FedCustom(fl.server.strategy.Strategy):
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         logger.info(f"Configuring fit for server round {server_round}.")
-
-        # Initialize the round timestamps
-        self.round_timestamps[server_round] = {"start": int(time.time() * 1000)}
         
         selected_clients = []
 
         # Check if this is not the first round and the previous round timestamps are available
-        if server_round > 0 and server_round - 1 in self.round_timestamps:
-
+        if server_round > 1:
+            
             client_selector = ClientSelector(client_manager)  
             all_clients = client_selector.get_all_clients()
-            selected_clients = client_selector.filter_clients_by_criteria(all_clients, server_round, self.round_timestamps)
+            selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps)
             logger.info(f"Selected clients based on criteria are: {selected_clients}")
 
        
@@ -145,12 +147,19 @@ class FedCustom(fl.server.strategy.Strategy):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results and convert from serialized sparse to dense format."""
         logger.info(f"Aggregating fit results for server round {server_round}.")
-
+        
         # Convert from serialized sparse to dense format and prepare for aggregation
         dense_results = []
         for ClientProxy, fit_res in results:
+            
+            metrics = fit_res.metrics
+            self.round_timestamps[metrics['container_name']] = {
+            "start": metrics['start_time'],
+            "end": metrics['end_time']
+        }
             # Get the client properties
             client_properties = get_client_properties(ClientProxy)
+            
             enabledSparsification =  client_properties.get('sparsification_enabled')
             logger.info(f"Client {client_properties['container_name']} has sparsification enabled: {enabledSparsification}")
             
@@ -176,7 +185,7 @@ class FedCustom(fl.server.strategy.Strategy):
         # Convert aggregated weights back to Parameters
         parameters_aggregated = ndarrays_to_parameters(aggregated_weights)
         metrics_aggregated = {}
-
+       
         return parameters_aggregated, metrics_aggregated
 
 
@@ -221,6 +230,9 @@ class FedCustom(fl.server.strategy.Strategy):
         examples = [evaluate_res.num_examples for _, evaluate_res in results]
         accuracy_aggregated = sum(accuracies) / sum(examples) if sum(examples) != 0 else 0
 
+        # Update the Prometheus gauges with the latest aggregated accuracy and loss values
+        self.accuracy_gauge.set(accuracy_aggregated)
+        self.loss_gauge.set(loss_aggregated)
         
         # After aggregating the accuracy:
         self.check_convergence(accuracy_aggregated)
@@ -251,7 +263,6 @@ class FedCustom(fl.server.strategy.Strategy):
             # log the number of clients that participated in this round
             mlflow.log_metric("num_clients", len(results))
         
-        self.round_timestamps[server_round]["end"] = int(time.time() * 1000)
 
         return loss_aggregated, metrics_aggregated
 

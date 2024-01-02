@@ -31,7 +31,7 @@ class ClientSelector:
             query_funcs = CRITERIA_TO_QUERY_MAPPING.get(crit_type, [])
 
             for query_func in query_funcs:
-                query = query_func(client_properties['container_name'], prev_round_start_time, prev_round_end_time)
+                query = query_func(container_name = client_properties['container_name'], start_timestamp = prev_round_start_time , end_timestamp = prev_round_end_time)
                 query_name = query_func.__name__
                 if (query, query_name) not in queries:
                     queries.append((query, query_name))
@@ -41,17 +41,17 @@ class ClientSelector:
         return queries
 
 
-    def filter_clients_by_criteria(self, all_clients: List[ClientProxy], server_round: int, round_timestamps: Dict[int, Dict[str, int]]) -> List[ClientProxy]:
+    def filter_clients_by_criteria(self, all_clients: List[ClientProxy], round_timestamps: Dict[int, Dict[str, int]]) -> List[ClientProxy]:
         criteria = self._load_criteria()
         selected_clients = []
 
         for client in all_clients:
             # Get the properties of the client
             client_properties = get_client_properties(client)
-           
-            # Get the start and end time of the previous round
-            prev_round_start_time = round_timestamps[server_round - 1].get("start", None)
-            prev_round_end_time = round_timestamps[server_round - 1].get("end", None)
+                        
+            # Get the start and end timesmtamps for the current client
+            prev_round_start_time = round_timestamps[client_properties['container_name']].get("start", None)
+            prev_round_end_time = round_timestamps[client_properties['container_name']].get("end", None)
             
             # Create a list of queries based on criteria
             queries = self.generate_dynamic_queries_for_client_B0_criteria(client_properties, prev_round_start_time, prev_round_end_time)

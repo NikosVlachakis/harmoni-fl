@@ -13,11 +13,11 @@ from services.prometheus_service import PrometheusService
 import tensorflow as tf
 from threading import Thread
 import logging
-from helpers.load_data_helper import load_data_helper
+from helpers.load_data import DataLoader
 import os
 import numpy as np
-from helpers.mlflow_helper import log_round_metrics_for_client
-from models.cnn import cnn as cnn_model
+from helpers.mlflow import MlflowHelper
+from models.model import Model
 from models.callbacks.learning_rate_setter import LearningRateSetter
 from models.sparsification import Sparsifier
 
@@ -29,12 +29,24 @@ logger = logging.getLogger(__name__)     # Create logger for the module
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
+# Parse command line arguments
 parser = argparse.ArgumentParser(description='Flower client')
-parser.add_argument('--server_address', type=str, default="server:8080",
-                    help='Server address')
+
+parser.add_argument('--server_address', type=str, default="server:8080", help="Address of the server")
+parser.add_argument('--client_id', type=int, default=1, help="Unique ID for the client")
+parser.add_argument('--total_clients', type=int, default=2, help="Total number of clients")
+
 args = parser.parse_args()
 
-model = cnn_model()
+# Create an instance of the model and pass the learning rate as an argument
+model = Model()
+
+# Compile the model
+model.compile()
+
+# Get the model
+model = model.get_model()
 
 class Client(fl.client.NumPyClient):
     def __init__(self):
@@ -43,37 +55,55 @@ class Client(fl.client.NumPyClient):
         self.properties = {}
         self.prom_service = PrometheusService()
         self.container_name = os.getenv('container_name')
-        self.static_metrics = self.prom_service.get_container_static_metrics(self.container_name)
         self.properties.update({
-            "container_name": self.container_name,
-            **self.static_metrics
+            "container_name": self.container_name
         })
+        self.args = args
+        self.data_loader = DataLoader(client_id=self.args.client_id, total_clients=self.args.total_clients)       
+     
+
 
     def get_parameters(self, config):
         return model.get_weights()
 
     def fit(self, parameters, config):
+        
+        # Load the data 
+        (x_train, y_train) = self.data_loader.load_train_data(data_sampling_percentage=config["data_sample_percentage"])
+       
         start_time = time.time()  # Capture the start time
+       
         # Set the weights of the model
         model.set_weights(parameters)
 
-        # logger.info the config and the name of the container
+        # config and the name of the container
         logger.info("Config for client with name: %s, is: %s", self.container_name, config)
         
         # Update the properties with the config as it contains the new configuration for the round
         self.properties.update(config)
-
-        # Use the dataset API for training
-        train_dataset, _, num_examples_train, _ = load_data_helper(percentage = config["data_sample_percentage"],batch_size=config["batch_size"])
+    
+        logger.info("Training model for client with container name: %s", self.container_name)
+       
+        # Train the model
+        history = model.fit(x_train, y_train, batch_size=config["batch_size"], epochs=config["epochs"])
         
-        learning_rate_setter = LearningRateSetter(learning_rate= config["learning_rate"])
-        gradient_clipping_setter = GradientClippingCallback(clipvalue=config.get("gradient_clipping_value"))
-        model_precision_adjustment = ModelPrecisionAdjustmentCallback(target_dtype=config.get("model_precision"))
 
-        # Apply model adjustments based on config
-        model_adjuster = ModelAdjuster(model)
-        with model_adjuster.apply_adjustments(config):
-            history = model.fit(train_dataset, epochs=config["epochs"], callbacks=[learning_rate_setter, gradient_clipping_setter,model_precision_adjustment])
+        # learning_rate_setter = LearningRateSetter(learning_rate= config["learning_rate"])
+        # gradient_clipping_setter = GradientClippingCallback(clipvalue=config.get("gradient_clipping_value"))
+        # model_precision_adjustment = ModelPrecisionAdjustmentCallback(target_dtype=config.get("model_precision"))
+
+        # # Apply model adjustments based on config
+        # model_adjuster = ModelAdjuster(model)
+        # with model_adjuster.apply_adjustments(config):
+        #     history = model.fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"], callbacks=[learning_rate_setter, gradient_clipping_setter, model_precision_adjustment])      
+    
+
+        # Get the weights after training
+        parameters_prime = model.get_weights()
+
+        logger.info("Training completed for client with container name: %s", self.container_name)
+
+
 
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
@@ -87,11 +117,11 @@ class Client(fl.client.NumPyClient):
 
         # Calculate evaluation metric
         results = {
-            "accuracy": float(history.history["accuracy"][config["epochs"]-1]),
-        }         
-        
-        # Get the weights after training
-        parameters_prime = model.get_weights()
+            "accuracy": float(history.history["accuracy"][-1]),
+            "start_time": start_time,
+            "end_time": end_time,
+            "container_name": self.container_name,
+        }     
        
         # Check if sparsification is enabled
         if config["sparsification_enabled"]:
@@ -111,26 +141,26 @@ class Client(fl.client.NumPyClient):
             logger.info("original_weights_size: %s", original_weights_size)
             
             # Return new weights, number of training examples, and results
-            return serialized_sparse_weights, num_examples_train, results
+            return serialized_sparse_weights, len(self.x_train), results
 
         else:
             # Directly return the dense weights without sparsification
-            return parameters_prime, num_examples_train, results
-
-
+            return parameters_prime, len(x_train), results
         
 
-    
     def evaluate(self, parameters, config):
+        
+        (x_test, y_test) = self.data_loader.get_test_data()
+
         start_time = time.time()  # Capture the start time
         
         model.set_weights(parameters)
 
-        # Use the dataset API for evaluation
-        _, test_dataset, _, num_examples_test = load_data_helper()
+        logger.info("Evaluating model for client with container name: %s", self.container_name)
+        # Evaluate the model and get the loss and accuracy
+        loss, accuracy = model.evaluate(x_test, y_test)
+        logger.info("Evaluation completed for client with container name: %s", self.container_name)
 
-        loss, accuracy = model.evaluate(test_dataset)
-        
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
 
@@ -139,7 +169,7 @@ class Client(fl.client.NumPyClient):
             "eval_start_time": start_time,
             "eval_end_time": end_time,
             "eval_duration": duration,
-            "test_set_size": num_examples_test,
+            "test_set_size": len(x_test),
             "test_set_accuracy": accuracy
         }
 
@@ -147,14 +177,14 @@ class Client(fl.client.NumPyClient):
         combined_metrics = {**self.fit_operational_metrics, **self.eval_operational_metrics}
 
         # Log the combined operational metrics
-        log_round_metrics_for_client(
+        MlflowHelper.log_round_metrics_for_client(
             container_name=os.getenv('container_name'),
             server_round=config["server_round"],
             experiment_id=config["experiment_id"],
             operational_metrics=combined_metrics 
         )
 
-        return float(loss), num_examples_test, {"accuracy": float(accuracy)}
+        return float(loss), len(x_test), {"accuracy": float(accuracy)}
     
 
     def get_properties(self, *args, **kwargs):

@@ -1,4 +1,29 @@
+import logging
+import random
+import argparse
 
+logging.basicConfig(level=logging.INFO)  # Configure logging
+logger = logging.getLogger(__name__)     # Create logger for the module
+
+parser = argparse.ArgumentParser(description='Generated Docker Compose')
+parser.add_argument('--total_clients', type=int, default=2, help="Total clients to spawn (default: 2)")
+parser.add_argument('--num_rounds', type=int, default=100, help="Number of FL rounds (default: 100)")
+parser.add_argument('--random', type=bool, default=False, help='Randomize client configurations (default: False)')
+parser.add_argument('--convergence_accuracy', type=float, default=0.8, help='Convergence accuracy (default: 0.8)')
+
+def create_docker_compose(args):
+    # cpus is used to set the number of CPUs available to the container as a fraction of the total number of CPUs on the host machine.
+    # mem_limit is used to set the memory limit for the container.
+    client_configs = [
+        {'mem_limit': '3g',  "cpus": 4},
+        # {'mem_limit': '4g',  "cpus": 3},
+        # {'mem_limit': '5g',  "cpus": 2.5},
+        {'mem_limit': '6g',  "cpus": 1}
+        
+        # Add or modify the configurations depending on your host machine
+    ]
+
+    docker_compose_content = f"""
 version: '3'
 services:
   prometheus:
@@ -69,7 +94,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python server.py --number_of_rounds=100 --convergence_accuracy=0.8
+    command: python server.py --number_of_rounds={args.num_rounds} --convergence_accuracy={args.convergence_accuracy}
     environment:
       FLASK_RUN_PORT: 6000
       DOCKER_HOST_IP: host.docker.internal
@@ -78,54 +103,48 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock      
     ports:
       - "6000:6000"
+      - "8265:8265"
+      - "8000:8000"
     depends_on:
       - prometheus
       - grafana
-
-  client1:
-    container_name: client1
+"""
+    # Add client services
+    for i in range(1, args.total_clients + 1):
+        if args.random:
+            config = random.choice(client_configs)
+        else:
+            config = client_configs[(i-1) % len(client_configs)]
+        docker_compose_content += f"""
+  client{i}:
+    container_name: client{i}
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id=1 --total_clients=2
-    mem_limit: 3g
+    command: python client.py --server_address=server:8080  --client_id={i} --total_clients={args.total_clients}
+    mem_limit: {config['mem_limit']}
     deploy:
       resources:
         limits:
-          cpus: "4"
+          cpus: "{(config['cpus'])}"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "6001:6001"
+      - "{6000 + i}:{6000 + i}"
     depends_on:
       - server
     environment:
-      FLASK_RUN_PORT: 6001
-      container_name: client1
+      FLASK_RUN_PORT: {6000 + i}
+      container_name: client{i}
       DOCKER_HOST_IP: host.docker.internal
+"""
 
-  client2:
-    container_name: client2
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id=2 --total_clients=2
-    mem_limit: 6g
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-    volumes:
-      - .:/app
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "6002:6002"
-    depends_on:
-      - server
-    environment:
-      FLASK_RUN_PORT: 6002
-      container_name: client2
-      DOCKER_HOST_IP: host.docker.internal
-volumes:
-  grafana-storage:
+    docker_compose_content += "volumes:\n  grafana-storage:\n"
+
+    with open('docker-compose.yml', 'w') as file:
+        file.write(docker_compose_content)
+
+if __name__ == "__main__":
+    args = parser.parse_args()
+    create_docker_compose(args)

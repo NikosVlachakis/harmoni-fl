@@ -1,61 +1,32 @@
+import math
 
-# Max cpu usage for a container between two timestamps
-import logging
-from utils.simple_utils import range_from_timestamps
-
-logging.basicConfig(level=logging.INFO)  # Configure logging
-logger = logging.getLogger(__name__)  
-
-
-def container_specific_max_cpu_usage_query(container_name: str, start_timestamp: int, end_timestamp: int, metric: str = 'container_cpu_usage_seconds_total') -> str:
-    query = f'max_over_time({metric}{{name="{container_name}"}}[{start_timestamp}ms:{end_timestamp}ms])'
-    return query
-
-# Max memory usage for a container between two timestamps
-def container_specific_max_memory_usage_query(container_name: str, start_timestamp: int, end_timestamp: int, metric: str = 'container_memory_usage_bytes') -> str:
-    query = f'max_over_time({metric}{{name="{container_name}"}}[{start_timestamp}ms:{end_timestamp}ms])'
-    return query
-
-# Average CPU usage for a container between two timestamps
-def container_specific_rate_of_cpu_usase_query(container_name: str, start_timestamp: int, end_timestamp: int, metric: str = 'container_cpu_usage_seconds_total') -> str:
-    range_str = range_from_timestamps(start_timestamp)
-    query = f'rate({metric}{{name="{container_name}"}}[{range_str}])'
-    return query
-
-# Average memory usage for a container between two timestamps
-def container_specific_average_memory_usage_query(container_name: str, start_timestamp: int, end_timestamp: int, metric: str = 'container_memory_usage_bytes') -> str:
-    query = f'avg_over_time({metric}{{name="{container_name}"}}[{start_timestamp}ms:{end_timestamp}ms])'
+def container_cpu_usage_percentage(container_name: str, start_timestamp: int, end_timestamp: int, cpu_usage_metric: str = 'container_cpu_usage_seconds_total', cpu_quota_metric: str = 'container_spec_cpu_quota', cpu_period_metric: str = 'container_spec_cpu_period') -> str:
+    duration = math.ceil(end_timestamp - start_timestamp)
+    query = (
+            f"sum(rate({cpu_usage_metric}{{name=\"{container_name}\"}}[{duration}s] @{end_timestamp} )) / "
+            f"sum({cpu_quota_metric}{{name=\"{container_name}\"}} / {cpu_period_metric}{{name=\"{container_name}\"}}) * 100"
+        )
     return query
 
 
-# Max memory usage for a container between two timestamps
-def container_specific_max_memory_usage_query(container_name: str, start_timestamp: int, end_timestamp: int, metric: str = 'container_memory_usage_bytes') -> str:
-    query = f'max_over_time({metric}{{name="{container_name}"}}[{start_timestamp}ms:{end_timestamp}ms])'
+def container_memory_usage_percentage(container_name: str, start_timestamp: int, end_timestamp: int, memory_usage_metric: str = 'container_memory_working_set_bytes', memory_limit_metric: str = 'container_spec_memory_limit_bytes') -> str:
+    duration = math.ceil(end_timestamp - start_timestamp)
+    query = (
+        f"avg_over_time({memory_usage_metric}{{name=\"{container_name}\"}}[{duration}s] @ {end_timestamp}) / "
+        f"avg_over_time({memory_limit_metric}{{name=\"{container_name}\"}}[{duration}s] @ {end_timestamp}) * 100"
+    )
     return query
 
-# Download bandwidth for a container between two timestamps
 def container_incoming_bandwidth_query(container_name: str, start_timestamp: int, end_timestamp: int, network_interface: str = 'eth0', metric: str = 'container_network_receive_bytes_total') -> str:
-    range_str = range_from_timestamps(start_timestamp)
-    incoming_bandwidth_query = f'8 * rate({metric}{{name="{container_name}", interface="{network_interface}"}}[{range_str}]) / 1000000'
+    duration = math.ceil(end_timestamp - start_timestamp)
+    incoming_bandwidth_query = (
+        f"rate({metric}{{name=\"{container_name}\", interface=\"{network_interface}\"}}[{duration}s] @ {end_timestamp}) / 1024^2"
+    )
     return incoming_bandwidth_query
 
-# Upload bandwidth for a container between two timestamps
-def container_outgoing_bandwidth_query(container_name: str, start_timestamp: int, end_timestamp: int,network_interface: str = 'eth0', metric: str = 'container_network_transmit_bytes_total') -> str:
-    range_str = range_from_timestamps(start_timestamp)
-    outgoing_bandwidth_query = f'8 * rate({metric}{{name="{container_name}", interface="{network_interface}"}}[{range_str}]) / 1000000'
+def container_outgoing_bandwidth_query(container_name: str, start_timestamp: int, end_timestamp: int, network_interface: str = 'eth0', metric: str = 'container_network_transmit_bytes_total') -> str:
+    duration = math.ceil(end_timestamp - start_timestamp)
+    outgoing_bandwidth_query = (
+        f"rate({metric}{{name=\"{container_name}\", interface=\"{network_interface}\"}}[{duration}s] @ {end_timestamp}) / 1024^2"
+    )
     return outgoing_bandwidth_query
-
-# CPU allocation for a container
-def container_cpu_allocation_query(container_name: str, metric_quota='container_spec_cpu_quota', metric_period='container_spec_cpu_period') -> str:
-    query = f'({metric_quota}{{name="{container_name}"}} / {metric_period}{{name="{container_name}"}})'
-    return query
-
-# Container memory limit
-def container_memory_limit_query(container_name: str, metric='container_spec_memory_limit_bytes') -> str:
-    query = f'{metric}{{name="{container_name}"}}'
-    return query
-
-# Number of physical CPU cores
-def machine_physical_cpu_cores_query(container_name: str,metric='machine_cpu_physical_cores') -> str:
-    query = metric
-    return query

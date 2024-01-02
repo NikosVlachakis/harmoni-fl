@@ -1,5 +1,30 @@
-socat TCP-LISTEN:2375,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
+- socat TCP-LISTEN:2375,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
 
-https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md
+- https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md
 
-Increased the resources docker can use from the host ( memory 4 -> 7 gb) 
+- Increased the resources docker can use from the host ( memory 4 -> 7 gb) 
+
+- https://blog.freshtracks.io/a-deep-dive-into-kubernetes-metrics-part-3-container-resource-metrics-361c5ee46e66
+
+- EXPRESSIONS FOR CPU USAGE:
+"expr": "sum(rate(container_cpu_usage_percentage_seconds_total{instance=~\"$host\",name=~\"$container\",name=~\".+\", name !~ \"(prometheus|cadvisor|grafana)\"}[10s])) by (name) *100",
+"expr": "sum(rate(container_cpu_usage_percentage_seconds_total{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"}[10s])) / sum(container_spec_cpu_quota{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"} / container_spec_cpu_period{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"}) by (name) *100",
+
+
+
+- https://github.com/google/cadvisor/issues/2026
+
+- 
+# flwr
+# tensorflow==2.15.0
+# tensorflow_probability==0.23.0
+# tensorflow_privacy
+# flask
+# flask-restful
+# flask_cors
+# requests
+# mlflow
+# psutil
+# scipy
+# numpy
+# sparse==0.13.0

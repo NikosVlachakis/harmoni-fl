@@ -1,16 +1,42 @@
+tensorflow-estimator~=2.4
+tensorflow-probability~=0.22.0
+tensorflow~=2.4
 flwr
-tensorflow
+tensorflow_privacy
+dp_accounting==0.4.3
 flask
 flask-restful
 flask_cors
 requests
 mlflow
-psutil
-ping3
-docker
 scipy
 numpy
-sparse==0.13.0
+sparse~=0.13.0
+prometheus_client == 0.19.0
+flwr_datasets[vision] == 0.0.2
 
 
+
+
+# flwr
+# tensorflow_privacy==0.8.12
+# flask
+# flask-restful
+# flask_cors
+# requests
+# # mlflow
+# sparse~=0.13.0
+# absl-py>=1.0==1.*
+# attrs>=21.4
+# dm-tree==0.1.8
+# dp-accounting==0.4.3
+# immutabledict~=2.2
+# numpy~=1.21
+# packaging~=22.0
+# scipy~=1.9
+# statsmodels~=0.13
+# tensorflow-estimator~=2.4
+# tensorflow-probability~=0.22.0
+# tensorflow~=2.4
+# tf-models-official~=2.13
 
