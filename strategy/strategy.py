@@ -28,6 +28,7 @@ import sparse
 from flwr.common import GetPropertiesIns
 from utils.simple_utils import get_client_properties
 from prometheus_client import Gauge
+from helpers.mlflow import MlflowHelper
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -65,7 +66,6 @@ class FedCustom(fl.server.strategy.Strategy):
 
 
         logger.info("Strategy initialized.")
-        logger.info("Configuring evaluation with experiment ID: %s", self.experiment_id)
 
 
     def __repr__(self) -> str:
@@ -207,6 +207,7 @@ class FedCustom(fl.server.strategy.Strategy):
         )
         return [(client, evaluate_ins) for client in clients]
 
+
     def aggregate_evaluate(
             self,
             server_round: int,
@@ -234,55 +235,26 @@ class FedCustom(fl.server.strategy.Strategy):
         self.accuracy_gauge.set(accuracy_aggregated)
         self.loss_gauge.set(loss_aggregated)
         
-        # After aggregating the accuracy:
-        self.check_convergence(accuracy_aggregated)
-        
-        # If converged, log the information, perform cleanup and raise an exception to stop the server
-        if self.converged:
-            self.handle_convergence(accuracy_aggregated)
-            raise Exception("Convergence criteria met. Stopping server.")
-
+        # Create a dictionary of aggregated metrics
         metrics_aggregated = {
             "loss": loss_aggregated, 
             "accuracy": accuracy_aggregated
         }
 
-        # Log the aggregated loss and accuracy to MLflow
-        with mlflow.start_run(experiment_id=self.experiment_id, run_name=f"{server_round} - round - server"): 
-            mlflow.log_metric("aggregated_loss", loss_aggregated)
-            mlflow.log_metric("aggregated_accuracy", accuracy_aggregated)
-            
-            # log the failure rate
-            denominator = len(results) + len(failures)
-            failure_rate = len(failures) / denominator if denominator != 0 else 0
-            mlflow.log_metric("failure_rate", failure_rate)
+        # Log the aggregated metrics to MLflow
+        mlflow_helper = MlflowHelper()
+        mlflow_helper.log_aggregated_metrics(self.experiment_id, server_round, loss_aggregated, accuracy_aggregated, results, failures)
 
-            mlflow.set_tag("server_round", server_round)
-            mlflow.set_tag("container_name", "fl-server")
-
-            # log the number of clients that participated in this round
-            mlflow.log_metric("num_clients", len(results))
+        # Check if convergence is achieved
+        self.check_convergence(accuracy_aggregated)
         
+        # If converged, perform cleanup and raise an exception to stop the server
+        if self.converged:
+            self.handle_convergence(accuracy_aggregated)
+            raise Exception("Convergence criteria met. Stopping server.")
 
         return loss_aggregated, metrics_aggregated
 
-
-
-    # def aggregate_fit(
-    #     self,
-    #     server_round: int,
-    #     results: List[Tuple[ClientProxy, FitRes]],
-    #     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    # ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-    #     """Aggregate fit results using weighted average."""
-    #     logger.info(f"Aggregating fit results for server round {server_round}.")
-    #     weights_results = [
-    #         (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-    #         for _, fit_res in results
-    #     ]
-    #     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-    #     metrics_aggregated = {}
-    #     return parameters_aggregated, metrics_aggregated
 
     def evaluate(
         self, server_round: int, parameters: Parameters
@@ -308,3 +280,19 @@ class FedCustom(fl.server.strategy.Strategy):
         logger.info(f"Convergence achieved with accuracy: {accuracy_aggregated:.2f}%")
 
         
+
+    # def aggregate_fit(
+    #     self,
+    #     server_round: int,
+    #     results: List[Tuple[ClientProxy, FitRes]],
+    #     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    # ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    #     """Aggregate fit results using weighted average."""
+    #     logger.info(f"Aggregating fit results for server round {server_round}.")
+    #     weights_results = [
+    #         (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+    #         for _, fit_res in results
+    #     ]
+    #     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+    #     metrics_aggregated = {}
+    #     return parameters_aggregated, metrics_aggregated

@@ -41,7 +41,7 @@ class ClientSelector:
         return queries
 
 
-    def filter_clients_by_criteria(self, all_clients: List[ClientProxy], server_round: int, round_timestamps: Dict[int, Dict[str, int]]) -> List[ClientProxy]:
+    def filter_clients_by_criteria(self, all_clients: List[ClientProxy], round_timestamps: Dict[str, Dict[str, float]] ) -> List[ClientProxy]:
         # Get the criteria objects
         criteria_objects = self._load_criteria()
         

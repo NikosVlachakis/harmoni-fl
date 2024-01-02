@@ -61,10 +61,14 @@ class StartFL(Resource):
     def get(self):
 
         # Initialize MLflow Experiment Instance
-        experiment = MlflowHelper(convergence_accuracy = args.convergence_accuracy, rounds = args.number_of_rounds)
+        mlflow_experiment = MlflowHelper(convergence_accuracy = args.convergence_accuracy, rounds = args.number_of_rounds)
+        
+        # Create a new experiment
+        mlflow_experiment.create_experiment()
+        logger.info(f"Experiment {mlflow_experiment.name} created with id {mlflow_experiment.get_experiment_id()}")
         
         # Initialize Strategy Instance
-        strategy_instance = FedCustom(experiment_id=experiment.get_experiment_id(), accuracy_gauge=accuracy_gauge, loss_gauge=loss_gauge, convergence_accuracy = args.convergence_accuracy)
+        strategy_instance = FedCustom(experiment_id=mlflow_experiment.get_experiment_id(), accuracy_gauge=accuracy_gauge, loss_gauge=loss_gauge, convergence_accuracy = args.convergence_accuracy)
         
         # Start FL Server
         server_thread = threading.Thread(target=start_fl_server, args=(strategy_instance,), daemon=True)
@@ -80,7 +84,7 @@ class StartFL(Resource):
                 logger.error(f"Error with client {client}: {e}", exc_info=True)
                 return {"status": "error", "message": str(e), "trace": traceback.format_exc()}, 500
 
-        return {"status": "started", "experiment_name": experiment.name}, 200
+        return {"status": "started", "experiment_id": mlflow_experiment.get_experiment_id()}, 200
 
 
 # Resource for Health Check

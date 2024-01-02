@@ -156,10 +156,8 @@ class Client(fl.client.NumPyClient):
         
         model.set_weights(parameters)
 
-        logger.info("Evaluating model for client with container name: %s", self.container_name)
         # Evaluate the model and get the loss and accuracy
         loss, accuracy = model.evaluate(x_test, y_test)
-        logger.info("Evaluation completed for client with container name: %s", self.container_name)
 
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
@@ -177,7 +175,8 @@ class Client(fl.client.NumPyClient):
         combined_metrics = {**self.fit_operational_metrics, **self.eval_operational_metrics}
 
         # Log the combined operational metrics
-        MlflowHelper.log_round_metrics_for_client(
+        mlflow_helper = MlflowHelper()
+        mlflow_helper.log_round_metrics_for_client(
             container_name=os.getenv('container_name'),
             server_round=config["server_round"],
             experiment_id=config["experiment_id"],

@@ -81,7 +81,7 @@ services:
       context: .
       dockerfile: Dockerfile
     mem_limit: 500m
-    command: mlflow server --host 0.0.0.0 --port 5010 --default-artifact-root /mlflow/artifacts --backend-store-uri /mlflow/runs
+    command: mlflow server --host 0.0.0.0 --port 5010 --default-artifact-root /mlflow/artifacts --backend-store-uri /mlruns
     volumes:
       - ./mlflow:/mlflow
       - ./mlruns:/mlruns 
