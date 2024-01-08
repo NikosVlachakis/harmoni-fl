@@ -15,13 +15,13 @@ class MlflowHelper:
         rounds: int = 100,
         convergence_accuracy: float = 0.8,
         client_id: int = 1,
-        dpsgd: bool = False
+        dpsgd: int = 0
     ) -> None:
         super().__init__()
         self.rounds = rounds
         self.convergence_accuracy = convergence_accuracy
         self.client_id = client_id
-        self.dpsgd = dpsgd
+        self.dpsgd = dpsgd == 1
         self.epsilon_values_file_path = f"mlflow/epsilon_data_client{self.client_id}.csv"
 
     @property

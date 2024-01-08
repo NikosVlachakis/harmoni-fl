@@ -10,7 +10,8 @@ parser.add_argument('--total_clients', type=int, default=2, help="Total clients 
 parser.add_argument('--num_rounds', type=int, default=100, help="Number of FL rounds (default: 100)")
 parser.add_argument('--random', type=bool, default=False, help='Randomize client configurations (default: False)')
 parser.add_argument('--convergence_accuracy', type=float, default=0.8, help='Convergence accuracy (default: 0.8)')
-parser.add_argument('--dpsgd', type=bool, default=False, help='DPSGD or not (default: False)')
+parser.add_argument('--dpsgd', type=int, default=0, help="DPSGD or not (default: 0)")
+
 
 
 def create_docker_compose(args):

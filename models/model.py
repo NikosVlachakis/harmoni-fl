@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)     # Create logger for the module
 
 
 class Model():
-    def __init__(self, client_id, dpsgd: bool = False, learning_rate=0.2, l2_norm_clip=1.5, noise_multiplier=1.5, num_microbatches=1, delta=1e-5):
+    def __init__(self, client_id, dpsgd: int = 0, learning_rate=0.2, l2_norm_clip=1.5, noise_multiplier=1.5, num_microbatches=1, delta=1e-5):
         self.learning_rate = learning_rate
         self.l2_norm_clip = l2_norm_clip
         self.noise_multiplier = noise_multiplier
         self.num_microbatches = num_microbatches
         self.delta = delta
         self.client_id = client_id
-        self.dpsgd = False
+        self.dpsgd = dpsgd == 1
         self.eval_loss = tf.keras.losses.SparseCategoricalCrossentropy()
         self.model = tf.keras.applications.MobileNetV2((32, 32, 3), alpha=0.1, classes=10, weights=None)
         self.init_optimizer()

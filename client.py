@@ -32,7 +32,7 @@ parser = argparse.ArgumentParser(description='Flower client')
 parser.add_argument('--server_address', type=str, default="server:8080", help="Address of the server")
 parser.add_argument('--client_id', type=int, default=1, help="Unique ID for the client")
 parser.add_argument('--total_clients', type=int, default=2, help="Total number of clients")
-parser.add_argument('--dpsgd', type=bool, default=False, help="DPSGD or not (default: False)")
+parser.add_argument('--dpsgd', type=int, default=0, help="DPSGD or not (default: 0)")
 
 args = parser.parse_args()
 logger.info("args: %s", args)

@@ -90,7 +90,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id=1 --total_clients=2 --dpsgd=False
+    command: python client.py --server_address=server:8080  --client_id=1 --total_clients=2 --dpsgd=0
     mem_limit: 3g
     deploy:
       resources:
@@ -113,7 +113,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id=2 --total_clients=2 --dpsgd=False
+    command: python client.py --server_address=server:8080  --client_id=2 --total_clients=2 --dpsgd=0
     mem_limit: 6g
     deploy:
       resources:
