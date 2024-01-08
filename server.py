@@ -73,7 +73,7 @@ class StartFL(Resource):
         # Start FL Server
         server_thread = threading.Thread(target=start_fl_server, args=(strategy_instance,), daemon=True)
         server_thread.start()
-        server_thread.join(timeout=5)
+        server_thread.join(timeout=10)
 
         clients = parse_docker_compose("docker-compose.yml")
         for client in clients:

@@ -10,6 +10,8 @@ parser.add_argument('--total_clients', type=int, default=2, help="Total clients 
 parser.add_argument('--num_rounds', type=int, default=100, help="Number of FL rounds (default: 100)")
 parser.add_argument('--random', type=bool, default=False, help='Randomize client configurations (default: False)')
 parser.add_argument('--convergence_accuracy', type=float, default=0.8, help='Convergence accuracy (default: 0.8)')
+parser.add_argument('--dpsgd', type=bool, default=False, help='DPSGD or not (default: False)')
+
 
 def create_docker_compose(args):
     # cpus is used to set the number of CPUs available to the container as a fraction of the total number of CPUs on the host machine.
@@ -81,10 +83,11 @@ services:
       context: .
       dockerfile: Dockerfile
     mem_limit: 500m
-    command: mlflow server --host 0.0.0.0 --port 5010 --default-artifact-root /mlflow/artifacts --backend-store-uri /mlruns
+    command: mlflow server --host 0.0.0.0 --port 5010  --backend-store-uri /mlruns
     volumes:
+      - .:/app
+      - ./mlruns:/mlruns
       - ./mlflow:/mlflow
-      - ./mlruns:/mlruns 
     ports:
       - "5010:5010"
 
@@ -121,7 +124,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id={i} --total_clients={args.total_clients}
+    command: python client.py --server_address=server:8080  --client_id={i} --total_clients={args.total_clients} --dpsgd={args.dpsgd}
     mem_limit: {config['mem_limit']}
     deploy:
       resources:

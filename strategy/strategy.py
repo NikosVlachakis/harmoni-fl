@@ -1,6 +1,4 @@
-import datetime
 import pickle
-import time
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from flwr.common import (
     EvaluateIns,
@@ -19,13 +17,10 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 import flwr as fl
 import logging
-import mlflow
-import sys
 import numpy as np
 from strategy.client_selector import ClientSelector
 from utils.load_configs import load_strategy_config
 import sparse 
-from flwr.common import GetPropertiesIns
 from utils.simple_utils import get_client_properties
 from prometheus_client import Gauge
 from helpers.mlflow import MlflowHelper

@@ -1,11 +1,10 @@
 {
-    "epochs": 1,
+    "epochs": 3,
     "batch_size": 64,
     "learning_rate": 0.2,
-    "data_sample_percentage": 0.2,
+    "data_sample_percentage": 0.005,
     "freeze_layers_percentage": 0,
     "gradient_clipping_value": 6,
-    "model_precision": "float32",
     "sparsification_enabled": false,
     "sparsification_method": "sparsity_threshold_bo_weight_magnitude",
     "sparsification_percentile": 95

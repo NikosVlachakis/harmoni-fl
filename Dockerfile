@@ -3,8 +3,10 @@ FROM python:3.9-slim-buster
 # Set the working directory in the container to /app
 WORKDIR /app
 
+COPY ./ /app
+
 # Copy the requirements file into the container
-COPY ./requirements.txt /app/requirements.txt
+# COPY ./requirements.txt /app/requirements.txt
 
 # Install gcc and other dependencies
 RUN apt-get update && apt-get install -y \
@@ -14,4 +16,4 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 
-RUN pip install --upgrade pip -v --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip  -r requirements.txt

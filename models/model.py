@@ -1,10 +1,11 @@
+import os
 import numpy as np
+import pandas as pd
 import tensorflow as tf
-import tensorflow_privacy
-# from tensorflow_privacy.privacy.optimizers.dp_optimizer_keras import DPKerasSGDOptimizer,DPKerasAdamOptimizer
 import dp_accounting
 import logging
-from tensorflow_privacy.privacy.optimizers.dp_optimizer import DPAdamOptimizer,DPAdamGaussianOptimizer
+from tensorflow_privacy.privacy.optimizers.dp_optimizer import DPAdamGaussianOptimizer
+from utils.simple_utils import save_data_to_csv
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -12,30 +13,37 @@ logger = logging.getLogger(__name__)     # Create logger for the module
 
 
 class Model():
-    def __init__(self, learning_rate=0.05, l2_norm_clip=1.5, noise_multiplier=1.5, num_microbatches=1, delta=1e-5):
+    def __init__(self, client_id, dpsgd: bool = False, learning_rate=0.2, l2_norm_clip=1.5, noise_multiplier=1.5, num_microbatches=1, delta=1e-5):
         self.learning_rate = learning_rate
         self.l2_norm_clip = l2_norm_clip
         self.noise_multiplier = noise_multiplier
         self.num_microbatches = num_microbatches
         self.delta = delta
-        self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy()
+        self.client_id = client_id
+        self.dpsgd = False
+        self.eval_loss = tf.keras.losses.SparseCategoricalCrossentropy()
         self.model = tf.keras.applications.MobileNetV2((32, 32, 3), alpha=0.1, classes=10, weights=None)
+        self.init_optimizer()
+        self.detailed_data = pd.DataFrame(columns=['Epoch', 'Epsilon'])
 
-      
-        # Differentially private optimizer
-        self.dp_optimizer = DPAdamGaussianOptimizer(
-            l2_norm_clip=self.l2_norm_clip,
-            noise_multiplier=self.noise_multiplier,
-            num_microbatches=self.num_microbatches,
-            learning_rate=self.learning_rate
-        )
-
-        # Optimizer for non-private training
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
+    def init_optimizer(self):
+        if self.dpsgd:
+            logger.info("Using DPAdamGaussianOptimizer")
+            # Differentially private optimizer
+            self.optimizer = DPAdamGaussianOptimizer(
+                l2_norm_clip=self.l2_norm_clip,
+                noise_multiplier=self.noise_multiplier,
+                num_microbatches=self.num_microbatches,
+                learning_rate=self.learning_rate
+            )
+        else:
+            logger.info("Using Adam Optimizer")
+            # Optimizer for non-private training
+            self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
 
 
     def compile(self):
-        self.model.compile(optimizer=self.optimizer, loss=self.loss_function, metrics=["accuracy"])
+        self.model.compile(optimizer=self.optimizer, loss=self.eval_loss, metrics=["accuracy"])
         return self.model
     
     def get_model(self):
@@ -63,64 +71,108 @@ class Model():
         return accountant.get_epsilon(self.delta)
 
 
-    def compute_epsilon_per_iteration(self,iteration, batch_size, number_of_examples):
-        """Computes epsilon value at the end of each iteration."""
-        if self.noise_multiplier == 0.0:
-            return float('inf')
-        orders = [1 + x / 10. for x in range(1, 100)] + list(range(12, 64))
-        accountant = dp_accounting.rdp.RdpAccountant(orders)
-        sampling_probability = batch_size / number_of_examples
-        
-        event = dp_accounting.SelfComposedDpEvent(
-            dp_accounting.PoissonSampledDpEvent(
-                sampling_probability,
-                dp_accounting.GaussianDpEvent(self.noise_multiplier)), iteration)
-
-        accountant.compose(event)
-        return accountant.get_epsilon(self.delta)
+    def set_gradient_clipping(self, optimizer, clipvalue):
+        if hasattr(optimizer, 'clipvalue'):
+            optimizer.clipvalue = clipvalue
+    
+    def set_learning_rate(self, optimizer, learning_rate):
+        tf.keras.backend.set_value(optimizer.learning_rate, learning_rate)
 
 
+    def freeze_layers(self, freeze_percentage):
+        if freeze_percentage == 0:
+            for layer in self.model.layers:
+                layer.trainable = True
+        else:
+            total_layers = len(self.model.layers)
+            layers_to_freeze = int(total_layers * (freeze_percentage / 100))
+            for layer in self.model.layers[:layers_to_freeze]:
+                layer.trainable = False
 
-    def fit_method(self, train_dataset, epochs, batch_size, number_of_examples):
-        final_epoch_accuracy = 0.0  # Variable to store the final epoch accuracy
 
+    # create a function that returns the percentage of freezed layers in the model
+    def get_freezed_layers_percentage(self):
+        freezed_layers = 0
+        for layer in self.model.layers:
+            if not layer.trainable:
+                freezed_layers += 1
+        return freezed_layers / len(self.model.layers) * 100
+
+
+    def apply_model_adjustments(self, config):
+        """
+        Applies the adjustments to the model based on the configuration.
+
+        :param config: Configuration for the round.
+        """
+        self.set_learning_rate(self.optimizer, config["learning_rate"])
+        self.set_gradient_clipping(self.optimizer, config.get("gradient_clipping_value"))
+        self.freeze_layers(config.get("freeze_layers_percentage"))
+
+
+
+    def fit(self, x_train, y_train, epochs, batch_size, config):
+        """
+        Custom training loop for the model with differential privacy.
+
+        :param x_train: Features of the training dataset.
+        :param y_train: Labels of the training dataset.
+        :param epochs: Number of epochs to train.
+        :param batch_size: Batch size for training.
+        :param config: Configuration for the round.
+        """
+    
+        # Apply the model adjustments
+        self.apply_model_adjustments(config)
+    
+        # Prepare the training dataset
+        train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train)).batch(batch_size)
+
+        row_index = 0
+
+        # Training loop
         for epoch in range(epochs):
-            logger.info(f"Starting epoch {epoch+1}/{epochs}")
-            total_accuracy = 0
-            total_batches = 0
-
-            for step, (x_batch_train, y_batch_train) in enumerate(train_dataset):
-                with tf.GradientTape() as tape:
-                    logits = self.model(x_batch_train, training=True)
-                    loss = self.loss_function(y_batch_train, logits)
+            for i, (images, labels) in enumerate(train_dataset):
+                with tf.GradientTape(persistent=True) as gradient_tape:
+                    # Compute logits and loss
+                    logits = self.model(images, training=True)
+                    var_list = self.model.trainable_variables
                 
-                # Compute DP gradients
-                grads_and_vars = self.dp_optimizer.compute_gradients(loss, self.model.trainable_weights, tape=tape)
+                    # In Eager mode, the optimizer takes a function that returns the loss.
+                    def loss_fn():
+                        logits = self.model(images, training=True) 
+                        loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
+                            labels=labels, logits=logits)  
+                        # If training without privacy, the loss is a scalar not a vector.
+                        if not self.dpsgd:
+                            loss = tf.reduce_mean(input_tensor=loss)
+                        return loss
+                
+                    if self.dpsgd:
+                        grads_and_vars = self.optimizer.compute_gradients(
+                            loss_fn, var_list, gradient_tape=gradient_tape)
+                    else:
+                        grads_and_vars = self.optimizer.compute_gradients(loss_fn, var_list)
 
-                # Apply DP gradients
-                self.dp_optimizer.apply_gradients(grads_and_vars)
+                self.optimizer.apply_gradients(grads_and_vars)
 
-                # Calculate batch accuracy
-                correct_predictions = tf.equal(tf.argmax(logits, 1), tf.argmax(y_batch_train, 1))
-                accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
-                total_accuracy += accuracy.numpy()
-                total_batches += 1
+            # Compute the privacy budget expended per iteration
+            if self.dpsgd:
+                epsilon = self.compute_epsilon_per_epoch(epoch + 1, batch_size, len(x_train))
+                self.detailed_data.loc[row_index] = [epoch+1, epsilon]
+                row_index += 1
 
-                # Log training process
-                if step % 100 == 0:
-                    loss_value = np.mean(loss.numpy())
-                    logger.info(f"Epoch {epoch+1}, Step {step}, Loss: {loss_value}")
+        
+        # Save the data to a CSV file
+        save_data_to_csv(f"mlflow/epsilon_data_client{self.client_id}.csv", self.detailed_data)   
 
-            # Compute and log epoch accuracy
-            epoch_accuracy = total_accuracy / total_batches
-            logger.info(f"End of epoch {epoch+1}, Accuracy: {epoch_accuracy}")
+        # Tests to check if the values were set correctly
+        # assert self.optimizer.learning_rate == config["learning_rate"], "Learning rate was not set correctly"
+        # if config.get("gradient_clipping_value"):
+        #     assert self.optimizer.clipvalue == config["gradient_clipping_value"], "Gradient clipping value was not set correctly"
+        # if config.get("freeze_layers_percentage"):
+        #     assert self.get_freezed_layers_percentage() >= config["freeze_layers_percentage"] - 1 and self.get_freezed_layers_percentage() <= config["freeze_layers_percentage"] + 1, "Freeze layers percentage was not set correctly"
+        return self.model
+    
 
-            # Compute epsilon at the end of the epoch
-            epsilon = self.compute_epsilon_per_epoch(epoch+1, batch_size, number_of_examples)
-            logger.info(f"End of epoch {epoch+1}, Epsilon: {epsilon}")
-
-            if epoch == epochs - 1:  # If it's the last epoch, store the accuracy
-                final_epoch_accuracy = epoch_accuracy
-
-        return final_epoch_accuracy
-
+    

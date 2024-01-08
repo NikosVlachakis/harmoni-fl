@@ -3,11 +3,8 @@ import os
 import argparse
 from flask import Flask
 from flask_cors.extension import CORS
-from models.callbacks.gradient_clipping_setter import GradientClippingCallback
-from models.callbacks.model_precision_setter import ModelPrecisionAdjustmentCallback
 from flask_restful import Resource, Api
 import flwr as fl
-from models.model_adjustments import ModelAdjuster
 from services.prometheus_queries import *
 from services.prometheus_service import PrometheusService
 import tensorflow as tf
@@ -18,7 +15,6 @@ import os
 import numpy as np
 from helpers.mlflow import MlflowHelper
 from models.model import Model
-from models.callbacks.learning_rate_setter import LearningRateSetter
 from models.sparsification import Sparsifier
 
 from utils.simple_utils import calculate_weights_size
@@ -36,17 +32,12 @@ parser = argparse.ArgumentParser(description='Flower client')
 parser.add_argument('--server_address', type=str, default="server:8080", help="Address of the server")
 parser.add_argument('--client_id', type=int, default=1, help="Unique ID for the client")
 parser.add_argument('--total_clients', type=int, default=2, help="Total number of clients")
+parser.add_argument('--dpsgd', type=bool, default=False, help="DPSGD or not (default: False)")
 
 args = parser.parse_args()
-
-# Create an instance of the model and pass the learning rate as an argument
-model = Model()
-
-# Compile the model
-model.compile()
-
-# Get the model
-model = model.get_model()
+logger.info("args: %s", args)
+# Create an instance of the model
+model_instance = Model(client_id=args.client_id, dpsgd=args.dpsgd)
 
 class Client(fl.client.NumPyClient):
     def __init__(self):
@@ -54,6 +45,7 @@ class Client(fl.client.NumPyClient):
         self.eval_operational_metrics = {}
         self.properties = {}
         self.prom_service = PrometheusService()
+        self.mlflow_helper = MlflowHelper(client_id=args.client_id, dpsgd=args.dpsgd)
         self.container_name = os.getenv('container_name')
         self.properties.update({
             "container_name": self.container_name
@@ -64,7 +56,7 @@ class Client(fl.client.NumPyClient):
 
 
     def get_parameters(self, config):
-        return model.get_weights()
+        return model_instance.get_model().get_weights()
 
     def fit(self, parameters, config):
         
@@ -74,36 +66,18 @@ class Client(fl.client.NumPyClient):
         start_time = time.time()  # Capture the start time
        
         # Set the weights of the model
-        model.set_weights(parameters)
+        model_instance.get_model().set_weights(parameters)
 
-        # config and the name of the container
-        logger.info("Config for client with name: %s, is: %s", self.container_name, config)
-        
         # Update the properties with the config as it contains the new configuration for the round
         self.properties.update(config)
-    
-        logger.info("Training model for client with container name: %s", self.container_name)
-       
+
+        logger.info("config is: %s", config)
+
         # Train the model
-        history = model.fit(x_train, y_train, batch_size=config["batch_size"], epochs=config["epochs"])
-        
-
-        # learning_rate_setter = LearningRateSetter(learning_rate= config["learning_rate"])
-        # gradient_clipping_setter = GradientClippingCallback(clipvalue=config.get("gradient_clipping_value"))
-        # model_precision_adjustment = ModelPrecisionAdjustmentCallback(target_dtype=config.get("model_precision"))
-
-        # # Apply model adjustments based on config
-        # model_adjuster = ModelAdjuster(model)
-        # with model_adjuster.apply_adjustments(config):
-        #     history = model.fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"], callbacks=[learning_rate_setter, gradient_clipping_setter, model_precision_adjustment])      
-    
+        model_instance.fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"], config=config)      
 
         # Get the weights after training
-        parameters_prime = model.get_weights()
-
-        logger.info("Training completed for client with container name: %s", self.container_name)
-
-
+        parameters_prime = model_instance.get_model().get_weights()
 
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
@@ -117,7 +91,6 @@ class Client(fl.client.NumPyClient):
 
         # Calculate evaluation metric
         results = {
-            "accuracy": float(history.history["accuracy"][-1]),
             "start_time": start_time,
             "end_time": end_time,
             "container_name": self.container_name,
@@ -154,10 +127,12 @@ class Client(fl.client.NumPyClient):
 
         start_time = time.time()  # Capture the start time
         
-        model.set_weights(parameters)
+        model_instance.get_model().set_weights(parameters)
+
+        compiled_model = model_instance.compile()
 
         # Evaluate the model and get the loss and accuracy
-        loss, accuracy = model.evaluate(x_test, y_test)
+        loss, accuracy = compiled_model.evaluate(x_test, y_test)
 
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
@@ -171,16 +146,12 @@ class Client(fl.client.NumPyClient):
             "test_set_accuracy": accuracy
         }
 
-        # Combine fit and eval operational metrics for logging
-        combined_metrics = {**self.fit_operational_metrics, **self.eval_operational_metrics}
-
-        # Log the combined operational metrics
-        mlflow_helper = MlflowHelper()
-        mlflow_helper.log_round_metrics_for_client(
+        self.mlflow_helper.log_round_metrics_for_client(
             container_name=os.getenv('container_name'),
             server_round=config["server_round"],
             experiment_id=config["experiment_id"],
-            operational_metrics=combined_metrics 
+            operational_metrics={**self.fit_operational_metrics, **self.eval_operational_metrics},
+            properties=self.properties
         )
 
         return float(loss), len(x_test), {"accuracy": float(accuracy)}

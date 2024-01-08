@@ -27,10 +27,6 @@ CRITERIA_CONFIG = {
         "query_func": [container_cpu_usage_percentage],
         "criterion_class": GradientClippingBasedOnHighCPUUtilization
     },
-    Names.WEIGHT_PRECISION_BASED_ON_HIGH_CPU_UTILIZATION.value: {
-        "query_func": [container_cpu_usage_percentage],
-        "criterion_class": ModelPrecisionBasedOnHighCPUUtilization
-    },
     Names.INCLUDE_CLIENTS_WITHIN_SPECIFIC_THRESHOLDS.value: {
         "query_func": [container_cpu_usage_percentage,container_memory_usage_percentage],
         "criterion_class": IncludeClientsWithinSpecificThresholds

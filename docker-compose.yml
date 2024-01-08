@@ -56,10 +56,11 @@ services:
       context: .
       dockerfile: Dockerfile
     mem_limit: 500m
-    command: mlflow server --host 0.0.0.0 --port 5010 --default-artifact-root /mlflow/artifacts --backend-store-uri /mlruns
+    command: mlflow server --host 0.0.0.0 --port 5010  --backend-store-uri /mlruns
     volumes:
+      - .:/app
+      - ./mlruns:/mlruns
       - ./mlflow:/mlflow
-      - ./mlruns:/mlruns 
     ports:
       - "5010:5010"
 
@@ -78,6 +79,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock      
     ports:
       - "6000:6000"
+      - "8265:8265"
+      - "8000:8000"
     depends_on:
       - prometheus
       - grafana
@@ -87,7 +90,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id=1 --total_clients=2
+    command: python client.py --server_address=server:8080  --client_id=1 --total_clients=2 --dpsgd=False
     mem_limit: 3g
     deploy:
       resources:
@@ -110,7 +113,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id=2 --total_clients=2
+    command: python client.py --server_address=server:8080  --client_id=2 --total_clients=2 --dpsgd=False
     mem_limit: 6g
     deploy:
       resources:

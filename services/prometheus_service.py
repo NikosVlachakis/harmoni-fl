@@ -13,14 +13,11 @@ class PrometheusService:
         self.prom_url = 'http://host.docker.internal:9090'
         
     def query(self, query):
-        logger.info(f"Querying Prometheus with query: {query}")
-
         response = requests.get(
             f'{self.prom_url}/api/v1/query',
             params={'query': query}
         )
         data = response.json()
-        logger.info(f"Response from Prometheus: {data}")
 
         # Process the response
         if response.status_code == 200 and 'data' in data and 'result' in data['data']:
@@ -28,7 +25,6 @@ class PrometheusService:
             if results:
                 # Assuming the result contains a single series with a single value
                 average = float(results[0]['value'][1])  # Extract the value
-                logger.info(f"Average value: {average}")
                 return average
             else:
                 logger.info("No data returned for the query.")

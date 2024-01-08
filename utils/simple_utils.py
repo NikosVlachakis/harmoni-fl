@@ -1,4 +1,5 @@
 import math
+import os
 import re
 import time
 import flwr as fl
@@ -54,3 +55,8 @@ def parse_docker_compose(file_path):
             client_services.append(f"{service_name}:{port}")
 
     return client_services
+
+
+def save_data_to_csv(path, data):
+        data.to_csv(path, mode='w', header=True, index=False)
+    

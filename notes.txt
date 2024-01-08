@@ -1,3 +1,10 @@
+4 - make sure that by changing clipping value the epsilon is changed correctly
+
+
+docker-compose up -d grafana prometheus cadvisor mlflow_server
+docker-compose up client1 client2 server
+
+
 - socat TCP-LISTEN:2375,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
 
 - https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md
@@ -11,6 +18,9 @@
 "expr": "sum(rate(container_cpu_usage_percentage_seconds_total{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"}[10s])) / sum(container_spec_cpu_quota{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"} / container_spec_cpu_period{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"}) by (name) *100",
 
 
+
+- https://typeset.io/papers/fluid-mitigating-stragglers-in-federated-learning-using-3qo2tzhy
+  says about a method beibg used for straggler mitigation in federated learning.(MAYBE USEFUL)
 
 - https://github.com/google/cadvisor/issues/2026
 

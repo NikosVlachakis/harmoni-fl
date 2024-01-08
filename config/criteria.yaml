@@ -6,51 +6,56 @@ criteria:
   #       max_cpu_utilization_percentage: 99
   #       min_memory_utilization_percentage: 5
   #       max_memory_utilization_percentage: 99
+
   # - type: sparsification_based_on_outgoing_bandwidth
   #   blocking: false
   #   config:
   #     threshold_bandwidth_MBps: 90
+  #     default: False
   #     methods:
   #       sparsity_threshold_bo_weight_magnitude:
   #         enabled: true
   #         percentile: 95
+  
   - type: learning_rate_based_on_incoming_bandwidth
     blocking: false
     config:
         threshold_bandwidth_MBps: 10 
         adjustment_factor: 1.5 
+        default: 0.2
+
   - type: epoch_adjustment_based_on_cpu_utilization
     blocking: false
     config: 
         threshold_cpu_utilization_percentage : 80
         adjustment_factor : 1.5
+        default: 3
+
   - type: adaptive_batch_size_based_on_memory_utilization
     blocking: false
     config:
       threshold_memory_utilization_percentage: 80
       adjustment_factor: 1.5
+      default: 64
     
-  # - type: adaptive_data_sampling_based_on_memory_utilization
-  #   blocking: false
-  #   config:
-  #     threshold_memory_utilization_percentage: 20
-  #     adjustment_factor: 1.2
+  - type: adaptive_data_sampling_based_on_memory_utilization
+    blocking: false
+    config:
+      threshold_memory_utilization_percentage: 20
+      adjustment_factor: 1.2
+      default: 0.005
 
-  # - type: model_layer_freezing_based_on_high_cpu_utilization
-  #   blocking: false
-  #   config:
-  #     threshold_cpu_utilization_percentage: 10
-  #     adjustment_factor: 5
+  - type: model_layer_freezing_based_on_high_cpu_utilization
+    blocking: false
+    config:
+      threshold_cpu_utilization_percentage: 10
+      adjustment_factor: 5
+      default: 0
   
-  # - type: gradient_clipping_based_on_high_cpu_utilization
-  #   blocking: false
-  #   config:
-  #     threshold_cpu_utilization_percentage: 90
-  #     adjustment_factor: 0.5
-
-
-  # - type: weight_precision_based_on_high_cpu_utilization
-  #   blocking: false
-  #   config: 
-  #     threshold_cpu_utilization_percentage: 90
-  #     new_precision_value: "float16"
+  - type: gradient_clipping_based_on_high_cpu_utilization
+    blocking: false
+    config:
+      threshold_cpu_utilization_percentage: 90
+      adjustment_factor: 0.5
+      default: 6
+  

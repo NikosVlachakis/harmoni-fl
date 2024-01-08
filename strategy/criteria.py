@@ -40,6 +40,7 @@ class SparsificationBOOutgoingBandwidth(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.is_blocking = blocking
         self.threshold_bandwidth_MBps = config.get('threshold_bandwidth_MBps')
+        self.default = config.get('default')
         self.methods = config.get('methods', {})
 
     def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
@@ -69,6 +70,7 @@ class LearningRateBOIncomingBandwidth(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool):
         self.bandwidth_threshold = config.get('threshold_bandwidth_MBps')  
         self.adjustment_factor = config.get('adjustment_factor')
+        self.default = config.get('default')
         self.is_blocking = blocking
     
     def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
@@ -84,7 +86,10 @@ class LearningRateBOIncomingBandwidth(AbstractCriterion):
             new_learning_rate = current_learning_rate * self.adjustment_factor
             learning_rate_adjustment["learning_rate"] = new_learning_rate
             logger.info(f"Adjusted learning rate to {new_learning_rate} due to low incoming bandwidth ({container_incoming_bandwidth_query} Mbps)")
-
+       
+        else:
+            learning_rate_adjustment["learning_rate"] = self.default
+            
         return learning_rate_adjustment
 
 
@@ -93,7 +98,8 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         self.is_blocking = blocking
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
-    
+        self.default = config.get('default')
+
     def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
         
         cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
@@ -109,6 +115,9 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
             epoch_adjustment["epochs"] = max(adjusted_epochs, 1)
             logger.info(f"Adjusted number of epochs to {epoch_adjustment['epochs']} due to high cpu usase of ({cpu_usase_percentage}%)")
 
+        else:
+            epoch_adjustment["epochs"] = self.default
+        
         return epoch_adjustment
     
 class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
@@ -116,7 +125,8 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
         self.is_blocking = blocking
         self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
-    
+        self.default = config.get('default')
+
     def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
         
         average_memory_usage_percentage = float(queries_results['container_memory_usage_percentage'])
@@ -131,6 +141,9 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
             batch_size_adjustment["batch_size"] = max(adjusted_batch_size, 1)
             logger.info(f"Adjusted batch size to {batch_size_adjustment['batch_size']} due to high memory utilization of ({average_memory_usage_percentage}%)")
 
+        else:
+            batch_size_adjustment["batch_size"] = self.default
+        
         return batch_size_adjustment
     
 class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
@@ -138,7 +151,8 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
         self.is_blocking = blocking
         self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
-    
+        self.default = config.get('default')
+
     def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
         
         # Get the average memory usage percentage
@@ -158,6 +172,9 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
             data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, 0.05)
             logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to high memory utilization of ({average_memory_usage_percentage}%)")
 
+        else:
+            data_sample_percentage_adjustment["data_sample_percentage"] = self.default
+        
         return data_sample_percentage_adjustment
 
 
@@ -166,7 +183,8 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
         self.is_blocking = blocking
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
-    
+        self.default = config.get('default')
+
     def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
         
         cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
@@ -183,6 +201,8 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
             adjusted_freeze_percentage = math.ceil(current_freeze_percentage + self.adjustment_factor)
             freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, 90)
             logger.info(f"Adjusted percentage of freezing layers to {freeze_percentage_adjustment['freeze_layers_percentage']} due to high CPU utilization of ({cpu_usase_percentage}%)")
+        else:
+            freeze_percentage_adjustment["freeze_layers_percentage"] = self.default
 
         return freeze_percentage_adjustment
     
@@ -191,7 +211,8 @@ class GradientClippingBasedOnHighCPUUtilization(AbstractCriterion):
         self.is_blocking = blocking
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
-    
+        self.default = config.get('default')
+
     def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
         
         cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
@@ -207,26 +228,7 @@ class GradientClippingBasedOnHighCPUUtilization(AbstractCriterion):
             gradient_clipping_adjustment["gradient_clipping_value"] = max(adjusted_gradient_clipping, 0.5)
             logger.info(f"Adjusted gradient clipping to {gradient_clipping_adjustment['gradient_clipping_value']} due to high CPU utilization of ({cpu_usase_percentage}%)")
 
+        else:
+            gradient_clipping_adjustment["gradient_clipping_value"] = self.default
+        
         return gradient_clipping_adjustment
-
-class ModelPrecisionBasedOnHighCPUUtilization(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
-        self.is_blocking = blocking
-        self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
-        self.new_precision_value = config.get('new_precision_value')
-    
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
-        
-        cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
-        
-        current_model_precision = client_properties.get('model_precision')
-
-        current_model_precision = str(current_model_precision) if current_model_precision is not None else "float32"
-
-        model_precision_adjustment = {"model_precision": current_model_precision}
-
-        if cpu_usase_percentage > self.threshold_cpu_utilization_percentage:
-            model_precision_adjustment["model_precision"] = self.new_precision_value
-            logger.info(f"Adjusted model precision to {model_precision_adjustment['model_precision']} due to high CPU utilization of ({cpu_usase_percentage}%)")
-
-        return model_precision_adjustment
