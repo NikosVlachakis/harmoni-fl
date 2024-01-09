@@ -43,19 +43,19 @@ criteria:
     config:
       threshold_memory_utilization_percentage: 20
       adjustment_factor: 1.2
-      default: 0.005
+      default: 0.03
 
   - type: model_layer_freezing_based_on_high_cpu_utilization
     blocking: false
     config:
-      threshold_cpu_utilization_percentage: 10
+      threshold_cpu_utilization_percentage: 60
       adjustment_factor: 5
       default: 0
   
   - type: gradient_clipping_based_on_high_cpu_utilization
     blocking: false
     config:
-      threshold_cpu_utilization_percentage: 90
+      threshold_cpu_utilization_percentage: 60
       adjustment_factor: 0.5
       default: 6
   

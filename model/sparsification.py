@@ -4,7 +4,6 @@ import logging
 import numpy as np
 import sparse
 import pickle
-from utils.simple_utils import flatten_weights
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -65,6 +64,7 @@ class Sparsifier:
 
         return serialized_sparse_weights, total_nnz
     
+    
     def threshold_selection(self, weights):
         # Get the threshold selection method
         method = self.methods.get(self.method)
@@ -78,11 +78,19 @@ class Sparsifier:
     
     def sparsity_threshold_bo_weight_magnitude(self, weights):
         # Flatten all the weights
-        all_weights = flatten_weights(weights)
+        all_weights = self.flatten_weights(weights)
         # Calculates the value of threshold below which percentile% of the absolute values of the weights in the model fall.
         self.sparsity_threshold = np.percentile(np.abs(all_weights), self.percentile)
         return self.sparsity_threshold
     
     
+    def flatten_weights(self,weights):
+        flat_weights = np.concatenate([
+            np.array(weight).flatten() if not isinstance(weight, np.ndarray) else weight.flatten()
+            for weight in weights
+        ])
+        return flat_weights
+
+
     def fixed_sparsity_threshold(self):
         return self.sparsity_threshold

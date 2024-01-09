@@ -14,8 +14,8 @@ from helpers.load_data import DataLoader
 import os
 import numpy as np
 from helpers.mlflow import MlflowHelper
-from models.model import Model
-from models.sparsification import Sparsifier
+from model.model import Model
+from model.sparsification import Sparsifier
 
 from utils.simple_utils import calculate_weights_size
 
@@ -32,20 +32,19 @@ parser = argparse.ArgumentParser(description='Flower client')
 parser.add_argument('--server_address', type=str, default="server:8080", help="Address of the server")
 parser.add_argument('--client_id', type=int, default=1, help="Unique ID for the client")
 parser.add_argument('--total_clients', type=int, default=2, help="Total number of clients")
-parser.add_argument('--dpsgd', type=int, default=0, help="DPSGD or not (default: 0)")
+parser.add_argument('--dp_opt', type=int, default=0, help="dp_opt or not (default: 0)")
 
 args = parser.parse_args()
-logger.info("args: %s", args)
-# Create an instance of the model
-model_instance = Model(client_id=args.client_id, dpsgd=args.dpsgd)
 
+# Create an instance of the model
+model_instance = Model(client_id=args.client_id, dp_opt=args.dp_opt)
 class Client(fl.client.NumPyClient):
     def __init__(self):
         self.fit_operational_metrics = {}
         self.eval_operational_metrics = {}
         self.properties = {}
         self.prom_service = PrometheusService()
-        self.mlflow_helper = MlflowHelper(client_id=args.client_id, dpsgd=args.dpsgd)
+        self.mlflow_helper = MlflowHelper(client_id=args.client_id, dp_opt=args.dp_opt)
         self.container_name = os.getenv('container_name')
         self.properties.update({
             "container_name": self.container_name

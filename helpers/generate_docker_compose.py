@@ -10,7 +10,7 @@ parser.add_argument('--total_clients', type=int, default=2, help="Total clients 
 parser.add_argument('--num_rounds', type=int, default=100, help="Number of FL rounds (default: 100)")
 parser.add_argument('--random', type=bool, default=False, help='Randomize client configurations (default: False)')
 parser.add_argument('--convergence_accuracy', type=float, default=0.8, help='Convergence accuracy (default: 0.8)')
-parser.add_argument('--dpsgd', type=int, default=0, help="DPSGD or not (default: 0)")
+parser.add_argument('--dp_opt', type=int, default=0, help="dp_opt or not (default: 0)")
 
 
 
@@ -125,7 +125,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id={i} --total_clients={args.total_clients} --dpsgd={args.dpsgd}
+    command: python client.py --server_address=server:8080  --client_id={i} --total_clients={args.total_clients} --dp_opt={args.dp_opt}
     mem_limit: {config['mem_limit']}
     deploy:
       resources:

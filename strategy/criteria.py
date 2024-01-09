@@ -168,8 +168,8 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
             
             adjusted_data_sample_percentage = (current_data_sample_percentage / self.adjustment_factor)
             
-            # Ensure that the data sample percentage is not less than 5%
-            data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, 0.05)
+            # Ensure that the data sample percentage is not less than 1%
+            data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, 0.01)
             logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to high memory utilization of ({average_memory_usage_percentage}%)")
 
         else:

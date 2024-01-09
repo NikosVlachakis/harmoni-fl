@@ -6,7 +6,20 @@ import flwr as fl
 import pickle
 import numpy as np
 import yaml
+import json
+import yaml
 
+
+
+def load_strategy_config():
+        with open('config/strategy_config.json') as f:
+            config = json.load(f)
+        return config
+
+
+def load_criteria_config(filepath: str) -> dict:
+    with open(filepath, 'r') as file:
+        return yaml.safe_load(file)
 
 
 def get_client_properties(client_proxy, config={}, timeout=30):
@@ -34,14 +47,6 @@ def calculate_weights_size(weights):
     weights_size = sum(len(pickle.dumps(weight)) for weight in weights)
     return weights_size
 
-
-
-def flatten_weights(weights):
-    flat_weights = np.concatenate([
-        np.array(weight).flatten() if not isinstance(weight, np.ndarray) else weight.flatten()
-        for weight in weights
-    ])
-    return flat_weights
 
 
 def parse_docker_compose(file_path):

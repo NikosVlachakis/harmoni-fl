@@ -5,6 +5,9 @@ docker-compose up -d grafana prometheus cadvisor mlflow_server
 docker-compose up client1 client2 server
 
 
+-https://github.com/tensorflow/privacy/blob/master/tensorflow_privacy/privacy/analysis/compute_dp_sgd_privacy_lib.py
+ says about the formula for epsilon calculation from official tensorflow privacy library
+
 - socat TCP-LISTEN:2375,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
 
 - https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md
@@ -16,7 +19,6 @@ docker-compose up client1 client2 server
 - EXPRESSIONS FOR CPU USAGE:
 "expr": "sum(rate(container_cpu_usage_percentage_seconds_total{instance=~\"$host\",name=~\"$container\",name=~\".+\", name !~ \"(prometheus|cadvisor|grafana)\"}[10s])) by (name) *100",
 "expr": "sum(rate(container_cpu_usage_percentage_seconds_total{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"}[10s])) / sum(container_spec_cpu_quota{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"} / container_spec_cpu_period{instance=~\"$host\", name=~\"$container\", name !~ \"(prometheus|cadvisor|grafana)\"}) by (name) *100",
-
 
 
 - https://typeset.io/papers/fluid-mitigating-stragglers-in-federated-learning-using-3qo2tzhy

@@ -15,13 +15,13 @@ class MlflowHelper:
         rounds: int = 100,
         convergence_accuracy: float = 0.8,
         client_id: int = 1,
-        dpsgd: int = 0
+        dp_opt: int = 0
     ) -> None:
         super().__init__()
         self.rounds = rounds
         self.convergence_accuracy = convergence_accuracy
         self.client_id = client_id
-        self.dpsgd = dpsgd == 1
+        self.dp_opt = dp_opt == 1
         self.epsilon_values_file_path = f"mlflow/epsilon_data_client{self.client_id}.csv"
 
     @property
@@ -61,7 +61,7 @@ class MlflowHelper:
             mlflow.set_tag("container_name", container_name)
             mlflow.log_params(properties)
             mlflow.log_metrics(operational_metrics)
-            if self.dpsgd:
+            if self.dp_opt:
                 mlflow.log_artifact(local_path= self.epsilon_values_file_path)
 
             

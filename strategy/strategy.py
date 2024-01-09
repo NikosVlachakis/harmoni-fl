@@ -19,7 +19,7 @@ import flwr as fl
 import logging
 import numpy as np
 from strategy.client_selector import ClientSelector
-from utils.load_configs import load_strategy_config
+from utils.simple_utils import load_strategy_config
 import sparse 
 from utils.simple_utils import get_client_properties
 from prometheus_client import Gauge
