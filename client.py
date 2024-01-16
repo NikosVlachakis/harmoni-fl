@@ -40,8 +40,7 @@ args = parser.parse_args()
 model_instance = Model(client_id=args.client_id, dp_opt=args.dp_opt)
 class Client(fl.client.NumPyClient):
     def __init__(self):
-        self.fit_operational_metrics = {}
-        self.eval_operational_metrics = {}
+        self.round_metrics = {}
         self.properties = {}
         self.prom_service = PrometheusService()
         self.mlflow_helper = MlflowHelper(client_id=args.client_id, dp_opt=args.dp_opt)
@@ -82,11 +81,11 @@ class Client(fl.client.NumPyClient):
         duration = end_time - start_time  # Calculate duration
 
         # Store operational metrics for fit
-        self.fit_operational_metrics = {
+        self.round_metrics.update({
             "fit_start_time": start_time,
             "fit_end_time": end_time,
             "fit_duration": duration
-        }
+        })
 
         # Calculate evaluation metric
         results = {
@@ -112,8 +111,15 @@ class Client(fl.client.NumPyClient):
             logger.info("serialized_sparse_weights_size: %s", serialized_sparse_weights_size)
             logger.info("original_weights_size: %s", original_weights_size)
             
+            self.round_metrics.update({
+                "total_nnz": total_nnz,
+                "serialized_sparse_weights_size": serialized_sparse_weights_size,
+                "original_weights_size": original_weights_size
+            })
+
+
             # Return new weights, number of training examples, and results
-            return serialized_sparse_weights, len(self.x_train), results
+            return serialized_sparse_weights, len(x_train), results
 
         else:
             # Directly return the dense weights without sparsification
@@ -137,19 +143,19 @@ class Client(fl.client.NumPyClient):
         duration = end_time - start_time  # Calculate duration
 
         # Store operational metrics for evaluation
-        self.eval_operational_metrics = {
+        self.round_metrics.update({
             "eval_start_time": start_time,
             "eval_end_time": end_time,
             "eval_duration": duration,
             "test_set_size": len(x_test),
             "test_set_accuracy": accuracy
-        }
+        })
 
         self.mlflow_helper.log_round_metrics_for_client(
             container_name=os.getenv('container_name'),
             server_round=config["server_round"],
             experiment_id=config["experiment_id"],
-            operational_metrics={**self.fit_operational_metrics, **self.eval_operational_metrics},
+            operational_metrics={**self.round_metrics},
             properties=self.properties
         )
 

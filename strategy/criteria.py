@@ -1,27 +1,31 @@
 import logging
 from abc import ABC, abstractmethod
 import math
-from typing import Dict
+from typing import Dict, Union
 from utils.names import Names
 
 logger = logging.getLogger(__name__)
 
 class AbstractCriterion(ABC):
     @abstractmethod
-    def check(self, client_properties: Dict[str, str], metrics: Dict[str, float]) -> bool:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
         """Check if the client meets the criteria"""
         pass
 
 class IncludeClientsWithinSpecificThresholds(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
+    def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
         self.is_blocking = blocking
+        self.active = active
         self.min_cpu_utilization_percentage = config.get('min_cpu_utilization_percentage')
         self.max_cpu_utilization_percentage = config.get('max_cpu_utilization_percentage')
         self.min_memory_utilization_percentage = config.get('min_memory_utilization_percentage')
         self.max_memory_utilization_percentage = config.get('max_memory_utilization_percentage')
 
     
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
+        
+        if not self.active:
+            return True
         
         cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
 
@@ -37,13 +41,18 @@ class IncludeClientsWithinSpecificThresholds(AbstractCriterion):
         return meets_criteria
 
 class SparsificationBOOutgoingBandwidth(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
+    def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
         self.is_blocking = blocking
+        self.active = active
         self.threshold_bandwidth_MBps = config.get('threshold_bandwidth_MBps')
         self.default = config.get('default')
         self.methods = config.get('methods', {})
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
+        
+        if not self.active:
+            return False
+        
         container_outgoing_bandwidth_query = float(queries_results.get('container_outgoing_bandwidth_query')) # in Mbps
 
         if container_outgoing_bandwidth_query < self.threshold_bandwidth_MBps:
@@ -67,14 +76,20 @@ class SparsificationBOOutgoingBandwidth(AbstractCriterion):
 
 
 class LearningRateBOIncomingBandwidth(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
+    def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
+        
+        self.is_blocking = blocking
+        self.active = active
         self.bandwidth_threshold = config.get('threshold_bandwidth_MBps')  
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
-        self.is_blocking = blocking
-    
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
         
+    
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
+        
+        if not self.active:
+            return False
+
         container_incoming_bandwidth_query = float(queries_results['container_incoming_bandwidth_query'])  # in Mbps
         
         adjusted_learning_rate = client_properties.get('learning_rate')
@@ -94,14 +109,18 @@ class LearningRateBOIncomingBandwidth(AbstractCriterion):
 
 
 class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
+    def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
         self.is_blocking = blocking
+        self.active = active
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
         
+        if not self.active:
+            return False
+
         cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
         logger.info(f"cpu usage for client {client_properties.get('container_name')} is {cpu_usase_percentage}%")
 
@@ -121,14 +140,18 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         return epoch_adjustment
     
 class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
+    def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
         self.is_blocking = blocking
+        self.active = active
         self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
         
+        if not self.active:
+            return False
+
         average_memory_usage_percentage = float(queries_results['container_memory_usage_percentage'])
         logger.info(f"Average memory usage for client {client_properties.get('container_name')} is {average_memory_usage_percentage}%")
 
@@ -147,14 +170,18 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
         return batch_size_adjustment
     
 class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
+    def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
         self.is_blocking = blocking
+        self.active = active
         self.threshold_memory_utilization_percentage = config.get('threshold_memory_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
         
+        if not self.active:
+            return False
+
         # Get the average memory usage percentage
         average_memory_usage_percentage = float(queries_results['container_memory_usage_percentage'])
         logger.info(f"Average memory usage for client {client_properties.get('container_name')} is {average_memory_usage_percentage}%")
@@ -179,13 +206,17 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
 
 
 class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
+    def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
         self.is_blocking = blocking
+        self.active = active
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
+        
+        if not self.active:
+            return False
         
         cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
         logger.info(f"cpu usage for client {client_properties.get('container_name')} is {cpu_usase_percentage}%")
@@ -207,14 +238,18 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
         return freeze_percentage_adjustment
     
 class GradientClippingBasedOnHighCPUUtilization(AbstractCriterion):
-    def __init__(self, config: Dict[str, any], blocking: bool):
+    def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
         self.is_blocking = blocking
+        self.active = active
         self.threshold_cpu_utilization_percentage = config.get('threshold_cpu_utilization_percentage')
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Dict[str, any]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float]) -> Union[Dict, bool]:
         
+        if not self.active:
+            return False
+
         cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
 
         current_gradient_clipping = client_properties.get('gradient_clipping_value')

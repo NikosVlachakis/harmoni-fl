@@ -77,7 +77,8 @@ class ClientSelector:
                 client_config = {}
                 for criterion in non_blocking_criteria:
                     result = criterion.check(client_properties, queries_results)
-                    if isinstance(result, dict):
+                    if result and isinstance(result, dict):
+                        logger.info(f"Adding {result} to client config")
                         client_config.update(result)
 
                 selected_client = {
@@ -104,15 +105,16 @@ class ClientSelector:
         for crit in criteria_config:
             crit_type = crit.get('type')
             crit_config = crit.get('config', {})
-            is_blocking = crit.get('blocking', True)  # Default to True if 'blocking' is not specified
-            
+            is_blocking = crit.get('blocking', True)
+            is_active = crit.get('active', True)
+
             # check if the criterion type is in the mapping
             if crit_type in CRITERIA_CONFIG:
                 criterion_config = CRITERIA_CONFIG[crit_type]
                 criterion_class = criterion_config.get('criterion_class')
 
                 if criterion_class is not None:
-                    criterion_obj = criterion_class(crit_config, is_blocking)
+                    criterion_obj = criterion_class(crit_config, is_blocking, is_active)
                     criteria_objects.append(criterion_obj)
                 else:
                     logger.warning(f"No criterion class found for type {crit_type}")

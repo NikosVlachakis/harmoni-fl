@@ -4,6 +4,7 @@
 docker-compose up -d grafana prometheus cadvisor mlflow_server
 docker-compose up client1 client2 server
 
+docker rm -f $(docker ps -a -q)
 
 -https://github.com/tensorflow/privacy/blob/master/tensorflow_privacy/privacy/analysis/compute_dp_sgd_privacy_lib.py
  says about the formula for epsilon calculation from official tensorflow privacy library

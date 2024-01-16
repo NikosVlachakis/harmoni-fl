@@ -47,12 +47,13 @@ class Sparsifier:
 
 
     def sparsify_and_serialize_weights(self,weights):
-        
+
         # Call the threshold selection method for the given weights to determine the sparsity threshold
         self.threshold_selection(weights)
         
         total_nnz = 0  # Initialize total non-zero element count
         serialized_sparse_weights = []
+       
         for weight in weights:
             sparse_weight = self.sparsify_weight(weight)
             serialized_sparse_weight = self.serialize_sparse_coo(sparse_weight)
@@ -71,7 +72,6 @@ class Sparsifier:
         if method is None:
             raise ValueError(f"Invalid method: {self.method}")
         else:
-            logger.info("Using %s method for threshold selection", self.method)
             self.sparsity_threshold = method(weights)
             logger.info("Sparsity threshold is: %s", self.sparsity_threshold)
    
