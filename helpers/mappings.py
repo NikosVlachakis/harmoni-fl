@@ -4,7 +4,7 @@ from services.prometheus_queries import *
 
 CRITERIA_CONFIG = {
     Names.LEARNING_RATE_BASED_ON_CPU_UTILIZATION.value: {
-        "query_func": [container_cpu_usage_percentage],
+        "query_func": [container_incoming_bandwidth_query],
         "criterion_class": LearningRateBasedOnCPUUtilization
     },
     Names.EPOCH_ADJUSTMENT_BASED_ON_CPU_UTILIZATION.value: {

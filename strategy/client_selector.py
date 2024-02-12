@@ -1,11 +1,10 @@
 import logging
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-from flwr.common import GetPropertiesIns
-from strategy.criteria import *
+from strategy.criteria_check import *
 from utils.simple_utils import load_criteria_config
 from services.prometheus_service import PrometheusService
-from config.mappings import *
+from helpers.mappings import *
 from typing import Dict, List, Tuple
 from utils.simple_utils import get_client_properties
 
@@ -58,9 +57,28 @@ class ClientSelector:
             client_properties = get_client_properties(client)
                         
             # Get the start and end timesmtamps for the current client
-            prev_round_start_time = round_timestamps[client_properties['container_name']].get("start", None)
-            prev_round_end_time = round_timestamps[client_properties['container_name']].get("end", None)
+            # prev_round_start_time = round_timestamps[client_properties['container_name']].get("start", None)
+            # prev_round_end_time = round_timestamps[client_properties['container_name']].get("end", None)
             
+            try:
+                # Attempt to get the start and end timestamps for the current client
+                prev_round_start_time = round_timestamps[client_properties['container_name']].get("start", None)
+                prev_round_end_time = round_timestamps[client_properties['container_name']].get("end", None)
+
+                # Proceed only if both timestamps are available, indicating participation in a previous round
+                if prev_round_start_time is None or prev_round_end_time is None:
+                    raise KeyError(f"Client {client_properties['container_name']} does not have valid timestamps for a previous round.")
+            
+            except KeyError as e:
+                # For first-time participants, assume default or no specific configuration needed
+                logger.info(f"Client {client_properties['container_name']} is considered a new participant.")
+                selected_clients.append({
+                    'client': client,
+                    'config': {}
+                })
+                continue  # Proceed to the next client without further processing
+
+
             # Create a list of queries based on criteria
             queries = self.generate_dynamic_queries_for_client_B0_criteria(client_properties, prev_round_start_time, prev_round_end_time)
             
@@ -78,7 +96,6 @@ class ClientSelector:
                 for criterion in non_blocking_criteria:
                     result = criterion.check(client_properties, queries_results)
                     if result and isinstance(result, dict):
-                        logger.info(f"Adding {result} to client config")
                         client_config.update(result)
 
                 selected_client = {

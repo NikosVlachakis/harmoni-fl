@@ -19,17 +19,17 @@ criteria:
           enabled: true
           percentile: 95
   
-  - type: learning_rate_based_on_incoming_bandwidth
+  - type: learning_rate_based_on_cpu_utilization
     blocking: false
-    active: false
+    active: true
     config:
-        threshold_bandwidth_MBps: 10 
+        threshold_cpu_utilization_percentage: 80 
         adjustment_factor: 1.5 
-        default: 0.2
+        default: 0.02
 
   - type: epoch_adjustment_based_on_cpu_utilization
     blocking: false
-    active: false
+    active: true
     config: 
         threshold_cpu_utilization_percentage : 80
         adjustment_factor : 1.5
@@ -45,7 +45,7 @@ criteria:
     
   - type: adaptive_data_sampling_based_on_memory_utilization
     blocking: false
-    active: false
+    active: true
     config:
       threshold_memory_utilization_percentage: 20
       adjustment_factor: 1.2
@@ -53,7 +53,7 @@ criteria:
 
   - type: model_layer_freezing_based_on_high_cpu_utilization
     blocking: false
-    active: false
+    active: true
     config:
       threshold_cpu_utilization_percentage: 60
       adjustment_factor: 5

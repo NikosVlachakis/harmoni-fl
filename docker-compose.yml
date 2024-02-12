@@ -6,21 +6,23 @@ services:
     container_name: prometheus
     ports:
       - 9090:9090
-    mem_limit: 500m
+    deploy:
+      restart_policy:
+        condition: on-failure
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - cadvisor
-    restart: on-failure
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    restart: on-failure
     privileged: true
-    mem_limit: 500m
+    deploy:
+      restart_policy:
+        condition: on-failure
     ports:
       - "8080:8080"
     volumes:
@@ -36,8 +38,9 @@ services:
     container_name: grafana
     ports:
       - 3000:3000
-    mem_limit: 400m
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./config/grafana.ini:/etc/grafana/grafana.ini
@@ -50,12 +53,11 @@ services:
       - --config=/etc/grafana/grafana.ini
       
   mlflow_server:
+    image: ghcr.io/mlflow/mlflow:latest
     container_name: mlflow_server
-    restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
-    mem_limit: 500m
+    deploy:
+      restart_policy:
+        condition: on-failure
     command: mlflow server --host 0.0.0.0 --port 5010  --backend-store-uri /mlruns
     volumes:
       - .:/app
@@ -66,13 +68,11 @@ services:
 
   server:
     container_name: server
-    shm_size: '6g'
     build:
       context: .
       dockerfile: Dockerfile
     command: python server.py --number_of_rounds=100 --convergence_accuracy=0.8
     environment:
-      FLASK_RUN_PORT: 6000
       DOCKER_HOST_IP: host.docker.internal
     volumes:
       - .:/app
@@ -84,18 +84,19 @@ services:
     depends_on:
       - prometheus
       - grafana
+      - cadvisor
 
   client1:
     container_name: client1
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id=1 --total_clients=2 --dp_opt=1
-    mem_limit: 3g
+    command: python client.py --server_address=server:8080  --client_id=1 --total_clients=4 --dp_opt=0
     deploy:
       resources:
         limits:
           cpus: "4"
+          memory: "3g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -104,7 +105,6 @@ services:
     depends_on:
       - server
     environment:
-      FLASK_RUN_PORT: 6001
       container_name: client1
       DOCKER_HOST_IP: host.docker.internal
 
@@ -113,12 +113,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080  --client_id=2 --total_clients=2 --dp_opt=1
-    mem_limit: 6g
+    command: python client.py --server_address=server:8080  --client_id=2 --total_clients=4 --dp_opt=0
     deploy:
       resources:
         limits:
           cpus: "1"
+          memory: "6g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -127,8 +127,49 @@ services:
     depends_on:
       - server
     environment:
-      FLASK_RUN_PORT: 6002
       container_name: client2
       DOCKER_HOST_IP: host.docker.internal
+  client3:
+    container_name: client3
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python client.py --server_address=server:8080  --client_id=3 --total_clients=4 --dp_opt=0
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "3g"
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "6003:6003"
+    depends_on:
+      - server
+    environment:
+      container_name: client3
+      DOCKER_HOST_IP: host.docker.internal
+  client4:
+      container_name: client4
+      build:
+        context: .
+        dockerfile: Dockerfile
+      command: python client.py --server_address=server:8080  --client_id=4 --total_clients=4 --dp_opt=0
+      deploy:
+        resources:
+          limits:
+            cpus: "3"
+            memory: "2g"
+      volumes:
+        - .:/app
+        - /var/run/docker.sock:/var/run/docker.sock
+      ports:
+        - "6004:6004"
+      depends_on:
+        - server
+      environment:
+        container_name: client4
+        DOCKER_HOST_IP: host.docker.internal
 volumes:
   grafana-storage:

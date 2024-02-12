@@ -34,21 +34,23 @@ services:
     container_name: prometheus
     ports:
       - 9090:9090
-    mem_limit: 500m
+    deploy:
+      restart_policy:
+        condition: on-failure
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - cadvisor
-    restart: on-failure
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    restart: on-failure
     privileged: true
-    mem_limit: 500m
+    deploy:
+      restart_policy:
+        condition: on-failure
     ports:
       - "8080:8080"
     volumes:
@@ -64,8 +66,9 @@ services:
     container_name: grafana
     ports:
       - 3000:3000
-    mem_limit: 400m
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./config/grafana.ini:/etc/grafana/grafana.ini
@@ -79,11 +82,12 @@ services:
       
   mlflow_server:
     container_name: mlflow_server
-    restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    mem_limit: 500m
+    deploy:
+      restart_policy:
+        condition: on-failure
     command: mlflow server --host 0.0.0.0 --port 5010  --backend-store-uri /mlruns
     volumes:
       - .:/app
@@ -94,13 +98,11 @@ services:
 
   server:
     container_name: server
-    shm_size: '6g'
     build:
       context: .
       dockerfile: Dockerfile
     command: python server.py --number_of_rounds={args.num_rounds} --convergence_accuracy={args.convergence_accuracy}
     environment:
-      FLASK_RUN_PORT: 6000
       DOCKER_HOST_IP: host.docker.internal
     volumes:
       - .:/app
@@ -126,11 +128,11 @@ services:
       context: .
       dockerfile: Dockerfile
     command: python client.py --server_address=server:8080  --client_id={i} --total_clients={args.total_clients} --dp_opt={args.dp_opt}
-    mem_limit: {config['mem_limit']}
     deploy:
       resources:
         limits:
           cpus: "{(config['cpus'])}"
+          memory: "{config['mem_limit']}"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -139,7 +141,6 @@ services:
     depends_on:
       - server
     environment:
-      FLASK_RUN_PORT: {6000 + i}
       container_name: client{i}
       DOCKER_HOST_IP: host.docker.internal
 """

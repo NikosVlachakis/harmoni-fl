@@ -3,7 +3,7 @@ import json
 from services.prometheus_queries import *
 import logging
 from typing import Dict, List
-from config.mappings import *
+from helpers.mappings import *
 
 logging.basicConfig(level=logging.INFO)  
 logger = logging.getLogger(__name__)  

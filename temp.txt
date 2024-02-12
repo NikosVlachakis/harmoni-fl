@@ -1,0 +1,679 @@
+client2  | DEBUG flwr 2024-02-12 09:13:48,195 | connection.py:55 | ChannelConnectivity.IDLE
+client2  | DEBUG:flwr:ChannelConnectivity.IDLE
+client2  | DEBUG flwr 2024-02-12 09:13:48,201 | connection.py:55 | ChannelConnectivity.CONNECTING
+client2  | DEBUG:flwr:ChannelConnectivity.CONNECTING
+client2  | DEBUG flwr 2024-02-12 09:13:48,258 | connection.py:55 | ChannelConnectivity.READY
+client2  | DEBUG:flwr:ChannelConnectivity.READY
+server   | INFO flwr 2024-02-12 09:13:48,472 | server.py:280 | Received initial parameters from one random client
+server   | INFO:flwr:Received initial parameters from one random client
+server   | INFO flwr 2024-02-12 09:13:48,477 | server.py:91 | Evaluating initial parameters
+server   | INFO:flwr:Evaluating initial parameters
+server   | INFO:strategy.strategy:Evaluating model for server round 0.
+server   | INFO flwr 2024-02-12 09:13:48,478 | server.py:104 | FL starting
+server   | INFO:flwr:FL starting
+server   | INFO:strategy.strategy:Configuring fit for server round 1.
+server   | INFO:strategy.strategy:Determining number of fit clients from 1 available clients.
+client1  | INFO flwr 2024-02-12 09:13:49,142 | grpc.py:52 | Opened insecure gRPC connection (no certificates were passed)
+client1  | INFO:flwr:Opened insecure gRPC connection (no certificates were passed)
+client1  | DEBUG flwr 2024-02-12 09:13:49,167 | connection.py:55 | ChannelConnectivity.IDLE
+client1  | DEBUG:flwr:ChannelConnectivity.IDLE
+client1  | DEBUG flwr 2024-02-12 09:13:49,176 | connection.py:55 | ChannelConnectivity.CONNECTING
+client1  | DEBUG:flwr:ChannelConnectivity.CONNECTING
+client1  | DEBUG flwr 2024-02-12 09:13:49,184 | connection.py:55 | ChannelConnectivity.READY
+client1  | DEBUG:flwr:ChannelConnectivity.READY
+server   | DEBUG flwr 2024-02-12 09:13:49,216 | server.py:222 | fit_round 1: strategy sampled 2 clients (out of 2)
+server   | DEBUG:flwr:fit_round 1: strategy sampled 2 clients (out of 2)
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:14:02,331 | server.py:236 | fit_round 1 received 2 results and 0 failures
+server   | DEBUG:flwr:fit_round 1 received 2 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 1.
+server   | INFO:strategy.strategy:Evaluating model for server round 1.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 2 available clients.
+server   | DEBUG flwr 2024-02-12 09:14:02,423 | server.py:173 | evaluate_round 1: strategy sampled 2 clients (out of 2)
+server   | DEBUG:flwr:evaluate_round 1: strategy sampled 2 clients (out of 2)
+79/79 [==============================] - 3s 18ms/step - loss: 1488.3337 - accuracy: 0.0980
+client1  | 2024/02/12 09:14:06 WARNING mlflow.utils.git_utils: Failed to import Git (the Git executable is probably not on your PATH), so Git SHA is not available. Error: Failed to initialize: Bad git executable.
+client1  | The git executable must be specified in one of the following ways:
+client1  |     - be included in your $PATH
+client1  |     - be set via $GIT_PYTHON_GIT_EXECUTABLE
+client1  |     - explicitly set via git.refresh()
+client1  | 
+client1  | All git commands will error until this is rectified.
+client1  | 
+client1  | This initial warning can be silenced or aggravated in the future by setting the
+client1  | $GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+client1  |     - quiet|q|silence|s|none|n|0: for no warning or exception
+client1  |     - warn|w|warning|1: for a printed warning
+client1  |     - error|e|raise|r|2: for a raised exception
+client1  | 
+client1  | Example:
+client1  |     export GIT_PYTHON_REFRESH=quiet
+client1  | 
+79/79 [==============================] - 6s 57ms/step - loss: 1491.9681 - accuracy: 0.0932
+client2  | 2024/02/12 09:14:09 WARNING mlflow.utils.git_utils: Failed to import Git (the Git executable is probably not on your PATH), so Git SHA is not available. Error: Failed to initialize: Bad git executable.
+client2  | The git executable must be specified in one of the following ways:
+client2  |     - be included in your $PATH
+client2  |     - be set via $GIT_PYTHON_GIT_EXECUTABLE
+client2  |     - explicitly set via git.refresh()
+client2  | 
+client2  | All git commands will error until this is rectified.
+client2  | 
+client2  | This initial warning can be silenced or aggravated in the future by setting the
+client2  | $GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+client2  |     - quiet|q|silence|s|none|n|0: for no warning or exception
+client2  |     - warn|w|warning|1: for a printed warning
+client2  |     - error|e|raise|r|2: for a raised exception
+client2  | 
+client2  | Example:
+client2  |     export GIT_PYTHON_REFRESH=quiet
+client2  | 
+server   | DEBUG flwr 2024-02-12 09:14:10,405 | server.py:187 | evaluate_round 1 received 2 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 1 received 2 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 1 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1491.9681396484375, num_examples=2500, metrics={'accuracy': 0.09319999814033508})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1488.333740234375, num_examples=2500, metrics={'accuracy': 0.09799999743700027}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 2.
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 36.92533795201081%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.30000000000000004 due to high cpu usase of (36.92533795201081%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 36.92533795201081%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 26.438195364815847%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 26.438195364815847%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.025 due to high memory utilization of (26.438195364815847%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 36.92533795201081%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 91.85096888686512%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 91.85096888686512%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (91.85096888686512%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 13.14186520046658%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 13.14186520046658%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 91.85096888686512%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 5 due to high CPU utilization of (91.85096888686512%)
+server   | INFO:strategy.client_selector:Selected 2 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 0.30000000000000004, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.025, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 5}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 2 available clients.
+server   | DEBUG flwr 2024-02-12 09:14:11,419 | server.py:222 | fit_round 2: strategy sampled 2 clients (out of 2)
+server   | DEBUG:flwr:fit_round 2: strategy sampled 2 clients (out of 2)
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 5, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.025, 'sparsification_enabled': False, 'learning_rate': 0.30000000000000004, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:14:22,512 | server.py:236 | fit_round 2 received 2 results and 0 failures
+server   | DEBUG:flwr:fit_round 2 received 2 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 2.
+server   | INFO:strategy.strategy:Evaluating model for server round 2.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 2 available clients.
+server   | DEBUG flwr 2024-02-12 09:14:22,586 | server.py:173 | evaluate_round 2: strategy sampled 2 clients (out of 2)
+server   | DEBUG:flwr:evaluate_round 2: strategy sampled 2 clients (out of 2)
+79/79 [==============================] - 3s 20ms/step - loss: 1804.1344 - accuracy: 0.0980
+79/79 [==============================] - 6s 59ms/step - loss: 1806.0758 - accuracy: 0.0932
+server   | DEBUG flwr 2024-02-12 09:14:29,553 | server.py:187 | evaluate_round 2 received 2 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 2 received 2 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 2 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1804.1343994140625, num_examples=2500, metrics={'accuracy': 0.09799999743700027})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1806.0758056640625, num_examples=2500, metrics={'accuracy': 0.09319999814033508}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 3.
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 38.667008700586365%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.45000000000000007 due to high cpu usase of (38.667008700586365%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 38.667008700586365%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 30.828348795572918%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 30.828348795572918%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.020833333333333336 due to high memory utilization of (30.828348795572918%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 38.667008700586365%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.5754373243905%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.5754373243905%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (99.5754373243905%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 15.185825030008951%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 15.185825030008951%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.5754373243905%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 10 due to high CPU utilization of (99.5754373243905%)
+server   | INFO:strategy.client_selector:Selected 2 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 0.45000000000000007, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.020833333333333336, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 10}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 2 available clients.
+server   | DEBUG flwr 2024-02-12 09:14:30,323 | server.py:222 | fit_round 3: strategy sampled 2 clients (out of 2)
+server   | DEBUG:flwr:fit_round 3: strategy sampled 2 clients (out of 2)
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.020833333333333336, 'sparsification_enabled': False, 'learning_rate': 0.45000000000000007, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 10, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+Downloading data: 100%|██████████| 120M/120M [00:45<00:00, 2.65MB/s] 
+Downloading data: 100%|██████████| 120M/120M [00:50<00:00, 2.37MB/s] 
+server   | DEBUG flwr 2024-02-12 09:14:40,480 | server.py:236 | fit_round 3 received 2 results and 0 failures
+server   | DEBUG:flwr:fit_round 3 received 2 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 3.
+server   | INFO:strategy.strategy:Evaluating model for server round 3.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 2 available clients.
+server   | DEBUG flwr 2024-02-12 09:14:40,538 | server.py:173 | evaluate_round 3: strategy sampled 2 clients (out of 2)
+server   | DEBUG:flwr:evaluate_round 3: strategy sampled 2 clients (out of 2)
+Downloading data: 100%|██████████| 23.9M/23.9M [00:09<00:00, 2.63MB/s]
+Generating train split: 100%|██████████| 50000/50000 [00:00<00:00, 71985.89 examples/s]
+Generating test split: 100%|██████████| 10000/10000 [00:00<00:00, 168844.66 examples/s]
+79/79 [==============================] - 4s 32ms/step - loss: 2635.3091 - accuracy: 0.0980
+Downloading data: 100%|██████████| 23.9M/23.9M [00:07<00:00, 3.09MB/s]
+Generating train split: 100%|██████████| 50000/50000 [00:01<00:00, 42942.25 examples/s]
+Generating test split: 100%|██████████| 10000/10000 [00:00<00:00, 60012.08 examples/s]
+client3  | INFO flwr 2024-02-12 09:14:48,100 | grpc.py:52 | Opened insecure gRPC connection (no certificates were passed)
+client3  | INFO:flwr:Opened insecure gRPC connection (no certificates were passed)
+client3  | DEBUG flwr 2024-02-12 09:14:48,115 | connection.py:55 | ChannelConnectivity.IDLE
+client3  | DEBUG:flwr:ChannelConnectivity.IDLE
+client3  | DEBUG flwr 2024-02-12 09:14:48,123 | connection.py:55 | ChannelConnectivity.CONNECTING
+client3  | DEBUG:flwr:ChannelConnectivity.CONNECTING
+client3  | DEBUG flwr 2024-02-12 09:14:48,179 | connection.py:55 | ChannelConnectivity.READY
+client3  | DEBUG:flwr:ChannelConnectivity.READY
+79/79 [==============================] - 8s 80ms/step - loss: 2629.2856 - accuracy: 0.0932
+server   | DEBUG flwr 2024-02-12 09:14:50,223 | server.py:187 | evaluate_round 3 received 2 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 3 received 2 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 3 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=2635.30908203125, num_examples=2500, metrics={'accuracy': 0.09799999743700027})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=2629.28564453125, num_examples=2500, metrics={'accuracy': 0.09319999814033508}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 4.
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 37.613584183673474%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.675 due to high cpu usase of (37.613584183673474%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 37.613584183673474%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 32.31550852457683%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 32.31550852457683%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.017361111111111115 due to high memory utilization of (32.31550852457683%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 37.613584183673474%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 92.5178404213812%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 92.5178404213812%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (92.5178404213812%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 15.474192301432291%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 15.474192301432291%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 92.5178404213812%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 15 due to high CPU utilization of (92.5178404213812%)
+server   | INFO:strategy.client_selector:Client client3 is considered a new participant.
+server   | INFO:strategy.client_selector:Selected 3 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 0.675, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.017361111111111115, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 15}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 3 available clients.
+server   | DEBUG flwr 2024-02-12 09:14:51,543 | server.py:222 | fit_round 4: strategy sampled 3 clients (out of 3)
+server   | DEBUG:flwr:fit_round 4: strategy sampled 3 clients (out of 3)
+client4  | INFO flwr 2024-02-12 09:14:51,824 | grpc.py:52 | Opened insecure gRPC connection (no certificates were passed)
+client4  | INFO:flwr:Opened insecure gRPC connection (no certificates were passed)
+client4  | DEBUG flwr 2024-02-12 09:14:51,882 | connection.py:55 | ChannelConnectivity.IDLE
+client4  | DEBUG:flwr:ChannelConnectivity.IDLE
+client4  | DEBUG flwr 2024-02-12 09:14:51,893 | connection.py:55 | ChannelConnectivity.CONNECTING
+client4  | DEBUG:flwr:ChannelConnectivity.CONNECTING
+client4  | DEBUG flwr 2024-02-12 09:14:51,908 | connection.py:55 | ChannelConnectivity.READY
+client4  | DEBUG:flwr:ChannelConnectivity.READY
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 15, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.017361111111111115, 'sparsification_enabled': False, 'learning_rate': 0.675, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:15:04,748 | server.py:236 | fit_round 4 received 3 results and 0 failures
+server   | DEBUG:flwr:fit_round 4 received 3 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 4.
+server   | INFO:strategy.strategy:Evaluating model for server round 4.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:15:04,863 | server.py:173 | evaluate_round 4: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:evaluate_round 4: strategy sampled 4 clients (out of 4)
+79/79 [==============================] - 7s 35ms/step - loss: 2503.9666 - accuracy: 0.0980
+79/79 [==============================] - 8s 51ms/step - loss: 2532.3733 - accuracy: 0.1064
+79/79 [==============================] - 9s 60ms/step - loss: 2508.2510 - accuracy: 0.1000
+client4  | 2024/02/12 09:15:16 WARNING mlflow.utils.git_utils: Failed to import Git (the Git executable is probably not on your PATH), so Git SHA is not available. Error: Failed to initialize: Bad git executable.
+client4  | The git executable must be specified in one of the following ways:
+client4  |     - be included in your $PATH
+client4  |     - be set via $GIT_PYTHON_GIT_EXECUTABLE
+client4  |     - explicitly set via git.refresh()
+client4  | 
+client4  | All git commands will error until this is rectified.
+client4  | 
+client4  | This initial warning can be silenced or aggravated in the future by setting the
+client4  | $GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+client4  |     - quiet|q|silence|s|none|n|0: for no warning or exception
+client4  |     - warn|w|warning|1: for a printed warning
+client4  |     - error|e|raise|r|2: for a raised exception
+client4  | 
+client4  | Example:
+client4  |     export GIT_PYTHON_REFRESH=quiet
+client4  | 
+client3  | 2024/02/12 09:15:17 WARNING mlflow.utils.git_utils: Failed to import Git (the Git executable is probably not on your PATH), so Git SHA is not available. Error: Failed to initialize: Bad git executable.
+client3  | The git executable must be specified in one of the following ways:
+client3  |     - be included in your $PATH
+client3  |     - be set via $GIT_PYTHON_GIT_EXECUTABLE
+client3  |     - explicitly set via git.refresh()
+client3  | 
+client3  | All git commands will error until this is rectified.
+client3  | 
+client3  | This initial warning can be silenced or aggravated in the future by setting the
+client3  | $GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+client3  |     - quiet|q|silence|s|none|n|0: for no warning or exception
+client3  |     - warn|w|warning|1: for a printed warning
+client3  |     - error|e|raise|r|2: for a raised exception
+client3  | 
+client3  | Example:
+client3  |     export GIT_PYTHON_REFRESH=quiet
+client3  | 
+79/79 [==============================] - 13s 94ms/step - loss: 2499.0527 - accuracy: 0.0932
+server   | DEBUG flwr 2024-02-12 09:15:22,401 | server.py:187 | evaluate_round 4 received 4 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 4 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 4 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=2503.966552734375, num_examples=2500, metrics={'accuracy': 0.09799999743700027})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=2499.052734375, num_examples=2500, metrics={'accuracy': 0.09319999814033508})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=2532.373291015625, num_examples=2500, metrics={'accuracy': 0.10639999806880951})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=2508.2509765625, num_examples=2500, metrics={'accuracy': 0.10000000149011612}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 5.
+server   | INFO:strategy.client_selector:Client client4 is considered a new participant.
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 32.833646180605875%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 1.0125000000000002 due to high cpu usase of (32.833646180605875%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 32.833646180605875%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 33.565470377604164%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 33.565470377604164%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.014467592592592596 due to high memory utilization of (33.565470377604164%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 32.833646180605875%
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 61.23443228329604%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.30000000000000004 due to high cpu usase of (61.23443228329604%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 61.23443228329604%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 27.123355865478516%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 27.123355865478516%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.025 due to high memory utilization of (27.123355865478516%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 61.23443228329604%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 5 due to high CPU utilization of (61.23443228329604%)
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.88929471032736%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.88929471032736%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (99.88929471032736%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 17.018000284830727%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 17.018000284830727%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.88929471032736%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 20 due to high CPU utilization of (99.88929471032736%)
+server   | INFO:strategy.client_selector:Selected 4 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, 'config': {}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 1.0125000000000002, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.014467592592592596, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {'learning_rate': 0.30000000000000004, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.025, 'freeze_layers_percentage': 5}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 20}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:15:23,338 | server.py:222 | fit_round 5: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:fit_round 5: strategy sampled 4 clients (out of 4)
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 20, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client4  | INFO:__main__:container_name is: client4
+client4  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.014467592592592596, 'sparsification_enabled': False, 'learning_rate': 1.0125000000000002, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 5, 'data_sample_percentage': 0.025, 'sparsification_enabled': False, 'learning_rate': 0.30000000000000004, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:15:41,559 | server.py:236 | fit_round 5 received 4 results and 0 failures
+server   | DEBUG:flwr:fit_round 5 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 5.
+server   | INFO:strategy.strategy:Evaluating model for server round 5.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:15:41,730 | server.py:173 | evaluate_round 5: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:evaluate_round 5: strategy sampled 4 clients (out of 4)
+79/79 [==============================] - 8s 34ms/step - loss: 1640.7303 - accuracy: 0.0984
+79/79 [==============================] - 7s 36ms/step - loss: 1686.7346 - accuracy: 0.0928
+79/79 [==============================] - 7s 36ms/step - loss: 1647.7625 - accuracy: 0.1008
+79/79 [==============================] - 11s 59ms/step - loss: 1638.2854 - accuracy: 0.0996
+server   | DEBUG flwr 2024-02-12 09:15:55,284 | server.py:187 | evaluate_round 5 received 4 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 5 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 5 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1640.7303466796875, num_examples=2500, metrics={'accuracy': 0.09839999675750732})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1686.734619140625, num_examples=2500, metrics={'accuracy': 0.09279999881982803})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1638.285400390625, num_examples=2500, metrics={'accuracy': 0.09960000216960907})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1647.762451171875, num_examples=2500, metrics={'accuracy': 0.10080000013113022}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 6.
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 93.33574383097474%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 93.33574383097474%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (93.33574383097474%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 17.605228913136017%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 17.605228913136017%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 93.33574383097474%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 25 due to high CPU utilization of (93.33574383097474%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 63.28979164990749%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.45000000000000007 due to high cpu usase of (63.28979164990749%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 63.28979164990749%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 31.16243150499132%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 31.16243150499132%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.020833333333333336 due to high memory utilization of (31.16243150499132%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 63.28979164990749%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 10 due to high CPU utilization of (63.28979164990749%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 29.253559622918697%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 1.5187500000000003 due to high cpu usase of (29.253559622918697%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 29.253559622918697%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 32.667265997992615%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 32.667265997992615%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01205632716049383 due to high memory utilization of (32.667265997992615%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 29.253559622918697%
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.44821941128729%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.30000000000000004 due to high cpu usase of (41.44821941128729%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.44821941128729%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 46.295420328776046%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 46.295420328776046%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.025 due to high memory utilization of (46.295420328776046%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.44821941128729%
+server   | INFO:strategy.client_selector:Selected 4 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 25}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {'learning_rate': 0.45000000000000007, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.020833333333333336, 'freeze_layers_percentage': 10}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 1.5187500000000003, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01205632716049383, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, 'config': {'learning_rate': 0.30000000000000004, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.025, 'freeze_layers_percentage': 0}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:15:56,076 | server.py:222 | fit_round 6: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:fit_round 6: strategy sampled 4 clients (out of 4)
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 25, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01205632716049383, 'sparsification_enabled': False, 'learning_rate': 1.5187500000000003, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 10, 'data_sample_percentage': 0.020833333333333336, 'sparsification_enabled': False, 'learning_rate': 0.45000000000000007, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client4  | INFO:__main__:container_name is: client4
+client4  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.025, 'sparsification_enabled': False, 'learning_rate': 0.30000000000000004, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:16:08,490 | server.py:236 | fit_round 6 received 4 results and 0 failures
+server   | DEBUG:flwr:fit_round 6 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 6.
+server   | INFO:strategy.strategy:Evaluating model for server round 6.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:16:08,672 | server.py:173 | evaluate_round 6: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:evaluate_round 6: strategy sampled 4 clients (out of 4)
+79/79 [==============================] - 8s 42ms/step - loss: 1760.7354 - accuracy: 0.1052
+79/79 [==============================] - 8s 42ms/step - loss: 1727.5260 - accuracy: 0.1008
+79/79 [==============================] - 8s 43ms/step - loss: 1707.8770 - accuracy: 0.1008
+79/79 [==============================] - 10s 67ms/step - loss: 1719.8676 - accuracy: 0.0940
+server   | DEBUG flwr 2024-02-12 09:16:21,216 | server.py:187 | evaluate_round 6 received 4 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 6 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 6 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1707.876953125, num_examples=2500, metrics={'accuracy': 0.10080000013113022})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1719.8675537109375, num_examples=2500, metrics={'accuracy': 0.09399999678134918})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1760.7353515625, num_examples=2500, metrics={'accuracy': 0.10520000010728836})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=1727.5260009765625, num_examples=2500, metrics={'accuracy': 0.10080000013113022}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 7.
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 31.13893980158063%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 2.278125 due to high cpu usase of (31.13893980158063%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 31.13893980158063%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 33.26449076334635%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 33.26449076334635%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.010046939300411525 due to high memory utilization of (33.26449076334635%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 31.13893980158063%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 96.61056304520223%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 96.61056304520223%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (96.61056304520223%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 17.805205451117622%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 17.805205451117622%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 96.61056304520223%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 30 due to high CPU utilization of (96.61056304520223%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 44.26221078753371%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.45000000000000007 due to high cpu usase of (44.26221078753371%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 44.26221078753371%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 49.3055888584682%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 49.3055888584682%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.020833333333333336 due to high memory utilization of (49.3055888584682%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 44.26221078753371%
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 63.458644888082226%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.675 due to high cpu usase of (63.458644888082226%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 63.458644888082226%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 32.759312220982146%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 32.759312220982146%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.017361111111111115 due to high memory utilization of (32.759312220982146%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 63.458644888082226%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 15 due to high CPU utilization of (63.458644888082226%)
+server   | INFO:strategy.client_selector:Selected 4 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 2.278125, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.010046939300411525, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 30}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, 'config': {'learning_rate': 0.45000000000000007, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.020833333333333336, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {'learning_rate': 0.675, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.017361111111111115, 'freeze_layers_percentage': 15}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:16:22,048 | server.py:222 | fit_round 7: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:fit_round 7: strategy sampled 4 clients (out of 4)
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 30, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.010046939300411525, 'sparsification_enabled': False, 'learning_rate': 2.278125, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 15, 'data_sample_percentage': 0.017361111111111115, 'sparsification_enabled': False, 'learning_rate': 0.675, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client4  | INFO:__main__:container_name is: client4
+client4  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.020833333333333336, 'sparsification_enabled': False, 'learning_rate': 0.45000000000000007, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:16:35,046 | server.py:236 | fit_round 7 received 4 results and 0 failures
+server   | DEBUG:flwr:fit_round 7 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 7.
+server   | INFO:strategy.strategy:Evaluating model for server round 7.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:16:35,194 | server.py:173 | evaluate_round 7: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:evaluate_round 7: strategy sampled 4 clients (out of 4)
+79/79 [==============================] - 10s 63ms/step - loss: 3028.3933 - accuracy: 0.0996
+79/79 [==============================] - 11s 69ms/step - loss: 3021.7090 - accuracy: 0.1064
+79/79 [==============================] - 12s 72ms/step - loss: 3006.4067 - accuracy: 0.0984
+79/79 [==============================] - 14s 98ms/step - loss: 3012.3413 - accuracy: 0.0928
+server   | DEBUG flwr 2024-02-12 09:16:56,194 | server.py:187 | evaluate_round 7 received 4 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 7 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 7 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=3012.34130859375, num_examples=2500, metrics={'accuracy': 0.09279999881982803})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=3021.708984375, num_examples=2500, metrics={'accuracy': 0.10639999806880951})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=3028.393310546875, num_examples=2500, metrics={'accuracy': 0.09960000216960907})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=3006.40673828125, num_examples=2500, metrics={'accuracy': 0.09839999675750732}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 8.
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 60.392216748768526%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 1.0125000000000002 due to high cpu usase of (60.392216748768526%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 60.392216748768526%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 34.299468994140625%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 34.299468994140625%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.014467592592592596 due to high memory utilization of (34.299468994140625%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 60.392216748768526%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 20 due to high CPU utilization of (60.392216748768526%)
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.73832411353943%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.73832411353943%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (99.73832411353943%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 18.602856000264488%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 18.602856000264488%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.73832411353943%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 35 due to high CPU utilization of (99.73832411353943%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.774330243455246%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 0.675 due to high cpu usase of (41.774330243455246%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.774330243455246%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 51.89732142857143%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 51.89732142857143%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.017361111111111115 due to high memory utilization of (51.89732142857143%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.774330243455246%
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 28.462802275960126%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 3.4171875000000003 due to high cpu usase of (28.462802275960126%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 28.462802275960126%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 34.40457661946614%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 34.40457661946614%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01 due to high memory utilization of (34.40457661946614%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 28.462802275960126%
+server   | INFO:strategy.client_selector:Selected 4 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {'learning_rate': 1.0125000000000002, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.014467592592592596, 'freeze_layers_percentage': 20}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 35}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, 'config': {'learning_rate': 0.675, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.017361111111111115, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 3.4171875000000003, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01, 'freeze_layers_percentage': 0}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:16:57,228 | server.py:222 | fit_round 8: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:fit_round 8: strategy sampled 4 clients (out of 4)
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 35, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 20, 'data_sample_percentage': 0.014467592592592596, 'sparsification_enabled': False, 'learning_rate': 1.0125000000000002, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01, 'sparsification_enabled': False, 'learning_rate': 3.4171875000000003, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client4  | INFO:__main__:container_name is: client4
+client4  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.017361111111111115, 'sparsification_enabled': False, 'learning_rate': 0.675, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:17:19,979 | server.py:236 | fit_round 8 received 4 results and 0 failures
+server   | DEBUG:flwr:fit_round 8 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 8.
+server   | INFO:strategy.strategy:Evaluating model for server round 8.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:17:20,177 | server.py:173 | evaluate_round 8: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:evaluate_round 8: strategy sampled 4 clients (out of 4)
+79/79 [==============================] - 12s 60ms/step - loss: 3761.9473 - accuracy: 0.1040
+79/79 [==============================] - 12s 60ms/step - loss: 3737.4236 - accuracy: 0.0956
+79/79 [==============================] - 16s 77ms/step - loss: 3752.2896 - accuracy: 0.0968
+79/79 [==============================] - 17s 113ms/step - loss: 3774.7400 - accuracy: 0.0944
+server   | DEBUG flwr 2024-02-12 09:17:43,297 | server.py:187 | evaluate_round 8 received 4 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 8 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 8 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=3737.423583984375, num_examples=2500, metrics={'accuracy': 0.09560000151395798})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=3761.947265625, num_examples=2500, metrics={'accuracy': 0.10400000214576721})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=3752.28955078125, num_examples=2500, metrics={'accuracy': 0.09679999947547913})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=3774.739990234375, num_examples=2500, metrics={'accuracy': 0.09440000355243683}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 9.
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 28.337974865694555%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 5.12578125 due to high cpu usase of (28.337974865694555%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 28.337974865694555%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 37.62333031856652%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 37.62333031856652%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01 due to high memory utilization of (37.62333031856652%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 28.337974865694555%
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 38.93618443103738%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 1.0125000000000002 due to high cpu usase of (38.93618443103738%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 38.93618443103738%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 54.11557284268466%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 54.11557284268466%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.014467592592592596 due to high memory utilization of (54.11557284268466%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 38.93618443103738%
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 56.82461426654736%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 1.5187500000000003 due to high cpu usase of (56.82461426654736%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 56.82461426654736%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 36.057090759277344%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 36.057090759277344%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01205632716049383 due to high memory utilization of (36.057090759277344%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 56.82461426654736%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 98.67157708153691%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 98.67157708153691%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (98.67157708153691%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 19.55613030327691%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 19.55613030327691%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 98.67157708153691%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 40 due to high CPU utilization of (98.67157708153691%)
+server   | INFO:strategy.client_selector:Selected 4 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 5.12578125, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, 'config': {'learning_rate': 1.0125000000000002, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.014467592592592596, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {'learning_rate': 1.5187500000000003, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01205632716049383, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 40}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:17:44,302 | server.py:222 | fit_round 9: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:fit_round 9: strategy sampled 4 clients (out of 4)
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01, 'sparsification_enabled': False, 'learning_rate': 5.12578125, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 40, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client4  | INFO:__main__:container_name is: client4
+client4  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.014467592592592596, 'sparsification_enabled': False, 'learning_rate': 1.0125000000000002, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01205632716049383, 'sparsification_enabled': False, 'learning_rate': 1.5187500000000003, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:17:58,418 | server.py:236 | fit_round 9 received 4 results and 0 failures
+server   | DEBUG:flwr:fit_round 9 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 9.
+server   | INFO:strategy.strategy:Evaluating model for server round 9.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:17:58,584 | server.py:173 | evaluate_round 9: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:evaluate_round 9: strategy sampled 4 clients (out of 4)
+79/79 [==============================] - 8s 43ms/step - loss: 5279.5142 - accuracy: 0.1060
+79/79 [==============================] - 8s 41ms/step - loss: 5281.2656 - accuracy: 0.0980
+79/79 [==============================] - 8s 44ms/step - loss: 5261.2695 - accuracy: 0.1000
+79/79 [==============================] - 10s 75ms/step - loss: 5288.9780 - accuracy: 0.0932
+server   | DEBUG flwr 2024-02-12 09:18:11,319 | server.py:187 | evaluate_round 9 received 4 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 9 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 9 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5261.26953125, num_examples=2500, metrics={'accuracy': 0.10000000149011612})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5281.265625, num_examples=2500, metrics={'accuracy': 0.09799999743700027})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5279.51416015625, num_examples=2500, metrics={'accuracy': 0.10599999874830246})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5288.97802734375, num_examples=2500, metrics={'accuracy': 0.09319999814033508}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 10.
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.68340362386755%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.68340362386755%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (99.68340362386755%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 18.343127215350115%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 18.343127215350115%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.68340362386755%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 45 due to high CPU utilization of (99.68340362386755%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.337454854472135%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 1.5187500000000003 due to high cpu usase of (41.337454854472135%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.337454854472135%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 55.81951141357422%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 55.81951141357422%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01205632716049383 due to high memory utilization of (55.81951141357422%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.337454854472135%
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 30.809806090577773%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 7.688671875000001 due to high cpu usase of (30.809806090577773%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 30.809806090577773%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 35.33651563856336%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 35.33651563856336%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01 due to high memory utilization of (35.33651563856336%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 30.809806090577773%
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 55.30113444364001%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 2.278125 due to high cpu usase of (55.30113444364001%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 55.30113444364001%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 33.6419211493598%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 33.6419211493598%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.010046939300411525 due to high memory utilization of (33.6419211493598%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 55.30113444364001%
+server   | INFO:strategy.client_selector:Selected 4 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 45}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, 'config': {'learning_rate': 1.5187500000000003, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01205632716049383, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 7.688671875000001, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {'learning_rate': 2.278125, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.010046939300411525, 'freeze_layers_percentage': 0}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:18:12,266 | server.py:222 | fit_round 10: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:fit_round 10: strategy sampled 4 clients (out of 4)
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 45, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01, 'sparsification_enabled': False, 'learning_rate': 7.688671875000001, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.010046939300411525, 'sparsification_enabled': False, 'learning_rate': 2.278125, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client4  | INFO:__main__:container_name is: client4
+client4  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01205632716049383, 'sparsification_enabled': False, 'learning_rate': 1.5187500000000003, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:18:27,490 | server.py:236 | fit_round 10 received 4 results and 0 failures
+server   | DEBUG:flwr:fit_round 10 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 10.
+server   | INFO:strategy.strategy:Evaluating model for server round 10.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:18:27,700 | server.py:173 | evaluate_round 10: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:evaluate_round 10: strategy sampled 4 clients (out of 4)
+79/79 [==============================] - 10s 67ms/step - loss: 5463.8501 - accuracy: 0.1064
+79/79 [==============================] - 10s 66ms/step - loss: 5456.1455 - accuracy: 0.1000
+79/79 [==============================] - 11s 67ms/step - loss: 5482.6021 - accuracy: 0.0980
+79/79 [==============================] - 15s 117ms/step - loss: 5477.0122 - accuracy: 0.0932
+server   | DEBUG flwr 2024-02-12 09:18:45,826 | server.py:187 | evaluate_round 10 received 4 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 10 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 10 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5482.60205078125, num_examples=2500, metrics={'accuracy': 0.09799999743700027})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5477.01220703125, num_examples=2500, metrics={'accuracy': 0.09319999814033508})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5456.1455078125, num_examples=2500, metrics={'accuracy': 0.10000000149011612})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5463.85009765625, num_examples=2500, metrics={'accuracy': 0.10639999806880951}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 11.
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 19.149461933825922%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 11.533007812500001 due to high cpu usase of (19.149461933825922%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 19.149461933825922%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 36.92509969075521%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 36.92509969075521%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01 due to high memory utilization of (36.92509969075521%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 19.149461933825922%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.90473840746273%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.90473840746273%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (99.90473840746273%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 19.160588582356773%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 19.160588582356773%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 99.90473840746273%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 50 due to high CPU utilization of (99.90473840746273%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 54.62138365995879%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 3.4171875000000003 due to high cpu usase of (54.62138365995879%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 54.62138365995879%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 35.06715562608507%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 35.06715562608507%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01 due to high memory utilization of (35.06715562608507%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 54.62138365995879%
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.12259429400387%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 2.278125 due to high cpu usase of (41.12259429400387%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.12259429400387%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 52.22342354910714%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 52.22342354910714%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.010046939300411525 due to high memory utilization of (52.22342354910714%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 41.12259429400387%
+server   | INFO:strategy.client_selector:Selected 4 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 11.533007812500001, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.2, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.03, 'freeze_layers_percentage': 50}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {'learning_rate': 3.4171875000000003, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, 'config': {'learning_rate': 2.278125, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.010046939300411525, 'freeze_layers_percentage': 0}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:18:47,711 | server.py:222 | fit_round 11: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:fit_round 11: strategy sampled 4 clients (out of 4)
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01, 'sparsification_enabled': False, 'learning_rate': 11.533007812500001, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 50, 'data_sample_percentage': 0.03, 'sparsification_enabled': False, 'learning_rate': 0.2, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01, 'sparsification_enabled': False, 'learning_rate': 3.4171875000000003, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client4  | INFO:__main__:container_name is: client4
+client4  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.010046939300411525, 'sparsification_enabled': False, 'learning_rate': 2.278125, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+server   | DEBUG flwr 2024-02-12 09:19:05,504 | server.py:236 | fit_round 11 received 4 results and 0 failures
+server   | DEBUG:flwr:fit_round 11 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating fit results for server round 11.
+server   | INFO:strategy.strategy:Evaluating model for server round 11.
+server   | INFO:strategy.strategy:Determining number of evaluation clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:19:05,676 | server.py:173 | evaluate_round 11: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:evaluate_round 11: strategy sampled 4 clients (out of 4)
+79/79 [==============================] - 14s 64ms/step - loss: 5025.3857 - accuracy: 0.0980
+79/79 [==============================] - 14s 61ms/step - loss: 5002.0938 - accuracy: 0.1000
+79/79 [==============================] - 13s 58ms/step - loss: 5033.0796 - accuracy: 0.1064
+79/79 [==============================] - 15s 93ms/step - loss: 5017.2539 - accuracy: 0.0932
+server   | DEBUG flwr 2024-02-12 09:19:27,255 | server.py:187 | evaluate_round 11 received 4 results and 0 failures
+server   | DEBUG:flwr:evaluate_round 11 received 4 results and 0 failures
+server   | INFO:strategy.strategy:Aggregating evaluation results for server round 11 are [(<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5025.3857421875, num_examples=2500, metrics={'accuracy': 0.09799999743700027})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5002.09375, num_examples=2500, metrics={'accuracy': 0.10000000149011612})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5017.25390625, num_examples=2500, metrics={'accuracy': 0.09319999814033508})), (<flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, EvaluateRes(status=Status(code=<Code.OK: 0>, message='Success'), loss=5033.07958984375, num_examples=2500, metrics={'accuracy': 0.10639999806880951}))].
+server   | INFO:strategy.strategy:Configuring fit for server round 12.
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 57.75189892344502%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 5.12578125 due to high cpu usase of (57.75189892344502%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 57.75189892344502%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 37.996328444707956%
+server   | INFO:strategy.criteria_check:Average memory usage for client client3 is 37.996328444707956%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01 due to high memory utilization of (37.996328444707956%)
+server   | INFO:strategy.criteria_check:cpu usage for client client3 is 57.75189892344502%
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 29.223672608324552%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 17.29951171875 due to high cpu usase of (29.223672608324552%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 29.223672608324552%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 38.75233332316081%
+server   | INFO:strategy.criteria_check:Average memory usage for client client1 is 38.75233332316081%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01 due to high memory utilization of (38.75233332316081%)
+server   | INFO:strategy.criteria_check:cpu usage for client client1 is 29.223672608324552%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 98.94624811244044%
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 98.94624811244044%
+server   | INFO:strategy.criteria_check:Adjusted number of epochs to 2 due to high cpu usase of (98.94624811244044%)
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 20.095028021396732%
+server   | INFO:strategy.criteria_check:Average memory usage for client client2 is 20.095028021396732%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.025 due to high memory utilization of (20.095028021396732%)
+server   | INFO:strategy.criteria_check:cpu usage for client client2 is 98.94624811244044%
+server   | INFO:strategy.criteria_check:Adjusted percentage of freezing layers to 55 due to high CPU utilization of (98.94624811244044%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 39.36468841857728%
+server   | INFO:strategy.criteria_check:Adjusted learning rate to 3.4171875000000003 due to high cpu usase of (39.36468841857728%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 39.36468841857728%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 56.01921081542969%
+server   | INFO:strategy.criteria_check:Average memory usage for client client4 is 56.01921081542969%
+server   | INFO:strategy.criteria_check:Adjusted data sample percentage to 0.01 due to high memory utilization of (56.01921081542969%)
+server   | INFO:strategy.criteria_check:cpu usage for client client4 is 39.36468841857728%
+server   | INFO:strategy.client_selector:Selected 4 clients based on criteria
+server   | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324fe50>, 'config': {'learning_rate': 5.12578125, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff9324f8e0>, 'config': {'learning_rate': 17.29951171875, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01, 'freeze_layers_percentage': 0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93231d30>, 'config': {'learning_rate': 0.02, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.025, 'freeze_layers_percentage': 55}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0xffff93146d90>, 'config': {'learning_rate': 3.4171875000000003, 'epochs': 2, 'batch_size': 64, 'data_sample_percentage': 0.01, 'freeze_layers_percentage': 0}}]
+server   | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server   | DEBUG flwr 2024-02-12 09:19:28,254 | server.py:222 | fit_round 12: strategy sampled 4 clients (out of 4)
+server   | DEBUG:flwr:fit_round 12: strategy sampled 4 clients (out of 4)
+client1  | INFO:__main__:container_name is: client1
+client1  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01, 'sparsification_enabled': False, 'learning_rate': 17.29951171875, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client3  | INFO:__main__:container_name is: client3
+client3  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01, 'sparsification_enabled': False, 'learning_rate': 5.12578125, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client4  | INFO:__main__:container_name is: client4
+client4  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 0, 'data_sample_percentage': 0.01, 'sparsification_enabled': False, 'learning_rate': 3.4171875000000003, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}
+client2  | INFO:__main__:container_name is: client2
+client2  | INFO:__main__:config is: {'batch_size': 64, 'freeze_layers_percentage': 55, 'data_sample_percentage': 0.025, 'sparsification_enabled': False, 'learning_rate': 0.02, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'epochs': 2, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude'}

@@ -59,10 +59,6 @@ class FedCustom(fl.server.strategy.Strategy):
         self.accuracy_gauge = accuracy_gauge
         self.loss_gauge = loss_gauge
 
-
-        logger.info("Strategy initialized.")
-
-
     def __repr__(self) -> str:
         return "FedCustom"
 
@@ -75,7 +71,6 @@ class FedCustom(fl.server.strategy.Strategy):
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
-        logger.info("Initializing parameters.")
         self.initial_parameters = None  # Don't keep initial parameters in memory
         return initial_parameters
 
@@ -156,7 +151,7 @@ class FedCustom(fl.server.strategy.Strategy):
             client_properties = get_client_properties(ClientProxy)
             
             enabledSparsification =  client_properties.get('sparsification_enabled')
-            logger.info(f"Client {client_properties['container_name']} has sparsification enabled: {enabledSparsification}")
+            # logger.info(f"Client {client_properties['container_name']} has sparsification enabled: {enabledSparsification}")
             
             if enabledSparsification:
                 # Deserialize each sparse weight and convert to dense

@@ -71,7 +71,6 @@ class MlflowHelper:
     def log_aggregated_metrics(self,experiment_id,server_round, loss_aggregated, accuracy_aggregated, results, failures):
         """Logs aggregated metrics for a server round to MLflow."""
         with mlflow.start_run(experiment_id=experiment_id, run_name=f"{server_round} - round - server"): 
-            logger.info(f"Logging aggregated metrics for server round {server_round} for experiment_id {experiment_id}")
             
             mlflow.log_metric("aggregated_loss", loss_aggregated)
             mlflow.log_metric("aggregated_accuracy", accuracy_aggregated)

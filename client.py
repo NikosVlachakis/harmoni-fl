@@ -1,14 +1,10 @@
 import time
 import os
 import argparse
-from flask import Flask
-from flask_cors.extension import CORS
-from flask_restful import Resource, Api
 import flwr as fl
 from services.prometheus_queries import *
 from services.prometheus_service import PrometheusService
 import tensorflow as tf
-from threading import Thread
 import logging
 from helpers.load_data import DataLoader
 import os
@@ -69,7 +65,9 @@ class Client(fl.client.NumPyClient):
         # Update the properties with the config as it contains the new configuration for the round
         self.properties.update(config)
 
+        logger.info("container_name is: %s",  self.container_name)
         logger.info("config is: %s", config)
+        
 
         # Train the model
         model_instance.fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"], config=config)      
@@ -96,9 +94,7 @@ class Client(fl.client.NumPyClient):
        
         # Check if sparsification is enabled
         if config["sparsification_enabled"]:
-            
-            logger.info("sparsification enabled for client with container name: %s", self.container_name)
-            
+                        
             # Create a sparsifier object 
             sparsifier = Sparsifier(method=config["sparsification_method"], percentile=config["sparsification_percentile"])
             
@@ -108,15 +104,11 @@ class Client(fl.client.NumPyClient):
             serialized_sparse_weights_size = calculate_weights_size(serialized_sparse_weights)
             original_weights_size = calculate_weights_size(parameters_prime)    
             
-            logger.info("serialized_sparse_weights_size: %s", serialized_sparse_weights_size)
-            logger.info("original_weights_size: %s", original_weights_size)
-            
             self.round_metrics.update({
                 "total_nnz": total_nnz,
                 "serialized_sparse_weights_size": serialized_sparse_weights_size,
                 "original_weights_size": original_weights_size
             })
-
 
             # Return new weights, number of training examples, and results
             return serialized_sparse_weights, len(x_train), results
@@ -165,41 +157,14 @@ class Client(fl.client.NumPyClient):
     def get_properties(self, *args, **kwargs):
             return self.properties
 
-
-
-
-app = Flask(__name__)
-client_api = Api(app)
-CORS(app, resources={r"/client_api/*": {"origins": "*"}})
-
-class StartFLClient(Resource):
-    def get(self):
-        try:
-            client_thread = Thread(target=start_fl_client, daemon=True)
-            client_thread.start()
-            return {"message": "Started FL client"}, 200 
-        except Exception as e:
-            logger.error("Error starting FL client: %s", e)
-            return {"status": "error", "message": str(e)}, 500
-
     
 def start_fl_client():
     try:
-        fl.client.start_numpy_client(server_address=args.server_address, client=Client())
+        fl.client.start_client(server_address=args.server_address, client=Client().to_client())
     except Exception as e:
         logger.error("Error starting FL client: %s", e)
         return {"status": "error", "message": str(e)}
 
-class Ping(Resource):
-    def get(self):
-        logger.info("Received ping. I'm client and I'm alive.")
-        return 'I am client and I am alive', 200
-
-
-client_api.add_resource(Ping, '/client_api/ping')
-client_api.add_resource(StartFLClient, '/client_api/start-fl-client')
 
 if __name__ == "__main__":
-    port = int(os.environ.get("FLASK_RUN_PORT"))
-    logger.info("Starting client on port %s", port)
-    app.run(debug=True, threaded=True, host="0.0.0.0", port=port)
+    start_fl_client()

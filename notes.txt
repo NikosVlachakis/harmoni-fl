@@ -1,4 +1,6 @@
-4 - make sure that by changing clipping value the epsilon is changed correctly
+!!!!! if a specific client was not part of a previous round and its not involved in round_metrics, then
+when looking for the client in client_selector in (prev_round_start_time = round_timestamps[client_properties['container_name']].get("start", None))
+there will be a key error, so we need to handle this case !!!!!
 
 
 docker-compose up -d grafana prometheus cadvisor mlflow_server

@@ -30,3 +30,4 @@ def container_outgoing_bandwidth_query(container_name: str, start_timestamp: int
         f"rate({metric}{{name=\"{container_name}\", interface=\"{network_interface}\"}}[{duration}s] @ {end_timestamp}) / 1024^2"
     )
     return outgoing_bandwidth_query
+

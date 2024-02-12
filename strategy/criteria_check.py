@@ -75,12 +75,12 @@ class SparsificationBOOutgoingBandwidth(AbstractCriterion):
 
 
 
-class LearningRateBOIncomingBandwidth(AbstractCriterion):
+class LearningRateBasedOnCPUUtilization(AbstractCriterion):
     def __init__(self, config: Dict[str, any], blocking: bool, active: bool):
         
         self.is_blocking = blocking
         self.active = active
-        self.bandwidth_threshold = config.get('threshold_bandwidth_MBps')  
+        self.cpu_utilization_threshold = config.get('threshold_cpu_utilization_percentage')  
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
         
@@ -90,17 +90,22 @@ class LearningRateBOIncomingBandwidth(AbstractCriterion):
         if not self.active:
             return False
 
-        container_incoming_bandwidth_query = float(queries_results['container_incoming_bandwidth_query'])  # in Mbps
-        
+        cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
+        logger.info(f"cpu usage for client {client_properties.get('container_name')} is {cpu_usase_percentage}%")
+
         adjusted_learning_rate = client_properties.get('learning_rate')
         current_learning_rate = float(adjusted_learning_rate)
 
         learning_rate_adjustment = {"learning_rate": current_learning_rate}
 
-        if container_incoming_bandwidth_query < self.bandwidth_threshold:
+        if cpu_usase_percentage < self.cpu_utilization_threshold:
             new_learning_rate = current_learning_rate * self.adjustment_factor
+            
+            # Ensure the learning rate does not exceed 1.0
+            new_learning_rate = min(new_learning_rate, 1.0)
+
             learning_rate_adjustment["learning_rate"] = new_learning_rate
-            logger.info(f"Adjusted learning rate to {new_learning_rate} due to low incoming bandwidth ({container_incoming_bandwidth_query} Mbps)")
+            logger.info(f"Adjusted learning rate to {new_learning_rate} due to high cpu usase of ({cpu_usase_percentage}%)")
        
         else:
             learning_rate_adjustment["learning_rate"] = self.default
@@ -230,7 +235,7 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
 
         if cpu_usase_percentage > self.threshold_cpu_utilization_percentage:
             adjusted_freeze_percentage = math.ceil(current_freeze_percentage + self.adjustment_factor)
-            freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, 90)
+            freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, 95)
             logger.info(f"Adjusted percentage of freezing layers to {freeze_percentage_adjustment['freeze_layers_percentage']} due to high CPU utilization of ({cpu_usase_percentage}%)")
         else:
             freeze_percentage_adjustment["freeze_layers_percentage"] = self.default
