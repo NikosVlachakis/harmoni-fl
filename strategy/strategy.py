@@ -35,9 +35,9 @@ class FedCustom(fl.server.strategy.Strategy):
         experiment_id: str = None,
         fraction_fit: float = 1,
         fraction_evaluate: float = 1,
-        min_fit_clients: int = 2,
+        min_fit_clients: int = 4,
         min_evaluate_clients: int = 2,
-        min_available_clients: int = 2,
+        min_available_clients: int = 4,
         initial_parameters: Optional[Parameters] = None,
         converged: bool = False,
         convergence_accuracy: float = None,
@@ -147,27 +147,33 @@ class FedCustom(fl.server.strategy.Strategy):
             "start": metrics['start_time'],
             "end": metrics['end_time']
         }
-            # Get the client properties
-            client_properties = get_client_properties(ClientProxy)
+            # ////// SPARSIFICATION START///////
             
-            enabledSparsification =  client_properties.get('sparsification_enabled')
+            # Get the client properties
+            # client_properties = get_client_properties(ClientProxy)
+            
+            # enabledSparsification =  client_properties.get('sparsification_enabled')
             # logger.info(f"Client {client_properties['container_name']} has sparsification enabled: {enabledSparsification}")
             
-            if enabledSparsification:
-                # Deserialize each sparse weight and convert to dense
-                dense_weights = []
-                for serialized_sparse_weight in parameters_to_ndarrays(fit_res.parameters):
-                    # Deserialize sparse weight (this is where you add your deserialization logic)
-                    sparse_weight = self.deserialize_sparse_coo(serialized_sparse_weight)
+            # if enabledSparsification:
+            #     # Deserialize each sparse weight and convert to dense
+            #     dense_weights = []
+            #     for serialized_sparse_weight in parameters_to_ndarrays(fit_res.parameters):
+            #         # Deserialize sparse weight (this is where you add your deserialization logic)
+            #         sparse_weight = self.deserialize_sparse_coo(serialized_sparse_weight)
                     
-                    # Convert to dense format
-                    dense_weight = sparse_weight.todense()
-                    dense_weights.append(dense_weight)
+            #         # Convert to dense format
+            #         dense_weight = sparse_weight.todense()
+            #         dense_weights.append(dense_weight)
 
-                dense_results.append((dense_weights, fit_res.num_examples))
+            #     dense_results.append((dense_weights, fit_res.num_examples))
 
-            else:
-                dense_results.append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
+            # else:
+            #     dense_results.append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
+            
+            # ////// SPARSIFICATION  END///////
+
+            dense_results.append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
 
         # Use Flower's default aggregation method on dense weights
         aggregated_weights = aggregate(dense_results)

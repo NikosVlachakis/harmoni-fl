@@ -71,7 +71,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python server.py --number_of_rounds=100 --convergence_accuracy=0.8
+    command: python server.py --number_of_rounds=5 --convergence_accuracy=0.8
     environment:
       DOCKER_HOST_IP: host.docker.internal
     volumes:
@@ -96,7 +96,7 @@ services:
       resources:
         limits:
           cpus: "4"
-          memory: "3g"
+          memory: "6g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -118,7 +118,7 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: "6g"
+          memory: "1g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -138,8 +138,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: "3g"
+          cpus: "1"
+          memory: "2g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -159,8 +159,8 @@ services:
       deploy:
         resources:
           limits:
-            cpus: "3"
-            memory: "2g"
+            cpus: "2"
+            memory: "3g"
       volumes:
         - .:/app
         - /var/run/docker.sock:/var/run/docker.sock

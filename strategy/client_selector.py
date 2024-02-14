@@ -98,6 +98,16 @@ class ClientSelector:
                     if result and isinstance(result, dict):
                         client_config.update(result)
 
+                ############# Add just for experiments the cpu usage and memory usage to the client config #############
+                average_memory_usage_percentage = float(queries_results['container_memory_usage_percentage'])
+                cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
+                    
+                client_config.update({
+                    'cpu_usase_percentage': cpu_usase_percentage,
+                    'average_memory_usage_percentage': average_memory_usage_percentage
+                })
+                ############# Add just for experiments the cpu usage and memory usage to the client config #############
+                
                 selected_client = {
                     'client': client,
                     'config': client_config

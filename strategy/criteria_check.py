@@ -98,7 +98,7 @@ class LearningRateBasedOnCPUUtilization(AbstractCriterion):
 
         learning_rate_adjustment = {"learning_rate": current_learning_rate}
 
-        if cpu_usase_percentage < self.cpu_utilization_threshold:
+        if cpu_usase_percentage > self.cpu_utilization_threshold:
             new_learning_rate = current_learning_rate * self.adjustment_factor
             
             # Ensure the learning rate does not exceed 1.0
@@ -135,12 +135,17 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         epoch_adjustment = {"epochs": current_number_of_epochs}
 
         if cpu_usase_percentage > self.threshold_cpu_utilization_percentage:
-            adjusted_epochs = math.ceil(current_number_of_epochs / self.adjustment_factor)
-            epoch_adjustment["epochs"] = max(adjusted_epochs, 1)
-            logger.info(f"Adjusted number of epochs to {epoch_adjustment['epochs']} due to high cpu usase of ({cpu_usase_percentage}%)")
+            
+            temp_adjusted_epochs = current_number_of_epochs / self.adjustment_factor
+            if temp_adjusted_epochs < 2:
+                adjusted_epochs = 1
+            else:
+                adjusted_epochs = math.ceil(temp_adjusted_epochs)
 
         else:
-            epoch_adjustment["epochs"] = self.default
+            adjusted_epochs = self.default
+        
+        epoch_adjustment["epochs"] = max(adjusted_epochs, 1)
         
         return epoch_adjustment
     

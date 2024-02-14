@@ -93,29 +93,31 @@ class Client(fl.client.NumPyClient):
         }     
        
         # Check if sparsification is enabled
-        if config["sparsification_enabled"]:
+        # if config["sparsification_enabled"]:
                         
-            # Create a sparsifier object 
-            sparsifier = Sparsifier(method=config["sparsification_method"], percentile=config["sparsification_percentile"])
+        #     # Create a sparsifier object 
+        #     sparsifier = Sparsifier(method=config["sparsification_method"], percentile=config["sparsification_percentile"])
             
-            serialized_sparse_weights, total_nnz = sparsifier.sparsify_and_serialize_weights(parameters_prime)
+        #     serialized_sparse_weights, total_nnz = sparsifier.sparsify_and_serialize_weights(parameters_prime)
 
-            # Get the size of the serialized sparse weights and the original weights
-            serialized_sparse_weights_size = calculate_weights_size(serialized_sparse_weights)
-            original_weights_size = calculate_weights_size(parameters_prime)    
+        #     # Get the size of the serialized sparse weights and the original weights
+        #     serialized_sparse_weights_size = calculate_weights_size(serialized_sparse_weights)
+        #     original_weights_size = calculate_weights_size(parameters_prime)    
             
-            self.round_metrics.update({
-                "total_nnz": total_nnz,
-                "serialized_sparse_weights_size": serialized_sparse_weights_size,
-                "original_weights_size": original_weights_size
-            })
+        #     self.round_metrics.update({
+        #         "total_nnz": total_nnz,
+        #         "serialized_sparse_weights_size": serialized_sparse_weights_size,
+        #         "original_weights_size": original_weights_size
+        #     })
 
-            # Return new weights, number of training examples, and results
-            return serialized_sparse_weights, len(x_train), results
+        #     # Return new weights, number of training examples, and results
+        #     return serialized_sparse_weights, len(x_train), results
 
-        else:
-            # Directly return the dense weights without sparsification
-            return parameters_prime, len(x_train), results
+        # else:
+        #     # Directly return the dense weights without sparsification
+        #     return parameters_prime, len(x_train), results
+        
+        return parameters_prime, len(x_train), results
         
 
     def evaluate(self, parameters, config):

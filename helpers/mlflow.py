@@ -33,6 +33,7 @@ class MlflowHelper:
 
     def create_experiment(self):
         self.experiment_name = self.create_random_experiment_name()
+        self.experiment_name = 'v1'+ self.experiment_name
         self.experiment_id = mlflow.create_experiment(name=self.name)
         logger.info(f"Created experiment {self.name} with id {self.experiment_id}")
         self.log_experiment_details()
@@ -45,6 +46,7 @@ class MlflowHelper:
             mlflow.log_param("experiment_name", self.experiment_name)
             mlflow.log_param("max_rounds", self.rounds)
             mlflow.log_param("convergence_accuracy", self.convergence_accuracy)
+            mlflow.log_param("experiment_description", "4-clients-tool-enabled")
 
 
             # You can add other general details about the experiment here   
@@ -59,6 +61,7 @@ class MlflowHelper:
         # Start a new MLflow run
         with mlflow.start_run(experiment_id=experiment_id, run_name=f"{server_round} - round - {container_name}") as client_run:
             mlflow.set_tag("container_name", container_name)
+            mlflow.set_tag("server_round", server_round)
             mlflow.log_params(properties)
             mlflow.log_metrics(operational_metrics)
             if self.dp_opt:

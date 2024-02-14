@@ -23,39 +23,39 @@ criteria:
     blocking: false
     active: true
     config:
-        threshold_cpu_utilization_percentage: 80 
+        threshold_cpu_utilization_percentage: 75 
         adjustment_factor: 1.5 
-        default: 0.02
+        default: 0.01
 
   - type: epoch_adjustment_based_on_cpu_utilization
     blocking: false
     active: true
     config: 
-        threshold_cpu_utilization_percentage : 80
+        threshold_cpu_utilization_percentage : 75
         adjustment_factor : 1.5
-        default: 2
+        default: 5
 
   - type: adaptive_batch_size_based_on_memory_utilization
     blocking: false
     active: true
     config:
-      threshold_memory_utilization_percentage: 80
+      threshold_memory_utilization_percentage: 75
       adjustment_factor: 1.5
-      default: 64
+      default: 128
     
   - type: adaptive_data_sampling_based_on_memory_utilization
     blocking: false
     active: true
     config:
-      threshold_memory_utilization_percentage: 20
+      threshold_memory_utilization_percentage: 75
       adjustment_factor: 1.2
-      default: 0.03
+      default: 0.1
 
   - type: model_layer_freezing_based_on_high_cpu_utilization
     blocking: false
     active: true
     config:
-      threshold_cpu_utilization_percentage: 60
+      threshold_cpu_utilization_percentage: 75
       adjustment_factor: 5
       default: 0
   

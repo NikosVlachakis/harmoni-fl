@@ -213,8 +213,9 @@ class Model():
                 row_index += 1
 
 
-        # Save the data to a CSV file
-        save_data_to_csv(f"mlflow/epsilon_data_client{self.client_id}.csv", detailed_data)   
+        if self.dp_opt:
+            # Save the data to a CSV file
+            save_data_to_csv(f"mlflow/epsilon_data_client{self.client_id}.csv", detailed_data)   
 
         return self.model
     
