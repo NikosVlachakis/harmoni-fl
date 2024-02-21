@@ -10,8 +10,9 @@ from helpers.load_data import DataLoader
 import os
 import numpy as np
 from helpers.mlflow import MlflowHelper
-from model.model import Model
+from model.model import FreezeLayersCallback, LearningRateAdjustmentCallback, Model
 from model.sparsification import Sparsifier
+from utils.simple_utils import load_strategy_config
 
 from utils.simple_utils import calculate_weights_size
 
@@ -34,10 +35,29 @@ args = parser.parse_args()
 
 # Create an instance of the model
 model_instance = Model(client_id=args.client_id, dp_opt=args.dp_opt)
+
+model_instance.compile()
+
+# def print_layer_trainability(model):
+#     for layer in model.layers:
+#         logger.info("Layer: %s, Trainable: %s", layer.name, layer.trainable)
+# # Call the function to print the trainability status of each layer
+
+
+# def get_current_learning_rate(model):
+#     lr = model.optimizer.learning_rate
+#     # If the learning rate is a schedule, compute the current value with the step count
+#     if isinstance(lr, tf.keras.optimizers.schedules.LearningRateSchedule):
+#         lr = lr(model.optimizer.iterations)
+#     else:
+#         lr = tf.keras.backend.get_value(lr)
+#     return lr
+
+
 class Client(fl.client.NumPyClient):
     def __init__(self):
         self.round_metrics = {}
-        self.properties = {}
+        self.properties = load_strategy_config()
         self.prom_service = PrometheusService()
         self.mlflow_helper = MlflowHelper(client_id=args.client_id, dp_opt=args.dp_opt)
         self.container_name = os.getenv('container_name')
@@ -46,8 +66,6 @@ class Client(fl.client.NumPyClient):
         })
         self.args = args
         self.data_loader = DataLoader(client_id=self.args.client_id, total_clients=self.args.total_clients)       
-     
-
 
     def get_parameters(self, config):
         return model_instance.get_model().get_weights()
@@ -68,9 +86,21 @@ class Client(fl.client.NumPyClient):
         logger.info("container_name is: %s",  self.container_name)
         logger.info("config is: %s", config)
         
+        learning_rate_adjustment = LearningRateAdjustmentCallback(config["learning_rate"])
+        freeze_layers_adjustment = FreezeLayersCallback(config["freeze_layers_percentage"])
+       
+        history = model_instance.get_model().fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"],callbacks=[learning_rate_adjustment, freeze_layers_adjustment])      
 
-        # Train the model
-        model_instance.fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"], config=config)      
+        # get from model_instance the training parameters of the model like learning rate, optimizer and freeze layers
+        # if self.container_name == "client2":
+        #     print_layer_trainability(model_instance.get_model())
+        #     try:
+        #         logger.info("Learning rate: %s", get_current_learning_rate(model_instance.get_model()))
+        #     except Exception as e:
+        #         logger.error("Error getting learning rate: %s", e)
+
+        # Train the model with custom_fit
+        # model_instance.custom_fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"], config=config)      
 
         # Get the weights after training
         parameters_prime = model_instance.get_model().get_weights()
@@ -128,10 +158,13 @@ class Client(fl.client.NumPyClient):
         
         model_instance.get_model().set_weights(parameters)
 
-        compiled_model = model_instance.compile()
+        # Evaluate the model
+        loss, accuracy = model_instance.get_model().evaluate(x_test, y_test)
+
+        # compiled_model = model_instance.compile()
 
         # Evaluate the model and get the loss and accuracy
-        loss, accuracy = compiled_model.evaluate(x_test, y_test)
+        # loss, accuracy = compiled_model.evaluate(x_test, y_test)
 
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration

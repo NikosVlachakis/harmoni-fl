@@ -35,9 +35,9 @@ class FedCustom(fl.server.strategy.Strategy):
         experiment_id: str = None,
         fraction_fit: float = 1,
         fraction_evaluate: float = 1,
-        min_fit_clients: int = 4,
-        min_evaluate_clients: int = 2,
-        min_available_clients: int = 4,
+        min_fit_clients: int = 3,
+        min_evaluate_clients: int = 3,
+        min_available_clients: int = 3,
         initial_parameters: Optional[Parameters] = None,
         converged: bool = False,
         convergence_accuracy: float = None,
@@ -136,12 +136,19 @@ class FedCustom(fl.server.strategy.Strategy):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results and convert from serialized sparse to dense format."""
+        
+        if not results:
+            return None, {}
+        
         logger.info(f"Aggregating fit results for server round {server_round}.")
+
         
         # Convert from serialized sparse to dense format and prepare for aggregation
         dense_results = []
         for ClientProxy, fit_res in results:
             
+            logger.info(f"Processing fit results for client {fit_res.metrics['container_name']} with num_examples: {fit_res.num_examples}")
+
             metrics = fit_res.metrics
             self.round_timestamps[metrics['container_name']] = {
             "start": metrics['start_time'],
@@ -184,6 +191,21 @@ class FedCustom(fl.server.strategy.Strategy):
        
         return parameters_aggregated, metrics_aggregated
 
+          # def aggregate_fit(
+    #     self,
+    #     server_round: int,
+    #     results: List[Tuple[ClientProxy, FitRes]],
+    #     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    # ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    #     """Aggregate fit results using weighted average."""
+    #     logger.info(f"Aggregating fit results for server round {server_round}.")
+    #     weights_results = [
+    #         (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+    #         for _, fit_res in results
+    #     ]
+    #     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+    #     metrics_aggregated = {}
+    #     return parameters_aggregated, metrics_aggregated
 
 
     def configure_evaluate(
@@ -277,18 +299,4 @@ class FedCustom(fl.server.strategy.Strategy):
 
         
 
-    # def aggregate_fit(
-    #     self,
-    #     server_round: int,
-    #     results: List[Tuple[ClientProxy, FitRes]],
-    #     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    # ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-    #     """Aggregate fit results using weighted average."""
-    #     logger.info(f"Aggregating fit results for server round {server_round}.")
-    #     weights_results = [
-    #         (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-    #         for _, fit_res in results
-    #     ]
-    #     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-    #     metrics_aggregated = {}
-    #     return parameters_aggregated, metrics_aggregated
+  

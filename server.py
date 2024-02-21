@@ -27,7 +27,7 @@ def start_fl_server(strategy):
         fl.server.start_server(
             server_address="0.0.0.0:8080",
             # config=fl.server.ServerConfig(num_rounds=args.number_of_rounds),
-            config=fl.server.ServerConfig(num_rounds=10),
+            config=fl.server.ServerConfig(num_rounds=50),
             strategy=strategy,
         )
     except Exception as e:

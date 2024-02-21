@@ -56,3 +56,31 @@ docker rm -f $(docker ps -a -q)
     "sparsification_method": "sparsity_threshold_bo_weight_magnitude",
     "sparsification_percentile": 95
 }
+
+cpu_usage (90-freezing) with ADAPTION:
+client1:29,46,26,51,41,73,46,42,52,53
+client2:84,95,95,91,95,95,94,97,97,86
+
+memory_usage (90-freezing):
+client1: 24,23,35,23,24,25,26,26,28,28
+client2: 95,91,84,90,95,90,86,85,86,85
+
+
+NO-ADAPTION in (freeze_layers_percentage) -GENERAL ADAPTION
+cpu_usage (0-freezing):
+client1:42,52,53,54,53,53,55,55,55
+client2:90,DO,99,89,97,97,88,95,DO
+
+memory_usage (0-freezing):
+client1:23,29,33,35,36,37,38,39,40
+client2:98,DO,98,92,93,84,81,73,DO
+
+
+NO-ADAPTION at all
+cpu_usage:
+client1:42,50,48,51,54,57,53,56,54,57
+client2:95,96,DO,98,95,DO,98,92,DO,97,DO
+
+memory_usage:
+client1:23,30,34,35,36,38,39,41,41,42
+client2:97,93,DO,96,94,DO,91,95,DO,90,DO,DO,DO

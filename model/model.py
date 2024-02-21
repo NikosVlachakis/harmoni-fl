@@ -11,6 +11,38 @@ logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
 
 
+class FreezeLayersCallback(tf.keras.callbacks.Callback):
+    def __init__(self, freeze_percentage):
+        super().__init__()
+        self.freeze_percentage = freeze_percentage
+
+    def on_train_begin(self, logs=None):
+        total_layers = len(self.model.layers)
+        layers_to_freeze = int(total_layers * (self.freeze_percentage / 100.0))
+
+        # Freeze the specified percentage of layers
+        for layer in self.model.layers[:layers_to_freeze]:
+            layer.trainable = False
+        # Ensure the rest are trainable
+        for layer in self.model.layers[layers_to_freeze:]:
+            layer.trainable = True
+
+        logger.info(f"FreezeLayersCallback: {layers_to_freeze} layers frozen.")
+
+
+class LearningRateAdjustmentCallback(tf.keras.callbacks.Callback):
+    def __init__(self, new_learning_rate):
+        super().__init__()
+        self.new_learning_rate = new_learning_rate
+
+    def on_epoch_begin(self, epoch, logs=None):
+        # Access the model and its optimizer to adjust the learning rate
+        if hasattr(self.model.optimizer, 'learning_rate'):
+            tf.keras.backend.set_value(self.model.optimizer.learning_rate, self.new_learning_rate)
+            if epoch == 0:
+                logger.info(f"Epoch {epoch+1}: Learning rate adjusted to {self.new_learning_rate}.")
+
+
 
 class Model():
     def __init__(self, client_id, dp_opt: int = 0, learning_rate=0.2, l2_norm_clip=1.5, noise_multiplier=1.5, num_microbatches=1, delta=1e-5):
@@ -23,6 +55,8 @@ class Model():
         self.dp_opt = dp_opt == 1
         self.eval_loss = tf.keras.losses.SparseCategoricalCrossentropy()
         self.model = tf.keras.applications.MobileNetV2((32, 32, 3), alpha=0.1, classes=10, weights=None)
+        # self.model = tf.keras.applications.EfficientNetB2(include_top=True, weights=None)
+
         self.init_optimizer()
 
     def init_optimizer(self):
@@ -69,7 +103,7 @@ class Model():
         return accountant.get_epsilon(self.delta)
 
 
-    def set_learning_rate(self, optimizer, learning_rate_value):
+    def set_learning_rate(self,model, learning_rate_value):
         """
         This function sets the learning rate of the optimizer.
 
@@ -80,12 +114,12 @@ class Model():
         """
 
         # Check if the optimizer has a 'learning_rate' attribute
-        if hasattr(optimizer, 'learning_rate'):
+        if hasattr(model.optimizer, 'learning_rate'):
             # If it does, set its learning rate to the new value
-            tf.keras.backend.set_value(optimizer.learning_rate, learning_rate_value)
+            tf.keras.backend.set_value(model.optimizer.learning_rate, learning_rate_value)
 
 
-    def freeze_layers(self, freeze_percentage):
+    def freeze_layers(self,model, freeze_percentage):
         """
         This function freezes a percentage of layers in the model.
 
@@ -96,17 +130,17 @@ class Model():
 
         # If freeze_percentage is 0, set all layers to trainable
         if freeze_percentage == 0:
-            for layer in self.model.layers:
+            for layer in model.layers:
                 layer.trainable = True
         else:
             # Calculate the total number of layers in the model
-            total_layers = len(self.model.layers)
+            total_layers = len(model.layers)
 
             # Calculate the number of layers to freeze based on the freeze_percentage
             layers_to_freeze = int(total_layers * (freeze_percentage / 100))
 
             # Freeze the first 'layers_to_freeze' layers
-            for layer in self.model.layers[:layers_to_freeze]:
+            for layer in model.layers[:layers_to_freeze]:
                 layer.trainable = False
 
 
@@ -153,7 +187,7 @@ class Model():
         return clipped_grads_and_vars
 
 
-    def fit(self, x_train, y_train, epochs, batch_size, config):
+    def custom_fit(self, x_train, y_train, epochs, batch_size, config):
         """
         Custom training loop for the model with differential privacy.
 

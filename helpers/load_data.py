@@ -19,7 +19,8 @@ class DataLoader:
         self.load_and_partition_data()
 
     def load_and_partition_data(self):
-        fds = FederatedDataset(dataset="cifar10", partitioners={"train": self.total_clients})
+        # fds = FederatedDataset(dataset="cifar10", partitioners={"train": self.total_clients})
+        fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
         partition = fds.load_partition(self.client_id-1, "train")
         partition.set_format("numpy")
         partition = partition.train_test_split(test_size=0.2)

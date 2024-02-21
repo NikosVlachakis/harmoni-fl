@@ -54,9 +54,10 @@ def extract_all_experiments_data(mlruns_path='/mlruns'):
         experiment_path = os.path.join(mlruns_path, experiment_id)
         if os.path.isdir(experiment_path):
             try:
-                experiment_data = extract_mlflow_data_based_on_experiment(experiment_id)
-                if experiment_data['data'] and experiment_data['experiment_name'].startswith('v1') and experiment_data['experiment_description'].startswith('4-clients-tool-enable'):
-                    all_experiments_data.append(experiment_data)
+                if experiment_id == '316501109621453837':
+                    experiment_data = extract_mlflow_data_based_on_experiment(experiment_id)
+                    if experiment_data['data'] and experiment_data['experiment_name'].startswith('v1') and experiment_data['experiment_description'].startswith('4-clients-tool-enable'):
+                        all_experiments_data.append(experiment_data)
             except Exception as e:
                 print(f"Error processing experiment {experiment_id}: {str(e)}")
                 continue  # Skip to the next experiment if an error occurs
