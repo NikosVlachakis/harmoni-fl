@@ -141,8 +141,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: "3g"
+          cpus: "1"
+          memory: "2g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -154,27 +154,27 @@ services:
     environment:
       container_name: client3
       DOCKER_HOST_IP: host.docker.internal
-  # client4:
-  #     container_name: client4
-  #     build:
-  #       context: .
-  #       dockerfile: Dockerfile
-  #     command: python client.py --server_address=server:8080  --client_id=4 --total_clients=4 --dp_opt=0
-  #     deploy:
-  #       resources:
-  #         limits:
-  #           cpus: "2"
-  #           memory: "3g"
-  #     volumes:
-  #       - .:/app
-  #       - /var/run/docker.sock:/var/run/docker.sock
-  #     ports:
-  #       - "6004:6004"
-  #     restart: always
-  #     depends_on:
-  #       - server
-  #     environment:
-  #       container_name: client4
-  #       DOCKER_HOST_IP: host.docker.internal
+  client4:
+      container_name: client4
+      build:
+        context: .
+        dockerfile: Dockerfile
+      command: python client.py --server_address=server:8080  --client_id=4 --total_clients=4 --dp_opt=0
+      deploy:
+        resources:
+          limits:
+            cpus: "2"
+            memory: "3g"
+      volumes:
+        - .:/app
+        - /var/run/docker.sock:/var/run/docker.sock
+      ports:
+        - "6004:6004"
+      restart: always
+      depends_on:
+        - server
+      environment:
+        container_name: client4
+        DOCKER_HOST_IP: host.docker.internal
 volumes:
   grafana-storage:

@@ -37,7 +37,7 @@ class FedCustom(fl.server.strategy.Strategy):
         fraction_evaluate: float = 1,
         min_fit_clients: int = 3,
         min_evaluate_clients: int = 3,
-        min_available_clients: int = 3,
+        min_available_clients: int = 4,
         initial_parameters: Optional[Parameters] = None,
         converged: bool = False,
         convergence_accuracy: float = None,
