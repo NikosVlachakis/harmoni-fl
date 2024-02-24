@@ -84,3 +84,76 @@ client2:95,96,DO,98,95,DO,98,92,DO,97,DO
 memory_usage:
 client1:23,30,34,35,36,38,39,41,41,42
 client2:97,93,DO,96,94,DO,91,95,DO,90,DO,DO,DO
+
+
+
+  # Determine categories for each client
+      1)  if self.client_id in [1, 4]:
+            categories = [0,1,2,3,4,5]  # Categories for clients 1 and 4
+      2)  elif self.client_id in [2]:
+            categories = [0,1,2,3,4,5,6,7,8,9]  # Categories for client 2
+      3)  elif self.client_id in [3]:
+            categories = [0,1,2,3,4,5,6,7,8,9]  # Categories for client 3
+        else:
+            logger.error("Invalid client ID, categories cannot be assigned.")
+            return
+WITHOUT-TOOL:
+when 1) is together with 2) and 3) with unlimited resources ( linear up to 0.6)
+when 1) is alone graph is goes liner up to 0.3
+when 1) is together with 2) and 3) but 2) and 3) have limited resources (so they do not participate in training-dropouts) graph is goes liner up to 0.3
+TOOL-ENABLED:
+I want to see if ->
+when 1) is together with 2) and 3) but 2) and 3) have limited resources how the graph will adapt ? I hope to be in between 0.3 and 0.6
+
+
+
+erver           | INFO:strategy.strategy:Configuring fit for server round 14.
+server           | INFO:services.prometheus_service:No data returned for the query.
+server           | INFO:services.prometheus_service:No data returned for the query.
+server           | INFO:services.prometheus_service:No data returned for the query.
+server           | INFO:services.prometheus_service:No data returned for the query.
+server           | INFO:strategy.criteria_check:cpu usage for client client3 is 0.0%
+server           | INFO:strategy.criteria_check:cpu usage for client client3 is 0.0%
+server           | INFO:strategy.criteria_check:Average memory usage for client client3 is 0.0%
+server           | INFO:strategy.criteria_check:Average memory usage for client client3 is 0.0%
+server           | INFO:strategy.criteria_check:cpu usage for client client3 is 0.0%
+server           | INFO:services.prometheus_service:No data returned for the query.
+server           | INFO:services.prometheus_service:No data returned for the query.
+server           | INFO:services.prometheus_service:No data returned for the query.
+server           | INFO:services.prometheus_service:No data returned for the query.
+server           | INFO:strategy.criteria_check:cpu usage for client client2 is 0.0%
+server           | INFO:strategy.criteria_check:cpu usage for client client2 is 0.0%
+server           | INFO:strategy.criteria_check:Average memory usage for client client2 is 0.0%
+server           | INFO:strategy.criteria_check:Average memory usage for client client2 is 0.0%
+server           | INFO:strategy.criteria_check:cpu usage for client client2 is 0.0%
+server           | INFO:strategy.criteria_check:cpu usage for client client4 is 47.297419411310834%
+server           | INFO:strategy.criteria_check:cpu usage for client client4 is 47.297419411310834%
+server           | INFO:strategy.criteria_check:Average memory usage for client client4 is 53.88092627892127%
+server           | INFO:strategy.criteria_check:Average memory usage for client client4 is 53.88092627892127%
+server           | INFO:strategy.criteria_check:cpu usage for client client4 is 47.297419411310834%
+server           | INFO:strategy.criteria_check:cpu usage for client client1 is 40.5423671822461%
+server           | INFO:strategy.criteria_check:cpu usage for client client1 is 40.5423671822461%
+server           | INFO:strategy.criteria_check:Average memory usage for client client1 is 33.83973439534505%
+server           | INFO:strategy.criteria_check:Average memory usage for client client1 is 33.83973439534505%
+server           | INFO:strategy.criteria_check:cpu usage for client client1 is 40.5423671822461%
+server           | INFO:strategy.client_selector:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0x7f0d80138fa0>, 'config': {'learning_rate': 0.01, 'epochs': 3, 'batch_size': 128, 'data_sample_percentage': 1, 'freeze_layers_percentage': 0, 'cpu_usase_percentage': 0.0, 'average_memory_usage_percentage': 0.0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0x7f0d800ff310>, 'config': {'learning_rate': 0.01, 'epochs': 3, 'batch_size': 128, 'data_sample_percentage': 1, 'freeze_layers_percentage': 0, 'cpu_usase_percentage': 0.0, 'average_memory_usage_percentage': 0.0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0x7f0d8018eb80>, 'config': {'learning_rate': 0.01, 'epochs': 3, 'batch_size': 128, 'data_sample_percentage': 1, 'freeze_layers_percentage': 0, 'cpu_usase_percentage': 47.297419411310834, 'average_memory_usage_percentage': 53.88092627892127}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0x7f0d82a2ec70>, 'config': {'learning_rate': 0.01, 'epochs': 3, 'batch_size': 128, 'data_sample_percentage': 1, 'freeze_layers_percentage': 0, 'cpu_usase_percentage': 40.5423671822461, 'average_memory_usage_percentage': 33.83973439534505}}] 
+server           | INFO:strategy.strategy:Selected clients based on criteria are: [{'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0x7f0d80138fa0>, 'config': {'learning_rate': 0.01, 'epochs': 3, 'batch_size': 128, 'data_sample_percentage': 1, 'freeze_layers_percentage': 0, 'cpu_usase_percentage': 0.0, 'average_memory_usage_percentage': 0.0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0x7f0d800ff310>, 'config': {'learning_rate': 0.01, 'epochs': 3, 'batch_size': 128, 'data_sample_percentage': 1, 'freeze_layers_percentage': 0, 'cpu_usase_percentage': 0.0, 'average_memory_usage_percentage': 0.0}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0x7f0d8018eb80>, 'config': {'learning_rate': 0.01, 'epochs': 3, 'batch_size': 128, 'data_sample_percentage': 1, 'freeze_layers_percentage': 0, 'cpu_usase_percentage': 47.297419411310834, 'average_memory_usage_percentage': 53.88092627892127}}, {'client': <flwr.server.fleet.grpc_bidi.grpc_client_proxy.GrpcClientProxy object at 0x7f0d82a2ec70>, 'config': {'learning_rate': 0.01, 'epochs': 3, 'batch_size': 128, 'data_sample_percentage': 1, 'freeze_layers_percentage': 0, 'cpu_usase_percentage': 40.5423671822461, 'average_memory_usage_percentage': 33.83973439534505}}]
+server           | INFO:strategy.strategy:Determining number of fit clients from 4 available clients.
+server           | DEBUG flwr 2024-02-24 15:03:52,875 | server.py:222 | fit_round 14: strategy sampled 4 clients (out of 4)
+server           | DEBUG:flwr:fit_round 14: strategy sampled 4 clients (out of 4)
+client4          | INFO:__main__:container_name is: client4
+client4          | INFO:__main__:config is: {'average_memory_usage_percentage': 53.88092627892127, 'batch_size': 128, 'epochs': 3, 'data_sample_percentage': 1, 'sparsification_enabled': False, 'freeze_layers_percentage': 0, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'learning_rate': 0.01, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude', 'cpu_usase_percentage': 47.297419411310834}
+client1          | INFO:__main__:container_name is: client1
+client1          | INFO:__main__:config is: {'average_memory_usage_percentage': 33.83973439534505, 'batch_size': 128, 'epochs': 3, 'data_sample_percentage': 1, 'sparsification_enabled': False, 'freeze_layers_percentage': 0, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'learning_rate': 0.01, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude', 'cpu_usase_percentage': 40.5423671822461}
+client2          | INFO:__main__:container_name is: client2
+client2          | INFO:__main__:config is: {'average_memory_usage_percentage': 0.0, 'batch_size': 128, 'epochs': 3, 'data_sample_percentage': 1, 'sparsification_enabled': False, 'freeze_layers_percentage': 0, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'learning_rate': 0.01, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude', 'cpu_usase_percentage': 0.0}
+client3          | INFO:__main__:container_name is: client3
+client3          | INFO:__main__:config is: {'average_memory_usage_percentage': 0.0, 'batch_size': 128, 'epochs': 3, 'data_sample_percentage': 1, 'sparsification_enabled': False, 'freeze_layers_percentage': 0, 'sparsification_percentile': 95, 'gradient_clipping_value': 6, 'learning_rate': 0.01, 'sparsification_method': 'sparsity_threshold_bo_weight_magnitude', 'cpu_usase_percentage': 0.0}
+client1          | INFO:model.model:FreezeLayersCallback: 0 layers frozen.
+client1          | INFO:model.model:Epoch 1: Learning rate adjusted to 0.01.
+client1          | Epoch 1/3
+client4          | INFO:model.model:FreezeLayersCallback: 0 layers frozen.
+client4          | INFO:model.model:Epoch 1: Learning rate adjusted to 0.01.
+client4          | Epoch 1/3
+client2 exited with code 137
+client3 exited with code 137

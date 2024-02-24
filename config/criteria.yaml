@@ -33,7 +33,7 @@ criteria:
     config: 
         threshold_cpu_utilization_percentage : 75
         adjustment_factor : 1.5
-        default: 5
+        default: 3
 
   - type: adaptive_batch_size_based_on_memory_utilization
     blocking: false
@@ -49,7 +49,7 @@ criteria:
     config:
       threshold_memory_utilization_percentage: 75
       adjustment_factor: 1.2
-      default: 0.2
+      default: 1
 
   - type: model_layer_freezing_based_on_high_cpu_utilization
     blocking: false

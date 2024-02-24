@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class PrometheusService:
     def __init__(self):
-        self.prom_url = 'http://host.docker.internal:9090'
+        self.prom_url = 'http://prometheus:9090'
         
     def query(self, query):
         response = requests.get(

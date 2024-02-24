@@ -38,21 +38,6 @@ model_instance = Model(client_id=args.client_id, dp_opt=args.dp_opt)
 
 model_instance.compile()
 
-# def print_layer_trainability(model):
-#     for layer in model.layers:
-#         logger.info("Layer: %s, Trainable: %s", layer.name, layer.trainable)
-# # Call the function to print the trainability status of each layer
-
-
-# def get_current_learning_rate(model):
-#     lr = model.optimizer.learning_rate
-#     # If the learning rate is a schedule, compute the current value with the step count
-#     if isinstance(lr, tf.keras.optimizers.schedules.LearningRateSchedule):
-#         lr = lr(model.optimizer.iterations)
-#     else:
-#         lr = tf.keras.backend.get_value(lr)
-#     return lr
-
 
 class Client(fl.client.NumPyClient):
     def __init__(self):
@@ -72,10 +57,18 @@ class Client(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         
+        if self.container_name == 'client2' or self.container_name == 'client3':
+            config = {
+                "epochs": 2,
+                "batch_size": 16,
+                "learning_rate": 0.01,
+                "data_sample_percentage": 0.1,
+                "freeze_layers_percentage": 0,
+            }
+
+
         # Load the data 
         (x_train, y_train) = self.data_loader.load_train_data(data_sampling_percentage=config["data_sample_percentage"])
-       
-        start_time = time.time()  # Capture the start time
        
         # Set the weights of the model
         model_instance.get_model().set_weights(parameters)
@@ -89,24 +82,15 @@ class Client(fl.client.NumPyClient):
         learning_rate_adjustment = LearningRateAdjustmentCallback(config["learning_rate"])
         freeze_layers_adjustment = FreezeLayersCallback(config["freeze_layers_percentage"])
        
+        start_time = time.time()  # Capture the start time
+
         history = model_instance.get_model().fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"],callbacks=[learning_rate_adjustment, freeze_layers_adjustment])      
-
-        # get from model_instance the training parameters of the model like learning rate, optimizer and freeze layers
-        # if self.container_name == "client2":
-        #     print_layer_trainability(model_instance.get_model())
-        #     try:
-        #         logger.info("Learning rate: %s", get_current_learning_rate(model_instance.get_model()))
-        #     except Exception as e:
-        #         logger.error("Error getting learning rate: %s", e)
-
-        # Train the model with custom_fit
-        # model_instance.custom_fit(x_train, y_train, epochs=config["epochs"], batch_size=config["batch_size"], config=config)      
-
-        # Get the weights after training
-        parameters_prime = model_instance.get_model().get_weights()
 
         end_time = time.time()  # Capture the end time
         duration = end_time - start_time  # Calculate duration
+
+        # Get the weights after training
+        parameters_prime = model_instance.get_model().get_weights()
 
         # Store operational metrics for fit
         self.round_metrics.update({
