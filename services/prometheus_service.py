@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class PrometheusService:
     def __init__(self):
-        self.prom_url = 'http://host.docker.internal:9090'
+        self.prom_url = 'http://prometheus:9090'
         
     def query(self, query):
         response = requests.get(
@@ -28,7 +28,7 @@ class PrometheusService:
                 return average
             else:
                 logger.info("No data returned for the query.")
-                return 0
+                return -1
         else:
             error_message = data.get('error', 'Unknown error')
             logger.error(f"Error while querying Prometheus: {error_message}")
