@@ -24,6 +24,7 @@ import sparse
 from utils.simple_utils import get_client_properties
 from prometheus_client import Gauge
 from helpers.mlflow import MlflowHelper
+import copy
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -44,6 +45,8 @@ class FedCustom(fl.server.strategy.Strategy):
         round_timestamps:Dict[str, Dict[str, float]] = {},
         accuracy_gauge: Gauge = None,
         loss_gauge: Gauge = None,
+        dropped_out: int = 0,
+        dropped_out_clients: list = []
     ) -> None:
         super().__init__()
         self.experiment_id = experiment_id
@@ -58,6 +61,9 @@ class FedCustom(fl.server.strategy.Strategy):
         self.round_timestamps = round_timestamps
         self.accuracy_gauge = accuracy_gauge
         self.loss_gauge = loss_gauge
+        self.dropped_out = dropped_out
+        self.dropped_out_clients = dropped_out_clients
+
 
     def __repr__(self) -> str:
         return "FedCustom"
@@ -88,7 +94,7 @@ class FedCustom(fl.server.strategy.Strategy):
             
             client_selector = ClientSelector(client_manager)  
             all_clients = client_selector.get_all_clients()
-            selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps)
+            selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps,self.dropped_out_clients)
             logger.info(f"Selected clients based on criteria are: {selected_clients}")
 
        
@@ -96,6 +102,22 @@ class FedCustom(fl.server.strategy.Strategy):
         clients = selected_clients if selected_clients else client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
+
+        
+        # Handle the clients that exited during training
+        if server_round > 1:
+            sampled_client_names = [client_dict['client'] for client_dict in clients]
+        else:
+            sampled_client_names = clients
+
+        self.dropped_out_clients = []
+        # Save the container names of sampled clients in dropped_out_clients
+        for client in sampled_client_names:
+            client_properties = get_client_properties(client)
+            container_name = client_properties.get('container_name')
+            if container_name:
+                self.dropped_out_clients.append(container_name)
+
 
         standard_config = load_strategy_config()
 
@@ -141,6 +163,7 @@ class FedCustom(fl.server.strategy.Strategy):
             return None, {}
         
         logger.info(f"Aggregating fit results for server round {server_round}.")
+        logger.info(f"failures for server round {failures}.")
 
         
         # Convert from serialized sparse to dense format and prepare for aggregation
@@ -148,12 +171,18 @@ class FedCustom(fl.server.strategy.Strategy):
         for ClientProxy, fit_res in results:
             
             logger.info(f"Processing fit results for client {fit_res.metrics['container_name']} with num_examples: {fit_res.num_examples}")
+            logger.info(f"ClientProxy is: {ClientProxy}")
+
+            # Remove the clients fromd dropped_out_clients that succeeded in that round
+            self.dropped_out_clients.remove(get_client_properties(ClientProxy).get('container_name'))
 
             metrics = fit_res.metrics
             self.round_timestamps[metrics['container_name']] = {
             "start": metrics['start_time'],
             "end": metrics['end_time']
         }
+
+
             # ////// SPARSIFICATION START///////
             
             # Get the client properties
@@ -188,8 +217,14 @@ class FedCustom(fl.server.strategy.Strategy):
         # Convert aggregated weights back to Parameters
         parameters_aggregated = ndarrays_to_parameters(aggregated_weights)
         metrics_aggregated = {}
-       
+        
+        logger.info("self.dropped_out_clients")
+        logger.info(self.dropped_out_clients)
+
+
         return parameters_aggregated, metrics_aggregated
+
+    
 
           # def aggregate_fit(
     #     self,
@@ -261,7 +296,7 @@ class FedCustom(fl.server.strategy.Strategy):
 
         # Log the aggregated metrics to MLflow
         mlflow_helper = MlflowHelper()
-        mlflow_helper.log_aggregated_metrics(self.experiment_id, server_round, loss_aggregated, accuracy_aggregated, results, failures)
+        mlflow_helper.log_aggregated_metrics(self.experiment_id, server_round, loss_aggregated, accuracy_aggregated, results, self.dropped_out)
 
         # Check if convergence is achieved
         self.check_convergence(accuracy_aggregated)

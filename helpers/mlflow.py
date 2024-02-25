@@ -71,17 +71,15 @@ class MlflowHelper:
             
 
     
-    def log_aggregated_metrics(self,experiment_id,server_round, loss_aggregated, accuracy_aggregated, results, failures):
+    def log_aggregated_metrics(self,experiment_id,server_round, loss_aggregated, accuracy_aggregated, results, dropped_out):
         """Logs aggregated metrics for a server round to MLflow."""
         with mlflow.start_run(experiment_id=experiment_id, run_name=f"{server_round} - round - server"): 
             
             mlflow.log_metric("aggregated_loss", loss_aggregated)
             mlflow.log_metric("aggregated_accuracy", accuracy_aggregated)
 
-            # log the failure rate
-            denominator = len(results) + len(failures)
-            failure_rate = len(failures) / denominator if denominator != 0 else 0
-            mlflow.log_metric("failure_rate", failure_rate)
+            # log the dropped_out rate
+            mlflow.log_metric("dropped_out", dropped_out)
 
             mlflow.set_tag("server_round", server_round)
             mlflow.set_tag("container_name", "fl-server")

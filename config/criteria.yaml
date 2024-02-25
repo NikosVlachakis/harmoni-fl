@@ -33,7 +33,7 @@ criteria:
     config: 
         threshold_cpu_utilization_percentage : 75
         adjustment_factor : 1.5
-        default: 3
+        default: 5
 
   - type: adaptive_batch_size_based_on_memory_utilization
     blocking: false

@@ -28,7 +28,7 @@ class PrometheusService:
                 return average
             else:
                 logger.info("No data returned for the query.")
-                return 0
+                return -1
         else:
             error_message = data.get('error', 'Unknown error')
             logger.error(f"Error while querying Prometheus: {error_message}")
