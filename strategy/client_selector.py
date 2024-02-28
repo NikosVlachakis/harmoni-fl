@@ -75,10 +75,10 @@ class ClientSelector:
                 selected_clients.append({
                     'client': client,
                     'config': {
-                        "epochs": 1,
+                        "epochs": 2,
                         "batch_size": 16,
                         "learning_rate": 0.01,
-                        "data_sample_percentage": 0.08,
+                        "data_sample_percentage": 0.09,
                         "freeze_layers_percentage": 0,
                     }
                 })

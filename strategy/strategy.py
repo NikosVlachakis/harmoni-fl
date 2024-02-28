@@ -45,8 +45,9 @@ class FedCustom(fl.server.strategy.Strategy):
         round_timestamps:Dict[str, Dict[str, float]] = {},
         accuracy_gauge: Gauge = None,
         loss_gauge: Gauge = None,
-        dropped_out: int = 0,
-        dropped_out_clients: list = []
+        dropped_out_clients: list = [],
+        fit_dropped_out_clients: list = [],
+        evaluate_dropped_out_clients: list = []
     ) -> None:
         super().__init__()
         self.experiment_id = experiment_id
@@ -61,8 +62,9 @@ class FedCustom(fl.server.strategy.Strategy):
         self.round_timestamps = round_timestamps
         self.accuracy_gauge = accuracy_gauge
         self.loss_gauge = loss_gauge
-        self.dropped_out = dropped_out
         self.dropped_out_clients = dropped_out_clients
+        self.fit_dropped_out_clients = fit_dropped_out_clients
+        self.evaluate_dropped_out_clients = evaluate_dropped_out_clients
 
 
     def __repr__(self) -> str:
@@ -92,6 +94,8 @@ class FedCustom(fl.server.strategy.Strategy):
         # Check if this is not the first round and the previous round timestamps are available
         if server_round > 1:
             
+            self.dropped_out_clients = self.fit_dropped_out_clients + self.evaluate_dropped_out_clients
+            logger.info(f"Previous round dropped out clients are: {self.dropped_out_clients}")
             client_selector = ClientSelector(client_manager)  
             all_clients = client_selector.get_all_clients()
             selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps,self.dropped_out_clients)
@@ -110,13 +114,14 @@ class FedCustom(fl.server.strategy.Strategy):
         else:
             sampled_client_names = clients
 
-        self.dropped_out_clients = []
-        # Save the container names of sampled clients in dropped_out_clients
+        # sampled_client_names = clients
+
+        self.fit_dropped_out_clients = []
         for client in sampled_client_names:
             client_properties = get_client_properties(client)
             container_name = client_properties.get('container_name')
             if container_name:
-                self.dropped_out_clients.append(container_name)
+                self.fit_dropped_out_clients.append(container_name)
 
 
         standard_config = load_strategy_config()
@@ -171,10 +176,9 @@ class FedCustom(fl.server.strategy.Strategy):
         for ClientProxy, fit_res in results:
             
             logger.info(f"Processing fit results for client {fit_res.metrics['container_name']} with num_examples: {fit_res.num_examples}")
-            logger.info(f"ClientProxy is: {ClientProxy}")
 
             # Remove the clients fromd dropped_out_clients that succeeded in that round
-            self.dropped_out_clients.remove(get_client_properties(ClientProxy).get('container_name'))
+            self.fit_dropped_out_clients.remove(get_client_properties(ClientProxy).get('container_name'))
 
             metrics = fit_res.metrics
             self.round_timestamps[metrics['container_name']] = {
@@ -218,8 +222,8 @@ class FedCustom(fl.server.strategy.Strategy):
         parameters_aggregated = ndarrays_to_parameters(aggregated_weights)
         metrics_aggregated = {}
         
-        logger.info("self.dropped_out_clients")
-        logger.info(self.dropped_out_clients)
+        logger.info("self.fit_dropped_out_clients")
+        logger.info(self.fit_dropped_out_clients)
 
 
         return parameters_aggregated, metrics_aggregated
@@ -258,6 +262,15 @@ class FedCustom(fl.server.strategy.Strategy):
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
+
+        # Handle the clients that exited during evaluation
+        self.evaluate_dropped_out_clients = []
+        for client in clients:
+            client_properties = get_client_properties(client)
+            container_name = client_properties.get('container_name')
+            if container_name:
+                self.evaluate_dropped_out_clients.append(container_name)
+
         return [(client, evaluate_ins) for client in clients]
 
 
@@ -273,7 +286,13 @@ class FedCustom(fl.server.strategy.Strategy):
             return None, {}
 
         logger.info(f"Aggregating evaluation results for server round {server_round} are {results}.")
+
+        for ClientProxy, evaluate_res in results:
+            # Remove the clients from dropped_out_clients that succeeded in that round
+            self.evaluate_dropped_out_clients.remove(get_client_properties(ClientProxy).get('container_name'))
         
+        logger.info(f"evaluate_dropped_out_clients are: {self.evaluate_dropped_out_clients}")
+
         # Calculate weighted average for loss using the provided function
         loss_aggregated = weighted_loss_avg(
             [(evaluate_res.num_examples, evaluate_res.loss) for _, evaluate_res in results]
@@ -294,9 +313,11 @@ class FedCustom(fl.server.strategy.Strategy):
             "accuracy": accuracy_aggregated
         }
 
+        number_of_dropped_out_clients = self.number_of_dropped_out_clients()
+        logger.info(f"Number of dropped out clients in server round {server_round} are: {number_of_dropped_out_clients}")
         # Log the aggregated metrics to MLflow
         mlflow_helper = MlflowHelper()
-        mlflow_helper.log_aggregated_metrics(self.experiment_id, server_round, loss_aggregated, accuracy_aggregated, results, self.dropped_out)
+        mlflow_helper.log_aggregated_metrics(self.experiment_id, server_round, loss_aggregated, accuracy_aggregated, results, number_of_dropped_out_clients)
 
         # Check if convergence is achieved
         self.check_convergence(accuracy_aggregated)
@@ -331,6 +352,10 @@ class FedCustom(fl.server.strategy.Strategy):
     def handle_convergence(self, accuracy_aggregated):
         # Log the convergence
         logger.info(f"Convergence achieved with accuracy: {accuracy_aggregated:.2f}%")
+
+    def number_of_dropped_out_clients(self):
+        return len(self.fit_dropped_out_clients + self.evaluate_dropped_out_clients)
+         
 
         
 

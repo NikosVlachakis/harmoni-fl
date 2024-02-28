@@ -132,9 +132,3 @@ TOOL-ENABLED:
 I want to see if ->
 when 1) is together with 2) and 3) but 2) and 3) have limited resources how the graph will adapt ? I hope to be in between 0.3 and 0.6
 
-
-
-EXPERIMENT PROCESS:
-
-WITHOUT-TOOL:
-4 CLIENTS 

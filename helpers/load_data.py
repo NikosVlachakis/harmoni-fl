@@ -53,6 +53,9 @@ class DataLoader:
             data_sampling_percentage = self.data_sampling_percentage
         else:
             data_sampling_percentage = 0.2
+        
+        data_sampling_percentage = max(data_sampling_percentage,0.2)
+        
         num_samples = int(data_sampling_percentage * len(self.x_test))
         indices = np.random.choice(len(self.x_test), num_samples, replace=False)
         self.x_test_sampled, self.y_test_sampled = self.x_test[indices], self.y_test[indices]
