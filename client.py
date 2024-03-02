@@ -127,10 +127,10 @@ class Client(fl.client.NumPyClient):
         
         # if self.container_name == 'client2' or self.container_name == 'client3':
         #     config = {
-        #         "epochs": 3,
+        #         "epochs": 2,
         #         "batch_size": 16,
         #         "learning_rate": 0.01,
-        #         "data_sample_percentage": 1,
+        #         "data_sample_percentage": 0.05,
         #         "freeze_layers_percentage": 0,
         #     }
 

@@ -1,0 +1,16 @@
+artifact_uri: file:///app/mlruns/130748769025888483/905a3cbf53d8485889c54814cd9ec396/artifacts
+deleted_time: 1709050896810
+end_time: 1709048259642
+entry_point_name: ''
+experiment_id: '130748769025888483'
+lifecycle_stage: deleted
+run_id: 905a3cbf53d8485889c54814cd9ec396
+run_name: 30 - round - client1
+run_uuid: 905a3cbf53d8485889c54814cd9ec396
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1709048259616
+status: 3
+tags: []
+user_id: root

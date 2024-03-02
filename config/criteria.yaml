@@ -31,32 +31,31 @@ criteria:
     blocking: false
     active: true
     config: 
-        threshold_cpu_utilization_percentage : 75
-        adjustment_factor : 1.5
-        default: 3
-
+        threshold_cpu_utilization_percentage : 70
+        adjustment_factor : 1.2
+        default: 5
   - type: adaptive_batch_size_based_on_memory_utilization
     blocking: false
     active: true
     config:
       threshold_memory_utilization_percentage: 75
-      adjustment_factor: 1.5
+      adjustment_factor: 1.3
       default: 128
     
   - type: adaptive_data_sampling_based_on_memory_utilization
     blocking: false
     active: true
     config:
-      threshold_memory_utilization_percentage: 75
-      adjustment_factor: 1.2
+      threshold_memory_utilization_percentage: 50
+      adjustment_factor: 1.05
       default: 1
 
   - type: model_layer_freezing_based_on_high_cpu_utilization
     blocking: false
     active: true
     config:
-      threshold_cpu_utilization_percentage: 75
-      adjustment_factor: 20
+      threshold_cpu_utilization_percentage: 80
+      adjustment_factor: 2
       default: 0
   
   - type: gradient_clipping_based_on_high_cpu_utilization

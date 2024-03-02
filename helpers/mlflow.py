@@ -26,14 +26,14 @@ class MlflowHelper:
 
     @property
     def name(self):
-        return 'v2-test' + str(self.experiment_name)
+        return 'v2' + str(self.experiment_name)
 
     def get_experiment_id(self):
         return str(self.experiment_id)
 
     def create_experiment(self):
         self.experiment_name = self.create_random_experiment_name()
-        self.experiment_name = 'v2-test'+ self.experiment_name
+        self.experiment_name = self.experiment_name
         self.experiment_id = mlflow.create_experiment(name=self.name)
         logger.info(f"Created experiment {self.name} with id {self.experiment_id}")
         self.log_experiment_details()
@@ -46,7 +46,8 @@ class MlflowHelper:
             mlflow.log_param("experiment_name", self.experiment_name)
             mlflow.log_param("max_rounds", self.rounds)
             mlflow.log_param("convergence_accuracy", self.convergence_accuracy)
-            mlflow.log_param("experiment_description", "test")
+            # mlflow.log_param("experiment_description", "tool-enabled")
+            mlflow.log_param("experiment_description", "without-tool")
 
 
             # You can add other general details about the experiment here   

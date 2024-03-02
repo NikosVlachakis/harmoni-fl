@@ -98,15 +98,18 @@ class LearningRateBasedOnCPUUtilization(AbstractCriterion):
 
         learning_rate_adjustment = {"learning_rate": current_learning_rate}
 
+        # This is to give a weight to the clients that exited (OOM errors)
+        extra_weight = 1
+
         # That means the client exitted (OOM errors) -- give a weight to overcome the exit
         if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
-            new_learning_rate = current_learning_rate * 4 * self.adjustment_factor
+            new_learning_rate = current_learning_rate * extra_weight * self.adjustment_factor
             
             # Ensure the learning rate does not exceed 1.0
             new_learning_rate = min(new_learning_rate, 1.0)
 
             learning_rate_adjustment["learning_rate"] = new_learning_rate
-            logger.info(f"Adjusted learning rate to {new_learning_rate} due to container EXIT")
+            logger.info(f"Adjusted learning rate to {new_learning_rate} due to container EXIT in previous round")
         
         elif cpu_usase_percentage > self.cpu_utilization_threshold:
             new_learning_rate = current_learning_rate * self.adjustment_factor
@@ -144,15 +147,18 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
 
         epoch_adjustment = {"epochs": current_number_of_epochs}
         
+        # This is to give a weight to the clients that exited (OOM errors)
+        extra_weight = 1
+
         # That means the client exitted (OOM errors) -- give a weight to overcome the exit
         if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
-            temp_adjusted_epochs = current_number_of_epochs / (2 * self.adjustment_factor)
+            temp_adjusted_epochs = current_number_of_epochs / (extra_weight * self.adjustment_factor)
             if temp_adjusted_epochs < 2:
                 adjusted_epochs = 1
             else:
                 adjusted_epochs = math.ceil(temp_adjusted_epochs)
             
-            logger.info(f"Adjusted of epochs to {adjusted_epochs} due to container EXIT")
+            logger.info(f"Adjusted of epochs to {adjusted_epochs} due to container EXIT in previous round")
 
 
         elif cpu_usase_percentage > self.threshold_cpu_utilization_percentage:  
@@ -189,15 +195,18 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
         current_batch_size = int(adjusted_batch_size)
         batch_size_adjustment = {"batch_size": current_batch_size}
 
+        # This is to give a weight to the clients that exited (OOM errors)
+        extra_weight = 2.5
+
         # That means the client exitted (OOM errors) -- give a weight to overcome the exit
         if average_memory_usage_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
-            adjusted_batch_size = math.ceil(current_batch_size / (4 * self.adjustment_factor))
-            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, 1)
-            logger.info(f"Adjusted batch size to {batch_size_adjustment['batch_size']} due to container EXIT")
+            adjusted_batch_size = math.ceil(current_batch_size / (extra_weight * self.adjustment_factor))
+            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, 10)
+            logger.info(f"Adjusted batch size to {batch_size_adjustment['batch_size']} due to container EXIT in previous round")
 
         elif average_memory_usage_percentage > self.threshold_memory_utilization_percentage:
             adjusted_batch_size = math.ceil(current_batch_size / self.adjustment_factor)
-            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, 1)
+            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, 10)
             logger.info(f"Adjusted batch size to {batch_size_adjustment['batch_size']} due to high memory utilization of ({average_memory_usage_percentage}%)")
 
         else:
@@ -227,19 +236,23 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
 
         data_sample_percentage_adjustment = {"data_sample_percentage": current_data_sample_percentage}
 
+        # Minimum percentage of data to sample
+        min_percentage_of_data_to_sample = 0.09
+
+        # This is to give a weight to the clients that exited (OOM errors)
+        extra_weight = 7
+
         if average_memory_usage_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
-            adjusted_data_sample_percentage = (current_data_sample_percentage / (4*self.adjustment_factor))
+            adjusted_data_sample_percentage = (current_data_sample_percentage / (extra_weight*self.adjustment_factor))
             
-            # Ensure that the data sample percentage is not less than 1%
-            data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, 0.01)
-            logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to container EXIT")
+            data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, min_percentage_of_data_to_sample)
+            logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to container EXIT in previous round")
 
         elif average_memory_usage_percentage > self.threshold_memory_utilization_percentage:
             
             adjusted_data_sample_percentage = (current_data_sample_percentage / self.adjustment_factor)
             
-            # Ensure that the data sample percentage is not less than 1%
-            data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, 0.01)
+            data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, min_percentage_of_data_to_sample)
             logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to high memory utilization of ({average_memory_usage_percentage}%)")
 
         else:
@@ -270,11 +283,13 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
 
         freeze_percentage_adjustment = {"freeze_layers_percentage": current_freeze_percentage}
 
+        # This is to give a weight to the clients that exited (OOM errors)
+        extra_weight = 1
 
         if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
-            adjusted_freeze_percentage = math.ceil(current_freeze_percentage + (2*self.adjustment_factor))
+            adjusted_freeze_percentage = math.ceil(current_freeze_percentage + (extra_weight*self.adjustment_factor))
             freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, 95)
-            logger.info(f"Adjusted percentage of freezing layers to {freeze_percentage_adjustment['freeze_layers_percentage']} due to container EXIT")
+            logger.info(f"Adjusted percentage of freezing layers to {freeze_percentage_adjustment['freeze_layers_percentage']} due to container EXIT in previous round")
         
         elif cpu_usase_percentage > self.threshold_cpu_utilization_percentage:
             adjusted_freeze_percentage = math.ceil(current_freeze_percentage + self.adjustment_factor)
