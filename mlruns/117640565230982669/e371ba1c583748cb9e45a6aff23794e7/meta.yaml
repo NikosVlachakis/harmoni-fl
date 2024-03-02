@@ -1,0 +1,15 @@
+artifact_uri: file:///app/mlruns/117640565230982669/e371ba1c583748cb9e45a6aff23794e7/artifacts
+end_time: 1709418122760
+entry_point_name: ''
+experiment_id: '117640565230982669'
+lifecycle_stage: active
+run_id: e371ba1c583748cb9e45a6aff23794e7
+run_name: 44 - round - server
+run_uuid: e371ba1c583748cb9e45a6aff23794e7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1709418122729
+status: 3
+tags: []
+user_id: root

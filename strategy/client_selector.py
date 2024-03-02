@@ -40,7 +40,7 @@ class ClientSelector:
         return queries
 
 
-    def filter_clients_by_criteria(self, all_clients: List[ClientProxy], round_timestamps: Dict[str, Dict[str, float]], dropped_out_clients: list[str]) -> List[ClientProxy]:
+    def filter_clients_by_criteria(self, all_clients: List[ClientProxy], round_timestamps: Dict[str, Dict[str, float]], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> List[ClientProxy]:
         # Get the criteria objects
         criteria_objects = self._load_criteria()
         
@@ -96,11 +96,11 @@ class ClientSelector:
             non_blocking_criteria = [c for c in criteria_objects if not c.is_blocking]
 
             # Check each blocking criterion using the fetched queries_results
-            if all(criterion.check(client_properties, queries_results, dropped_out_clients) for criterion in blocking_criteria):
+            if all(criterion.check(client_properties, queries_results, dropped_out_clients,round_fit_participant_ids) for criterion in blocking_criteria):
                 # If all blocking criteria are met, handle non-blocking criteria
                 client_config = {}
                 for criterion in non_blocking_criteria:
-                    result = criterion.check(client_properties, queries_results, dropped_out_clients)
+                    result = criterion.check(client_properties, queries_results, dropped_out_clients, round_fit_participant_ids)
                     if result and isinstance(result, dict):
                         client_config.update(result)
 
