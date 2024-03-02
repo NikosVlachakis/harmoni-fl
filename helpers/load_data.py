@@ -21,7 +21,7 @@ class DataLoader:
         self.load_and_partition_data()
 
     def load_and_partition_data(self):
-        fds = FederatedDataset(dataset="cifar10", partitioners={"train": 4})
+        fds = FederatedDataset(dataset="cifar10", partitioners={"train": 5})
         partition = fds.load_partition(self.client_id-1, "train")
         partition.set_format("numpy")
         partition = partition.train_test_split(test_size=0.2)
@@ -29,8 +29,8 @@ class DataLoader:
         self.x_test, self.y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
         
         if self.client_id in [1, 4]:
-            categories = [0,1,2,3,4,5]  # Categories for clients 1 and 4
-        elif self.client_id in [2, 3]:
+            categories = [0,1,2,3,4]  # Categories for clients 1 and 4
+        elif self.client_id in [2, 3, 5]:
             categories = [0,1,2,3,4,5,6,7,8,9]  # Categories for clients 2 and 3
         else:
             logger.error("Invalid client ID, categories cannot be assigned.")

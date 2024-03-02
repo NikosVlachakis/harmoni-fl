@@ -25,6 +25,7 @@ from utils.simple_utils import get_client_properties
 from prometheus_client import Gauge
 from helpers.mlflow import MlflowHelper
 import copy
+from logs.custom_logger import CustomLogger
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -65,6 +66,8 @@ class FedCustom(fl.server.strategy.Strategy):
         self.dropped_out_clients = dropped_out_clients
         self.fit_dropped_out_clients = fit_dropped_out_clients
         self.evaluate_dropped_out_clients = evaluate_dropped_out_clients
+        self.logger = CustomLogger(__name__)  # Create an instance of CustomLogger
+
 
 
     def __repr__(self) -> str:
@@ -108,7 +111,7 @@ class FedCustom(fl.server.strategy.Strategy):
         )
 
         
-        # Handle the clients that exited during training
+        # # Handle the clients that exited during training
         if server_round > 1:
             sampled_client_names = [client_dict['client'] for client_dict in clients]
         else:
@@ -168,7 +171,6 @@ class FedCustom(fl.server.strategy.Strategy):
             return None, {}
         
         logger.info(f"Aggregating fit results for server round {server_round}.")
-        logger.info(f"failures for server round {failures}.")
 
         
         # Convert from serialized sparse to dense format and prepare for aggregation
@@ -177,14 +179,14 @@ class FedCustom(fl.server.strategy.Strategy):
             
             logger.info(f"Processing fit results for client {fit_res.metrics['container_name']} with num_examples: {fit_res.num_examples}")
 
-            # Remove the clients fromd dropped_out_clients that succeeded in that round
-            self.fit_dropped_out_clients.remove(get_client_properties(ClientProxy).get('container_name'))
-
             metrics = fit_res.metrics
             self.round_timestamps[metrics['container_name']] = {
             "start": metrics['start_time'],
             "end": metrics['end_time']
         }
+            
+            # Remove the clients fromd dropped_out_clients that succeeded in that round
+            self.fit_dropped_out_clients.remove(metrics['container_name'])
 
 
             # ////// SPARSIFICATION START///////
@@ -288,8 +290,15 @@ class FedCustom(fl.server.strategy.Strategy):
         logger.info(f"Aggregating evaluation results for server round {server_round} are {results}.")
 
         for ClientProxy, evaluate_res in results:
-            # Remove the clients from dropped_out_clients that succeeded in that round
-            self.evaluate_dropped_out_clients.remove(get_client_properties(ClientProxy).get('container_name'))
+            
+            try:
+                container_name = get_client_properties(ClientProxy).get('container_name')
+                # Remove the clients from dropped_out_clients that succeeded in that round
+                self.evaluate_dropped_out_clients.remove(container_name)
+            except:
+                container_name = None
+            
+           
         
         logger.info(f"evaluate_dropped_out_clients are: {self.evaluate_dropped_out_clients}")
 
@@ -314,7 +323,9 @@ class FedCustom(fl.server.strategy.Strategy):
         }
 
         number_of_dropped_out_clients = self.number_of_dropped_out_clients()
-        logger.info(f"Number of dropped out clients in server round {server_round} are: {number_of_dropped_out_clients}")
+        # logger.info(f"Number of dropped out clients in server round {server_round} are: {number_of_dropped_out_clients}")
+        self.logger.log(f"Number of dropped out clients in server round {server_round} are: {number_of_dropped_out_clients}")
+        
         # Log the aggregated metrics to MLflow
         mlflow_helper = MlflowHelper()
         mlflow_helper.log_aggregated_metrics(self.experiment_id, server_round, loss_aggregated, accuracy_aggregated, results, number_of_dropped_out_clients)
