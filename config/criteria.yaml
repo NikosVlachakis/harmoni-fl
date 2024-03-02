@@ -34,7 +34,6 @@ criteria:
         threshold_cpu_utilization_percentage : 70
         adjustment_factor : 1.2
         default: 5
-
   - type: adaptive_batch_size_based_on_memory_utilization
     blocking: false
     active: true
