@@ -99,10 +99,10 @@ class FedCustom(fl.server.strategy.Strategy):
             
             self.dropped_out_clients = self.fit_dropped_out_clients + self.evaluate_dropped_out_clients
             logger.info(f"Previous round dropped out clients are: {self.dropped_out_clients}")
-            client_selector = ClientSelector(client_manager)  
-            all_clients = client_selector.get_all_clients()
-            selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps,self.dropped_out_clients)
-            logger.info(f"Selected clients based on criteria are: {selected_clients}")
+            # client_selector = ClientSelector(client_manager)  
+            # all_clients = client_selector.get_all_clients()
+            # selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps,self.dropped_out_clients)
+            # logger.info(f"Selected clients based on criteria are: {selected_clients}")
 
        
         sample_size, min_num_clients = self.num_fit_clients(client_manager.num_available())
@@ -112,12 +112,12 @@ class FedCustom(fl.server.strategy.Strategy):
 
         
         # # Handle the clients that exited during training
-        if server_round > 1:
-            sampled_client_names = [client_dict['client'] for client_dict in clients]
-        else:
-            sampled_client_names = clients
+        # if server_round > 1:
+        #     sampled_client_names = [client_dict['client'] for client_dict in clients]
+        # else:
+        #     sampled_client_names = clients
 
-        # sampled_client_names = clients
+        sampled_client_names = clients
 
         self.fit_dropped_out_clients = []
         for client in sampled_client_names:
