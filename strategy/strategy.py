@@ -48,7 +48,8 @@ class FedCustom(fl.server.strategy.Strategy):
         loss_gauge: Gauge = None,
         dropped_out_clients: list = [],
         fit_dropped_out_clients: list = [],
-        evaluate_dropped_out_clients: list = []
+        evaluate_dropped_out_clients: list = [],
+        round_participant_ids: list = []
     ) -> None:
         super().__init__()
         self.experiment_id = experiment_id
@@ -66,7 +67,8 @@ class FedCustom(fl.server.strategy.Strategy):
         self.dropped_out_clients = dropped_out_clients
         self.fit_dropped_out_clients = fit_dropped_out_clients
         self.evaluate_dropped_out_clients = evaluate_dropped_out_clients
-        self.logger = CustomLogger(__name__)  # Create an instance of CustomLogger
+        self.round_fit_participant_ids = round_participant_ids
+        self.logger = CustomLogger(__name__) 
 
 
 
@@ -99,10 +101,11 @@ class FedCustom(fl.server.strategy.Strategy):
             
             self.dropped_out_clients = self.fit_dropped_out_clients + self.evaluate_dropped_out_clients
             logger.info(f"Previous round dropped out clients are: {self.dropped_out_clients}")
-            # client_selector = ClientSelector(client_manager)  
-            # all_clients = client_selector.get_all_clients()
-            # selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps,self.dropped_out_clients)
-            # logger.info(f"Selected clients based on criteria are: {selected_clients}")
+            logger.info(f"Previous round_fit_participant_ids: {self.round_fit_participant_ids}")
+            client_selector = ClientSelector(client_manager)  
+            all_clients = client_selector.get_all_clients()
+            selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps,self.dropped_out_clients,self.round_fit_participant_ids)
+            logger.info(f"Selected clients based on criteria are: {selected_clients}")
 
        
         sample_size, min_num_clients = self.num_fit_clients(client_manager.num_available())
@@ -120,11 +123,13 @@ class FedCustom(fl.server.strategy.Strategy):
         sampled_client_names = clients
 
         self.fit_dropped_out_clients = []
+        self.round_fit_participant_ids = []
         for client in sampled_client_names:
             client_properties = get_client_properties(client)
             container_name = client_properties.get('container_name')
             if container_name:
                 self.fit_dropped_out_clients.append(container_name)
+                self.round_fit_participant_ids.append(container_name)
 
 
         standard_config = load_strategy_config()
