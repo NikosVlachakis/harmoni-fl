@@ -115,12 +115,12 @@ class FedCustom(fl.server.strategy.Strategy):
 
         
         # # Handle the clients that exited during training
-        if server_round > 1:
-            sampled_client_names = [client_dict['client'] for client_dict in clients]
-        else:
-            sampled_client_names = clients
+        # if server_round > 1:
+        #     sampled_client_names = [client_dict['client'] for client_dict in clients]
+        # else:
+        #     sampled_client_names = clients
 
-        # sampled_client_names = clients
+        sampled_client_names = clients
 
         self.fit_dropped_out_clients = []
         self.round_fit_participant_ids = []
