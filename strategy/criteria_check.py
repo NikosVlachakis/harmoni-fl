@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class AbstractCriterion(ABC):
     @abstractmethod
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         """Check if the client meets the criteria"""
         pass
 
@@ -22,7 +22,7 @@ class IncludeClientsWithinSpecificThresholds(AbstractCriterion):
         self.max_memory_utilization_percentage = config.get('max_memory_utilization_percentage')
 
     
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         
         if not self.active:
             return True
@@ -48,7 +48,7 @@ class SparsificationBOOutgoingBandwidth(AbstractCriterion):
         self.default = config.get('default')
         self.methods = config.get('methods', {})
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         
         if not self.active:
             return False
@@ -85,7 +85,7 @@ class LearningRateBasedOnCPUUtilization(AbstractCriterion):
         self.default = config.get('default')
         
     
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         
         if not self.active:
             return False
@@ -98,30 +98,27 @@ class LearningRateBasedOnCPUUtilization(AbstractCriterion):
 
         learning_rate_adjustment = {"learning_rate": current_learning_rate}
 
+        min_learning_rate = 0.0001
+        max_learning_rate = 1.0
+
         # This is to give a weight to the clients that exited (OOM errors)
         extra_weight = 1
 
         # That means the client exitted (OOM errors) -- give a weight to overcome the exit
-        if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
+        if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients or client_properties.get('container_name') not in round_fit_participant_ids:
             new_learning_rate = current_learning_rate * extra_weight * self.adjustment_factor
-            
-            # Ensure the learning rate does not exceed 1.0
-            new_learning_rate = min(new_learning_rate, 1.0)
-
+            new_learning_rate = min(new_learning_rate, max_learning_rate)
             learning_rate_adjustment["learning_rate"] = new_learning_rate
-            logger.info(f"Adjusted learning rate to {new_learning_rate} due to container EXIT in previous round")
         
         elif cpu_usase_percentage > self.cpu_utilization_threshold:
             new_learning_rate = current_learning_rate * self.adjustment_factor
-            
-            # Ensure the learning rate does not exceed 1.0
-            new_learning_rate = min(new_learning_rate, 1.0)
-
+            new_learning_rate = min(new_learning_rate, max_learning_rate)
             learning_rate_adjustment["learning_rate"] = new_learning_rate
-            logger.info(f"Adjusted learning rate to {new_learning_rate} due to high cpu usase of ({cpu_usase_percentage}%)")
        
         else:
-            learning_rate_adjustment["learning_rate"] = self.default
+            new_learning_rate = current_learning_rate / self.adjustment_factor
+            new_learning_rate = max(new_learning_rate, min_learning_rate)
+            learning_rate_adjustment["learning_rate"] = new_learning_rate
             
         return learning_rate_adjustment
 
@@ -134,7 +131,7 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         
         if not self.active:
             return False
@@ -147,19 +144,21 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
 
         epoch_adjustment = {"epochs": current_number_of_epochs}
         
+        min_epochs = 1
+        max_epochs = 5
+
         # This is to give a weight to the clients that exited (OOM errors)
         extra_weight = 1
 
         # That means the client exitted (OOM errors) -- give a weight to overcome the exit
-        if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
+        if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients or client_properties.get('container_name') not in round_fit_participant_ids:
             temp_adjusted_epochs = current_number_of_epochs / (extra_weight * self.adjustment_factor)
             if temp_adjusted_epochs < 2:
                 adjusted_epochs = 1
             else:
                 adjusted_epochs = math.ceil(temp_adjusted_epochs)
             
-            logger.info(f"Adjusted of epochs to {adjusted_epochs} due to container EXIT in previous round")
-
+            epoch_adjustment["epochs"] = max(adjusted_epochs, min_epochs)
 
         elif cpu_usase_percentage > self.threshold_cpu_utilization_percentage:  
             temp_adjusted_epochs = current_number_of_epochs / self.adjustment_factor
@@ -168,10 +167,16 @@ class EpochAdjustmentBasedOnCPUUtilization(AbstractCriterion):
             else:
                 adjusted_epochs = math.ceil(temp_adjusted_epochs)
 
+            epoch_adjustment["epochs"] = max(adjusted_epochs, min_epochs)
+
         else:
-            adjusted_epochs = self.default
-        
-        epoch_adjustment["epochs"] = max(adjusted_epochs, 1)
+            temp_adjusted_epochs = current_number_of_epochs * self.adjustment_factor
+            if temp_adjusted_epochs < 2:
+                adjusted_epochs = 1
+            else:
+                adjusted_epochs = math.ceil(temp_adjusted_epochs)
+            
+            epoch_adjustment["epochs"] = min(adjusted_epochs, max_epochs)
         
         return epoch_adjustment
     
@@ -183,7 +188,7 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         
         if not self.active:
             return False
@@ -195,23 +200,27 @@ class AdaptiveBatchSizeBasedOnMemoryUtilization(AbstractCriterion):
         current_batch_size = int(adjusted_batch_size)
         batch_size_adjustment = {"batch_size": current_batch_size}
 
+        min_batch_size = 10
+        max_batch_size = 512
+        
         # This is to give a weight to the clients that exited (OOM errors)
         extra_weight = 2.5
 
         # That means the client exitted (OOM errors) -- give a weight to overcome the exit
-        if average_memory_usage_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
+        if average_memory_usage_percentage == -1 or client_properties.get('container_name') in dropped_out_clients or client_properties.get('container_name') not in round_fit_participant_ids:
             adjusted_batch_size = math.ceil(current_batch_size / (extra_weight * self.adjustment_factor))
-            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, 10)
-            logger.info(f"Adjusted batch size to {batch_size_adjustment['batch_size']} due to container EXIT in previous round")
+            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, min_batch_size)
 
         elif average_memory_usage_percentage > self.threshold_memory_utilization_percentage:
             adjusted_batch_size = math.ceil(current_batch_size / self.adjustment_factor)
-            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, 10)
-            logger.info(f"Adjusted batch size to {batch_size_adjustment['batch_size']} due to high memory utilization of ({average_memory_usage_percentage}%)")
+            batch_size_adjustment["batch_size"] = max(adjusted_batch_size, min_batch_size)
 
         else:
-            batch_size_adjustment["batch_size"] = self.default
+            adjusted_batch_size = math.ceil(current_batch_size * self.adjustment_factor)
+            batch_size_adjustment["batch_size"] = min(adjusted_batch_size, max_batch_size)
         
+       
+
         return batch_size_adjustment
     
 class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
@@ -222,7 +231,7 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         
         if not self.active:
             return False
@@ -238,25 +247,23 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
 
         # Minimum percentage of data to sample
         min_percentage_of_data_to_sample = 0.09
+        max_percentage_of_data_to_sample = 1
 
         # This is to give a weight to the clients that exited (OOM errors)
         extra_weight = 7
 
-        if average_memory_usage_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
+        if average_memory_usage_percentage == -1 or client_properties.get('container_name') in dropped_out_clients or client_properties.get('container_name') not in round_fit_participant_ids:
             adjusted_data_sample_percentage = (current_data_sample_percentage / (extra_weight*self.adjustment_factor))
-            
             data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, min_percentage_of_data_to_sample)
-            logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to container EXIT in previous round")
 
         elif average_memory_usage_percentage > self.threshold_memory_utilization_percentage:
-            
             adjusted_data_sample_percentage = (current_data_sample_percentage / self.adjustment_factor)
-            
             data_sample_percentage_adjustment["data_sample_percentage"] = max(adjusted_data_sample_percentage, min_percentage_of_data_to_sample)
-            logger.info(f"Adjusted data sample percentage to {data_sample_percentage_adjustment['data_sample_percentage']} due to high memory utilization of ({average_memory_usage_percentage}%)")
 
         else:
-            data_sample_percentage_adjustment["data_sample_percentage"] = self.default
+            adjusted_data_sample_percentage = (current_data_sample_percentage * self.adjustment_factor)
+            data_sample_percentage_adjustment["data_sample_percentage"] = min(adjusted_data_sample_percentage, max_percentage_of_data_to_sample)
+
         
         return data_sample_percentage_adjustment
 
@@ -269,7 +276,7 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         
         if not self.active:
             return False
@@ -283,20 +290,22 @@ class ModelLayerReductionBasedOnHighCPUUtilization(AbstractCriterion):
 
         freeze_percentage_adjustment = {"freeze_layers_percentage": current_freeze_percentage}
 
+        min_freeze_percentage = 0
+        max_freeze_percentage = 95
+
         # This is to give a weight to the clients that exited (OOM errors)
         extra_weight = 1
 
-        if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients:
+        if cpu_usase_percentage == -1 or client_properties.get('container_name') in dropped_out_clients or client_properties.get('container_name') not in round_fit_participant_ids:
             adjusted_freeze_percentage = math.ceil(current_freeze_percentage + (extra_weight*self.adjustment_factor))
-            freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, 95)
-            logger.info(f"Adjusted percentage of freezing layers to {freeze_percentage_adjustment['freeze_layers_percentage']} due to container EXIT in previous round")
+            freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, max_freeze_percentage)
         
         elif cpu_usase_percentage > self.threshold_cpu_utilization_percentage:
             adjusted_freeze_percentage = math.ceil(current_freeze_percentage + self.adjustment_factor)
-            freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, 95)
-            logger.info(f"Adjusted percentage of freezing layers to {freeze_percentage_adjustment['freeze_layers_percentage']} due to high CPU utilization of ({cpu_usase_percentage}%)")
+            freeze_percentage_adjustment["freeze_layers_percentage"] = min(adjusted_freeze_percentage, max_freeze_percentage)
         else:
-            freeze_percentage_adjustment["freeze_layers_percentage"] = self.default
+            adjusted_freeze_percentage = math.ceil(current_freeze_percentage - self.adjustment_factor)
+            freeze_percentage_adjustment["freeze_layers_percentage"] = max(adjusted_freeze_percentage, min_freeze_percentage)
 
         return freeze_percentage_adjustment
     
@@ -308,7 +317,7 @@ class GradientClippingBasedOnHighCPUUtilization(AbstractCriterion):
         self.adjustment_factor = config.get('adjustment_factor')
         self.default = config.get('default')
 
-    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str]) -> Union[Dict, bool]:
+    def check(self, client_properties: Dict[str, str], queries_results: Dict[str, float], dropped_out_clients: list[str], round_fit_participant_ids: list[str]) -> Union[Dict, bool]:
         
         if not self.active:
             return False
