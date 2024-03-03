@@ -1,0 +1,15 @@
+artifact_uri: file:///app/mlruns/236190549831905507/cada13cb10ab4e58a2c7736be834322a/artifacts
+end_time: 1709492112591
+entry_point_name: ''
+experiment_id: '236190549831905507'
+lifecycle_stage: active
+run_id: cada13cb10ab4e58a2c7736be834322a
+run_name: 23 - round - client2
+run_uuid: cada13cb10ab4e58a2c7736be834322a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1709492112529
+status: 3
+tags: []
+user_id: root
