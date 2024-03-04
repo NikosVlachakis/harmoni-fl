@@ -34,6 +34,6 @@ plt.boxplot([training_times_with_tool, training_times_without_tool], labels=['Wi
 plt.ylabel('Total Training Time (minutes)')
 plt.title('Comparison of Total Training Time')
 
-plt.savefig('../results/training_time_comparison.pdf')
+plt.savefig('../results/training_time_experiment/training_time_comparison.pdf')
 
 plt.show()

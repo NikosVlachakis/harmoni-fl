@@ -73,7 +73,7 @@ def plot_for_container(categorized_data, container_name, training_params):
             ax.set_xlabel('Server Round')
     
     plt.xticks(np.arange(1, len(rounds) + 1), rounds)
-    file_path = f'../results/{container_name}_params_adaptivity.pdf'
+    file_path = f'../results/{experiment_name}/{container_name}_params_adaptivity.pdf'
     plt.savefig(file_path)
     plt.show()
 
@@ -87,8 +87,11 @@ with open('../../all_data.json', 'r') as file:
 categorized_data = categorize_data(data)
 
 # Specify the container name and parameters you want to plot
-container_name = 'client4'
+container_name = 'client1'
 training_params = ['learning_rate', 'batch_size', 'epochs', 'freeze_layers_percentage', 'data_sample_percentage']
+experiment_name = 'model_accuracy_experiment'
+# experiment_name = 'training_time_experiment'
+
 
 # Plot
 plot_for_container(categorized_data, container_name, training_params)
