@@ -76,8 +76,10 @@ def plot_for_container(categorized_data, container_name, training_params):
 
 
 
+data_path = "exp1_adaptive_params_all_data"
+
 # Load the JSON data
-with open('../../all_data.json', 'r') as file:
+with open(f'../data/{data_path}.json', 'r') as file:
     data = json.load(file)
 
 # Categorize the data

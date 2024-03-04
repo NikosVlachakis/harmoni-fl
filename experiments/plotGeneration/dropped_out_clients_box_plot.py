@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import json
 
+file_name = "exp2_acc_do_all_data"
+
 # Load the JSON data
-with open('../../all_data.json', 'r') as file:
+with open(f'../data/{file_name}.json', 'r') as file:
     new_data = json.load(file)
 
 # Analyzing the new data for total number of dropped out clients with and without the tool
@@ -20,9 +22,9 @@ for experiment in new_data:
 # Plotting the box plot for total number of dropped out clients
 plt.figure(figsize=(10, 6))
 plt.boxplot([dropped_out_without_tool, dropped_out_with_tool], labels=['Without Tool', 'With Tool'])
-plt.title('Total Number of Dropped Out Clients With and Without Tool')
-plt.ylabel('Total Dropped Out Clients')
-plt.grid(True)
+# plt.title('Total Number of Dropped Out Clients With and Without Tool')
+plt.ylabel('Total Number of Dropped Out Clients')
+plt.grid(False)
 
 plt.savefig('../results/model_accuracy_experiment/dropped_out_comparison.pdf')
 

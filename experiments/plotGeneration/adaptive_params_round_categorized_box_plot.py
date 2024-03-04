@@ -58,15 +58,17 @@ def plot_all_params_with_corrected_labels(categorized_data, container_name, trai
     plt.savefig(file_path)
     plt.show()
 
+file_name = "exp2_adaptive_params_all_data"
+
 # Load the JSON data
-with open('../../all_data.json', 'r') as file:
+with open(f'../data/{file_name}.json', 'r') as file:
     data = json.load(file)
 
 # Categorize the data
 categorized_data = categorize_data(data)
 
 # Specify the container name and parameters you want to plot
-container_name = 'client2'
+container_name = 'client5'
 training_params = ['learning_rate', 'batch_size', 'epochs', 'freeze_layers_percentage', 'data_sample_percentage']
 experiment_name = 'model_accuracy_experiment'
 

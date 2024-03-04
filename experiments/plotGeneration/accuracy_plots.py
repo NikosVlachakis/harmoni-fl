@@ -3,8 +3,10 @@ import json
 
 from numpy import median
 
+file_name = "exp2_acc_do_all_data"
+
 # Load the JSON data
-with open('../../all_data.json', 'r') as file:
+with open(f'../data/{file_name}.json', 'r') as file:
     new_data = json.load(file)
 
 # Re-initialize dictionaries to hold accuracies for each round
@@ -31,13 +33,13 @@ medians_without_tool_new = [median(accuracies) if accuracies else 0 for accuraci
 plt.figure(figsize=(12, 8))
 plt.plot(range(1, 101), medians_with_tool_new, label='With Tool', marker='o', linestyle='-', markersize=5)
 plt.plot(range(1, 101), medians_without_tool_new, label='Without Tool', marker='x', linestyle='-', markersize=5)
-plt.title('Median Accuracies With and Without Tool Over Server Rounds (New Data)')
+# plt.title('Model Accuracy Over Server Rounds')
 plt.xlabel('Server Round')
-plt.ylabel('Median Accuracy')
+plt.ylabel('Model Accuracy')
 plt.legend()
 plt.grid(True)
 
-plt.savefig('../results/exp2/accuracies_comparison.pdf')
+plt.savefig('../results/model_accuracy_experiment/accuracies_comparison_v2.pdf')
 
 plt.show()
 

@@ -78,19 +78,19 @@ def plot_for_container(categorized_data, container_name, training_params):
     plt.show()
 
 
+data_path = "exp1_adaptive_params_all_data"
 
 # Load the JSON data
-with open('../../all_data.json', 'r') as file:
+with open(f'../data/{data_path}.json', 'r') as file:
     data = json.load(file)
 
 # Categorize the data
 categorized_data = categorize_data(data)
 
 # Specify the container name and parameters you want to plot
-container_name = 'client1'
+container_name = 'client2'
 training_params = ['learning_rate', 'batch_size', 'epochs', 'freeze_layers_percentage', 'data_sample_percentage']
-experiment_name = 'model_accuracy_experiment'
-# experiment_name = 'training_time_experiment'
+experiment_name = 'training_time_experiment'
 
 
 # Plot

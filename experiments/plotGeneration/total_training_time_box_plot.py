@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import json
 
+data_path = "exp1_training_times_all_data"
+
 # Load the JSON data
-with open('../../all_data.json', 'r') as file:
+with open(f'../data/{data_path}.json', 'r') as file:
     data = json.load(file)
 
 # Initialize lists to hold total training times
