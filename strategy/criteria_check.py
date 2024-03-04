@@ -246,7 +246,7 @@ class AdaptiveDataSamplingBasedOnMemoryUtilization(AbstractCriterion):
         data_sample_percentage_adjustment = {"data_sample_percentage": current_data_sample_percentage}
 
         # Minimum percentage of data to sample
-        min_percentage_of_data_to_sample = 0.09
+        min_percentage_of_data_to_sample = 0.16
         max_percentage_of_data_to_sample = 1
 
         # This is to give a weight to the clients that exited (OOM errors)

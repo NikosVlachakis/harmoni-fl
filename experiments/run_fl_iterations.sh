@@ -36,10 +36,10 @@ do
     echo "Iteration $i of $NUM_ITERATIONS"
     
     # Stop and remove the Docker Compose services if they are already running
-    docker-compose down
+    # docker-compose down
     
     # Start the Docker Compose services in detached mode
-    docker-compose up client1 client2 client3 client4 server
+    docker-compose up client1 client2 client3 client4 client5 server
     
     # Call the function to wait for the federated learning process to finish
     waitForFLCompletion

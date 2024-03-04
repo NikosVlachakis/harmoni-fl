@@ -125,12 +125,12 @@ class Client(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         
-        # if self.container_name == 'client2' or self.container_name == 'client3':
+        # if self.container_name == 'client2' or self.container_name == 'client3' or self.container_name == 'client5':
         #     config = {
-        #         "epochs": 2,
+        #         "epochs": 3,
         #         "batch_size": 16,
         #         "learning_rate": 0.01,
-        #         "data_sample_percentage": 0.05,
+        #         "data_sample_percentage": 0.3,
         #         "freeze_layers_percentage": 0,
         #     }
 

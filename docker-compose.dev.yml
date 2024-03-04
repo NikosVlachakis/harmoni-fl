@@ -121,7 +121,7 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: "1.2g"
+          memory: "1.4g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -142,7 +142,7 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: "1.2g"
+          memory: "1.4g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -186,7 +186,7 @@ services:
         resources:
           limits:
             cpus: "1"
-            memory: "1.2g"
+            memory: "1.4g"
       volumes:
         - .:/app
         - /var/run/docker.sock:/var/run/docker.sock

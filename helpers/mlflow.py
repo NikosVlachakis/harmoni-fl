@@ -46,8 +46,8 @@ class MlflowHelper:
             mlflow.log_param("experiment_name", self.experiment_name)
             mlflow.log_param("max_rounds", self.rounds)
             mlflow.log_param("convergence_accuracy", self.convergence_accuracy)
-            # mlflow.log_param("experiment_description", "tool-enabled")
-            mlflow.log_param("experiment_description", "without-tool")
+            mlflow.log_param("experiment_description", "tool-enabled")
+            # mlflow.log_param("experiment_description", "without-tool")
 
 
             # You can add other general details about the experiment here   
