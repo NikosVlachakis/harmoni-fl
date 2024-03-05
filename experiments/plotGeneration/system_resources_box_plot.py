@@ -70,14 +70,16 @@ def plot_for_container(categorized_data, container_name, training_params):
     
     plt.xticks(np.arange(1, len(rounds) + 1), rounds)
     plt.subplots_adjust(bottom=0.2)  # Adjust bottom margin
-    file_path = f'../results/{container_name}_system_resources_adaptivity.pdf'
+    file_path = f'../results/training_time_experiment/{container_name}_system_resources_adaptivity.pdf'
     plt.savefig(file_path)
     plt.show()
 
 
 
+data_path = "exp1_adaptive_params_all_data"
+
 # Load the JSON data
-with open('../../all_data.json', 'r') as file:
+with open(f'../data/{data_path}.json', 'r') as file:
     data = json.load(file)
 
 # Categorize the data

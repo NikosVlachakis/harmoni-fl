@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import json
 
+data_path = "exp1_training_times_all_data"
+
 # Load the JSON data
-with open('../../all_data.json', 'r') as file:
+with open(f'../data/{data_path}.json', 'r') as file:
     data = json.load(file)
 
 # Initialize lists to hold total training times
@@ -34,6 +36,6 @@ plt.boxplot([training_times_with_tool, training_times_without_tool], labels=['Wi
 plt.ylabel('Total Training Time (minutes)')
 plt.title('Comparison of Total Training Time')
 
-plt.savefig('../results/training_time_comparison.pdf')
+plt.savefig('../results/training_time_experiment/training_time_comparison.pdf')
 
 plt.show()
