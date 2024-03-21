@@ -37,9 +37,9 @@ plt.plot(range(1, 101), medians_without_tool_new, label='Without Tool', marker='
 plt.xlabel('Server Round')
 plt.ylabel('Model Accuracy')
 plt.legend()
-plt.grid(True)
+plt.grid(False)
 
-plt.savefig('../results/model_accuracy_experiment/accuracies_comparison_v2.pdf')
+plt.savefig('../results/model_accuracy_experiment/accuracies_comparison.pdf')
 
 plt.show()
 
