@@ -55,10 +55,6 @@ class ClientSelector:
         for client in all_clients:
             # Get the properties of the client
             client_properties = get_client_properties(client)
-                        
-            # Get the start and end timesmtamps for the current client
-            # prev_round_start_time = round_timestamps[client_properties['container_name']].get("start", None)
-            # prev_round_end_time = round_timestamps[client_properties['container_name']].get("end", None)
             
             try:
                 # Attempt to get the start and end timestamps for the current client
@@ -103,16 +99,6 @@ class ClientSelector:
                     result = criterion.check(client_properties, queries_results, dropped_out_clients, round_fit_participant_ids)
                     if result and isinstance(result, dict):
                         client_config.update(result)
-
-                ############# Add just for experiments the cpu usage and memory usage to the client config #############
-                average_memory_usage_percentage = float(queries_results['container_memory_usage_percentage'])
-                cpu_usase_percentage = float(queries_results['container_cpu_usage_percentage'])
-                    
-                client_config.update({
-                    'cpu_usase_percentage': cpu_usase_percentage,
-                    'average_memory_usage_percentage': average_memory_usage_percentage
-                })
-                ############# Add just for experiments the cpu usage and memory usage to the client config #############
                 
                 selected_client = {
                     'client': client,

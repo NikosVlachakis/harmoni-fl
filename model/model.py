@@ -55,7 +55,6 @@ class Model():
         self.dp_opt = dp_opt == 1
         self.eval_loss = tf.keras.losses.SparseCategoricalCrossentropy()
         self.model = tf.keras.applications.MobileNetV2((32, 32, 3), alpha=0.1, classes=10, weights=None)
-        # self.model = tf.keras.applications.EfficientNetB2(include_top=True, weights=None)
 
         self.init_optimizer()
 

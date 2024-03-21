@@ -120,8 +120,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: "1.4g"
+          cpus: "2"
+          memory: "3g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -141,8 +141,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: "1.4g"
+          cpus: "3"
+          memory: "4g"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -163,7 +163,7 @@ services:
       deploy:
         resources:
           limits:
-            cpus: "2"
+            cpus: "3"
             memory: "4g"
       volumes:
         - .:/app
@@ -185,8 +185,8 @@ services:
       deploy:
         resources:
           limits:
-            cpus: "1"
-            memory: "1.4g"
+            cpus: "2"
+            memory: "2g"
       volumes:
         - .:/app
         - /var/run/docker.sock:/var/run/docker.sock

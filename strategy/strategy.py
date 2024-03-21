@@ -100,8 +100,6 @@ class FedCustom(fl.server.strategy.Strategy):
         if server_round > 1:
             
             self.dropped_out_clients = self.fit_dropped_out_clients + self.evaluate_dropped_out_clients
-            logger.info(f"Previous round dropped out clients are: {self.dropped_out_clients}")
-            logger.info(f"Previous round_fit_participant_ids: {self.round_fit_participant_ids}")
             client_selector = ClientSelector(client_manager)  
             all_clients = client_selector.get_all_clients()
             selected_clients = client_selector.filter_clients_by_criteria(all_clients, self.round_timestamps,self.dropped_out_clients,self.round_fit_participant_ids)
