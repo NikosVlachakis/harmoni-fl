@@ -124,18 +124,6 @@ class Client(fl.client.NumPyClient):
     #     return parameters_prime, len(x_train), results
 
     def fit(self, parameters, config):
-        
-        # if self.container_name == 'client2' or self.container_name == 'client3' or self.container_name == 'client5':
-        #     config = {
-        #         "epochs": 3,
-        #         "batch_size": 16,
-        #         "learning_rate": 0.01,
-        #         "data_sample_percentage": 0.3,
-        #         "freeze_layers_percentage": 0,
-        #     }
-
-        logger.info("container_name is: %s",  self.container_name)
-        logger.info("config is: %s", config)
 
         # Load the data 
         (x_train, y_train) = self.data_loader.load_train_data(data_sampling_percentage=config["data_sample_percentage"])
@@ -180,20 +168,18 @@ class Client(fl.client.NumPyClient):
         
         (x_test, y_test) = self.data_loader.get_test_data()
 
-        start_time = time.time()  # Capture the start time
+        # Capture the start time
+        start_time = time.time()
         
+        # Set the weights of the model
         model_instance.get_model().set_weights(parameters)
 
         # Evaluate the model
         loss, accuracy = model_instance.get_model().evaluate(x_test, y_test)
 
-        # compiled_model = model_instance.compile()
-
-        # Evaluate the model and get the loss and accuracy
-        # loss, accuracy = compiled_model.evaluate(x_test, y_test)
-
-        end_time = time.time()  # Capture the end time
-        duration = end_time - start_time  # Calculate duration
+        # Capture the end time
+        end_time = time.time() 
+        duration = end_time - start_time
 
         # Store operational metrics for evaluation
         self.round_metrics.update({

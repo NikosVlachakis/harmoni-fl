@@ -34,7 +34,7 @@ for experiment in data:
 plt.figure(figsize=(10, 6))
 plt.boxplot([training_times_with_tool, training_times_without_tool], labels=['With Tool', 'Without Tool'])
 plt.ylabel('Total Training Time (minutes)')
-plt.title('Comparison of Total Training Time')
+# plt.title('Comparison of Total Training Time')
 
 plt.savefig('../results/training_time_experiment/training_time_comparison.pdf')
 
