@@ -1,6 +1,6 @@
 # HarmoniFL: Resource-Adaptive Federated Learning Tool
 
-Detailed information about the theoretical aspects, framework, and methodologies underpinning the HarmoniFL tool can be found in the accompanying theoretical paper. For a comprehensive understanding of the development process that led to HarmoniFL, please refer to [the theoretical paper]([https://example.com/theoretical-paper](http://artemis.cslab.ece.ntua.gr:8080/jspui/handle/123456789/19076)).
+Detailed information about the theoretical aspects, framework, and methodologies underpinning the HarmoniFL tool can be found in the accompanying theoretical paper. For a comprehensive understanding of the development process that led to HarmoniFL, please refer to [the theoretical paper]([http://artemis.cslab.ece.ntua.gr:8080/jspui/handle/123456789/19076]).
 
 ## Abstract
 
