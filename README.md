@@ -1,7 +1,7 @@
 # HarmoniFL: Resource-Adaptive Federated Learning Tool
 
-Detailed information about the theoretical aspects, framework, and methodologies underpinning the HarmoniFL tool can be found in the accompanying theoretical paper. For a comprehensive understanding of the development process that led to HarmoniFL, please refer to [the theoretical paper]([http://artemis.cslab.ece.ntua.gr:8080/jspui/handle/123456789/19076]).
-
+Detailed information about the theoretical aspects, framework, and methodologies underpinning the HarmoniFL tool can be found in the accompanying theoretical paper. For a comprehensive understanding of the development process that led to HarmoniFL, please refer to [the theoretical paper](http://artemis.cslab.ece.ntua.gr:8080/jspui/handle/123456789/19076).
+ 
 ## Abstract
 
 This thesis introduces HarmoniFL, an initiative engineered to navigate the complexities of resource heterogeneity within federated learning frameworks. Focused on enhancing efficiency and inclusivity, HarmoniFL employs a dynamic client selection protocol, leveraging real-time metrics like CPU load, memory availability, and network bandwidth to optimize device participation in learning tasks. Adaptive strategies—ranging from data sampling adjustments to epoch reduction and batch size optimization for high-demand devices—address the challenges of resource diversity. Our experimental analysis focused on two primary goals: minimizing training duration for less capable devices and improving the accuracy of the aggregated global model. Results demonstrate that HarmoniFL effectively reduces training times and enhances model performance, underscoring its potential to foster more equitable device participation in federated learning tasks without sacrificing learning quality.
